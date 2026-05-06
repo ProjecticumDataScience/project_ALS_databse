@@ -13,6 +13,7 @@ qc <- QueryChat$new(
   data_source = gdb,
   table_name = "varInfo_synthetic",
   client = ollama_client,
+  data_description = "SIFT: D=deleterious, T=tolerated. PolyPhen: D=damaging, P=possibly damaging, B=benign. Genotype values: 0=homozygous reference, 1=heterozygous, 2=homozygous alternative.",
   greeting = "Ask me anything about the ALS variant data!"
 )
 
