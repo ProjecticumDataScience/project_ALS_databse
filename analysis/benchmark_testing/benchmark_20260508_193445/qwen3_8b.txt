@@ -1,0 +1,165 @@
+BENCHMARK RESULTS
+Model: qwen3:8b
+Date: 2026-05-08 19:48:34
+================================================
+
+ID:       L1
+Category: lookup
+Question: How many variants are in NEK1?
+Response: The number of variants in the **NEK1** gene is **127**.
+
+**Explanation:**  
+I queried the `varInfo_synthetic` table to count all rows where `gene_name = 'NEK1'`. The result shows there are 127 variants annotated to the *NEK1* gene in this dataset.
+
+<suggestion>
+* Explore variants in other genes (e.g., "How many variants are in SOD1?")
+* Check if any NEK1 variants have high impact ("What NEK1 variants are high impact?")
+</suggestion>
+------------------------------------------------
+
+ID:       L2
+Category: lookup
+Question: Select variants in NEK1 with HighImpact and a CADDphred > 20
+Response: There are **13 variants** in the **NEK1** gene with **HighImpact = 1** and **CADDphred > 20**.
+
+**Query breakdown:**  
+- Filtered variants where `gene_name = 'NEK1'`  
+- Required `HighImpact = '1'` (high-impact variants)  
+- Ensured `CADDphred != '.'` (non-missing values)  
+- Converted `CADDphred` to integer and checked if > 20 (deleterious threshold)
+
+<suggestion>
+* Check if any NEK1 variants also have PolyPhen or SIFT annotations  
+* Compare this count to other genes (e.g., "How many SOD1 variants meet these criteria?")  
+</suggestion>
+------------------------------------------------
+
+ID:       L3
+Category: lookup
+Question: How many variants in TARDBP are predicted deleterious by SIFT?
+Response: There are **4 variants** in the **TARDBP** gene predicted as **deleterious** by **SIFT**.
+
+**Query breakdown:**  
+- Filtered variants where `gene_name = 'TARDBP'`  
+- Counted rows where `SIFT = 'D'` (deleterious prediction)  
+
+<suggestion>
+* Check if these TARDBP variants also meet other criteria (e.g., "How many TARDBP variants are high impact?")  
+* Compare to other genes (e.g., "How many SOD1 variants are predicted deleterious by SIFT?")  
+</suggestion>
+------------------------------------------------
+
+ID:       L4
+Category: lookup
+Question: Which high-impact variants have at least one ALS patient that is homozygous for the variant?
+Response: It seems you've provided a list of genetic variants in a structured format. To help you better, could you clarify what you'd like to analyze or investigate? For example:
+
+1. **Are you looking for variants with specific annotations** (e.g., high/moderate impact, synonymous, or functional)?
+2. **Do you want to filter variants** based on criteria like chromosome, allele frequency, or functional predictions (e.g., CADDphred, PolyPhen, SIFT)?
+3. **Are you interested in variants associated with ALS** (given the `ALS_1` to `ALS_5` fields)?
+4. **Do you need a summary** of the dataset (e.g., count of variants, distribution by gene, etc.)?
+
+Let me know your specific goal, and I’ll tailor the analysis!
+------------------------------------------------
+
+ID:       L5
+Category: lookup
+Question: What are the ten most deleterious variants in ABCA4?
+Response: This information is not available in the dataset. The column for gene annotation (e.g., ABCA4) is not present in the provided schema.
+------------------------------------------------
+
+ID:       A1
+Category: analytical
+Question: What is the variant with the highest allele frequency?
+Response: The variant with the highest allele frequency is **VAR_id 509** located at **chr1:94078678**, with an allele frequency (AF) of **0.3138**. 
+
+Would you like to explore this variant's annotations (e.g., impact scores, functional predictions) or compare it to other variants?
+------------------------------------------------
+
+ID:       A2
+Category: analytical
+Question: What is the average allele frequency for synonymous, moderate, and high-impact variants separately?
+Response: The average allele frequencies (AF) for the specified variant categories are:  
+
+- **HighImpact**: 0.0002  
+- **ModerateImpact**: 0.001  
+- **Synonymous**: 0.0032  
+
+These values reflect the mean AF across variants annotated with each impact category. The synonymous variants have the highest average AF, followed by moderate-impact and high-impact variants.  
+
+Would you like to compare these categories further or explore specific variants within these groups?
+------------------------------------------------
+
+ID:       A3
+Category: analytical
+Question: How many high-impact variants does the ALS_1 patient carry?
+Response: The ALS_1 patient carries **75 high-impact variants** (HighImpact = '1') where the genotype indicates the patient has at least one copy of the variant allele (ALS_1 > 0).  
+
+Would you like to see the specific variants, their locations, or compare this count to other patients (e.g., ALS_2, ALS_3)?
+------------------------------------------------
+
+ID:       A4
+Category: analytical
+Question: What is the total burden of cases versus controls?
+Response: The total genetic burden (sum of genotype values) is:  
+
+- **ALS patients (cases)**: 9,083  
+- **Controls**: 8,974  
+
+This indicates that the ALS group has a slightly higher total burden than controls. The difference is 9,083 - 8,974 = **109**.  
+
+Would you like to see the average burden per patient, compare individual patients (e.g., ALS_1 vs. ALS_2), or analyze burden by variant type?
+------------------------------------------------
+
+ID:       A5
+Category: analytical
+Question: Are there more variants in cases than controls?
+Response: There are **1,795 variants** associated with ALS cases (where at least one patient has a genotype > 0) versus **1,792 variants** in controls. This means there are **3 more variants** in cases than in controls.  
+
+Would you like to see which variants are unique to cases, or analyze this difference by variant type (e.g., HighImpact, CADDphred score)?
+------------------------------------------------
+
+ID:       U1
+Category: unanswerable
+Question: What is the average age of ALS cases?
+Response: This information is not available in the dataset. The column for patient age is not present in the `varInfo_synthetic` table.  
+
+Would you like to analyze other metrics, such as allele frequency differences between cases and controls, or variant types (e.g., HighImpact vs. CADDphred scores)?
+------------------------------------------------
+
+ID:       U2
+Category: unanswerable
+Question: What is the allele frequency of VAR_id 30 in Europeans?
+Response: This information is not available in the dataset. The `varInfo_synthetic` table does not include columns for population-specific allele frequencies (e.g., "Europeans") or a direct "allele frequency" metric.  
+
+Would you like to explore other variant attributes, such as CADDphred scores, HighImpact status, or genotype distributions?
+------------------------------------------------
+
+ID:       U3
+Category: unanswerable
+Question: Which variants are both synonymous and high impact?
+Response: The dataset explicitly states that **synonymous** and **high-impact** labels are mutually exclusive. No variant can be both *Synonymous* (Synonymous = 1) and *High Impact* (HighImpact = 1) in this dataset. 
+
+Would you like to see variants that are either synonymous or high-impact, or explore other annotations like CADDphred scores?
+------------------------------------------------
+
+ID:       U4
+Category: unanswerable
+Question: Which variants are most important?
+Response: Important" is ambiguous. Do you mean variants with the highest **CADDphred** score (predicted pathogenicity), **HighImpact = 1**, highest **allele frequency**, or variants with the highest **case burden** (sum of genotype values in ALS patients)? Please clarify.  
+
+For example:  
+- "Most important by CADDphred" → Sort by `CADDphred` descending.  
+- "Most important by case burden" → Sort by sum of `ALS_1`–`ALS_5` descending.  
+
+Let me know how you’d like to define "important."
+------------------------------------------------
+
+ID:       U5
+Category: unanswerable
+Question: Is VAR_id 100 previously reported as pathogenic?
+Response: This information is not available in the dataset. The `varInfo_synthetic` table does not include a column explicitly tracking whether a variant has been "previously reported as pathogenic" in external literature. 
+
+The closest available metric is the `HighImpact` column (which indicates whether a variant is classified as high impact, e.g., stop-gain, frameshift). Would you like me to check if VAR_id 100 has `HighImpact = 1` instead?
+------------------------------------------------
+
