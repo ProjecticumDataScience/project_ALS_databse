@@ -64,7 +64,7 @@ EXAMPLES:
 - Question: How many ALS_1 genotypes 2 variants?
   Interpretation: count variants where ALS_1 = 2.
 - Question: How many pathogenic variants in SOD1?
-  Answer: This information is not available in the dataset. The column for pathogenicity annotation is 
+  Answer: This information is not available in the dataset. The column for pathogenicity annotation isn't in this dataset.
   
 For questions like 'how many variants does patient X carry?', interpret 'carries' as variants where the patient's genotype column (e.g. ALS_1) is 1 or 2.
 "
