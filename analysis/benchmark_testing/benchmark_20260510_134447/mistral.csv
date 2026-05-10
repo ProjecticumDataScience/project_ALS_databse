@@ -1,0 +1,186 @@
+"id","category","question","response","model"
+"L1","lookup","How many variants are in NEK1?"," To find out how many variants are in the 'NEK1' gene, you can use the following SQL query:
+
+```sql
+SELECT COUNT(*) AS num_variants
+FROM varInfo_synthetic
+WHERE gene_name = 'NEK1';
+```
+
+This query counts the number of rows (i.e., variants) in the `varInfo_synthetic` table where the `gene_name` column is equal to 'NEK1'. The result will be displayed as a single row with a single column named 'num_variants', containing the count of variants in the NEK1 gene.
+
+The explanation for this query is that it counts all rows (i.e., variants) from the `varInfo_synthetic` table where the gene name matches 'NEK1'. This will give you the total number of variants found in the NEK1 gene.","mistral"
+"L2","lookup","Select variants in NEK1 with HighImpact and a CADDphred > 20"," To find variants in the 'NEK1' gene that are both high impact (HighImpact = 1) and have a CADD phred score greater than 20, you can use the following SQL query:
+
+```sql
+SELECT *
+FROM varInfo_synthetic
+WHERE HighImpact = 1 AND CHROM IN ('chr1', 'chr9', 'chrX') AND gene_name = 'NEK1' AND CADDphred > 20;
+```
+
+This query selects all rows from the `varInfo_synthetic` table where:
+- HighImpact is equal to 1 (indicating high impact)
+- The chromosome is either 'chr1', 'chr9', or 'chrX' (since NEK1 is located on these chromosomes)
+- The gene name is 'NEK1'
+- The CADD phred score is greater than 20 (indicating a potentially deleterious variant)
+
+The result will be a table with all the requested variants, including their VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER, AC, AN, AF, gene_name, HighImpact, ModerateImpact, Synonymous, CADDphred, PolyPhen, SIFT, ALS_1 to ALS_5, and Control_1 to Control_5 columns.","mistral"
+"L3","lookup","How many variants in TARDBP are predicted deleterious by SIFT?"," To find out how many variants in the 'TARDBP' gene are predicted deleterious by SIFT, you can use the following SQL query:
+
+```sql
+SELECT COUNT(*) AS count
+FROM varInfo_synthetic
+WHERE gene_name = 'TARDBP' AND SIFT != '.' AND SIFT IS NOT NULL;
+```
+
+This query selects the count of rows from the `varInfo_synthetic` table where:
+- The gene name is 'TARDBP'
+- The SIFT value is not missing (not '.')
+- The SIFT value is not NULL
+
+The result will be a single row with the total number of deleterious variants in the TARDBP gene.","mistral"
+"L4","lookup","Which high-impact variants have at least one ALS patient that is homozygous for the variant?"," To find high-impact variants (HighImpact = 1) where at least one ALS patient is homozygous (ALS_1 or ALS_2 or ALS_3 or ALS_4 or ALS_5 = 2), you can use the following SQL query:
+
+```sql
+SELECT *
+FROM variants
+WHERE HighImpact = 1 AND (ALS_1 = 2 OR ALS_2 = 2 OR ALS_3 = 2 OR ALS_4 = 2 OR ALS_5 = 2);
+```
+
+This query will return all high-impact variants where at least one of the ALS patients is homozygous for the variant.","mistral"
+"L5","lookup","What are the ten most deleterious variants in ABCA4?"," To find the ten most deleterious variants (CADDphred > 20) in the 'ABCA4' gene, you can use the following SQL query:
+
+```sql
+SELECT *
+FROM varInfo_synthetic
+WHERE CHROM = 'chrX' AND gene_name = 'ABCA4' AND CADDphred > 20
+ORDER BY CADDphred DESC
+LIMIT 10;
+```
+
+This query will return the top ten most deleterious variants in the ABCA4 gene on chromosome X, sorted by CADDphred score in descending order.","mistral"
+"A1","analytical","What is the variant with the highest allele frequency?"," To find the variant with the highest allele frequency, we can use the `MAX` function to get the maximum value from the `allele_frequency` column and then join it back to the original table to get the corresponding variant details. Here's the SQL query:
+
+```sql
+SELECT * FROM table
+WHERE allele_frequency = (
+    SELECT MAX(allele_frequency) FROM table
+);
+```
+
+This query first finds the maximum allele frequency in the `table`, and then returns all rows from the original table where the allele frequency matches that maximum value. The result will be a single row containing the variant with the highest allele frequency.","mistral"
+"A2","analytical","What is the average allele frequency for synonymous, moderate, and high-impact variants separately?"," To find the average allele frequency for each impact category (synonymous, moderate, and high-impact), we'll run three separate queries:
+
+1. Synonymous variants:
+```sql
+SELECT AVG(allele_frequency) AS avg_syn_freq
+FROM table
+WHERE synonymous = 1 AND allele_frequency IS NOT NULL;
+```
+
+2. Moderate-impact variants:
+```sql
+SELECT AVG(allele_frequency) AS avg_mod_freq
+FROM table
+WHERE moderate_impact = 1 AND allele_frequency IS NOT NULL;
+```
+
+3. High-impact variants:
+```sql
+SELECT AVG(allele_frequency) AS avg_high_freq
+FROM table
+WHERE high_impact = 1 AND allele_frequency IS NOT NULL;
+```
+
+After running these queries, you'll get the average allele frequency for each impact category.","mistral"
+"A3","analytical","How many high-impact variants does the ALS_1 patient carry?"," To find out how many high-impact variants the ALS_1 patient carries, we can use a SQL query to count the number of rows where `HighImpact` is 1 and `ALS_1` is greater than 0.
+
+```sql
+SELECT COUNT(*) AS num_high_impact_variants
+FROM varInfo_synthetic
+WHERE HighImpact = 1 AND ALS_1 > 0;
+```
+
+This query will return the number of high-impact variants that the ALS_1 patient carries.","mistral"
+"A4","analytical","What is the total burden of cases versus controls?"," To find the total burden of cases (ALS_1 to ALS_5) versus controls (Control_1 to Control_5), we can use a SQL query that sums up the genotype columns for each group and subtracts the control burden from the case burden.
+
+```sql
+SELECT 'Cases' AS group, SUM(ALS_1 + ALS_2 + ALS_3 + ALS_4 + ALS_5) AS cases_burden,
+       'Controls' AS group, SUM(Control_1 + Control_2 + Control_3 + Control_4 + Control_5) AS controls_burden
+FROM table;
+```
+
+The response will be:
+
+```
+group | cases_burden | controls_burden
+------|--------------|-----------------
+Cases | X            |
+Controls | Y            |
+```
+
+Where `X` is the total burden of cases and `Y` is the total burden of controls.","mistral"
+"A5","analytical","Are there more variants in cases than controls?"," To determine if there are more variants in cases (ALS_1 to ALS_5) than controls (Control_1 to Control_5), we can use a SQL query that counts the number of rows for each group and compares the results.
+
+```sql
+SELECT COUNT(*) AS num_cases, SUM(ALS_1 + ALS_2 + ALS_3 + ALS_4 + ALS_5) AS cases_burden,
+       COUNT(*) AS num_controls, SUM(Control_1 + Control_2 + Control_3 + Control_4 + Control_5) AS controls_burden
+FROM varInfo_synthetic;
+```
+
+The response will be a table with the number of rows (total count), cases burden (sum of genotype columns for ALS patients), and controls burden (sum of genotype columns for control patients). If the cases burden is greater than the controls burden, there are more variants in cases than controls.
+
+Example response:
+```sql
+num_cases | num_controls | cases_burden | controls_burden
+---------|--------------|--------------|-----------------
+123456    | 111111       | 187902       | 165432
+```
+In this example, there are more variants in cases (cases burden = 187902) than controls (controls burden = 165432).","mistral"
+"U1","unanswerable","What is the average age of ALS cases?"," To find the average age of ALS cases, we need to assume that there is an `age` column in the database table. Since it's not provided in the data description, I will decline to answer this question as the information is not available in the dataset.
+
+Here's a sample SQL query for future reference:
+```sql
+SELECT AVG(age) AS avg_age FROM varInfo_synthetic WHERE gene_name = 'SOD1' AND HighImpact = 1; -- Assuming age column exists and we are looking at SOD1 high-impact variants.
+```","mistral"
+"U2","unanswerable","What is the allele frequency of VAR_id 30 in Europeans?"," To find the allele frequency (AF) of VAR\_id 30 in Europeans, we can use a SQL query that filters for the specific variant and checks the AF column. Since the data does not contain explicit information about population, we will assume that European ancestry corresponds to individuals with CADDphred scores greater than 15, as this is often used as a rough proxy for non-African ancestry.
+
+```sql
+SELECT AF
+FROM table
+WHERE VAR_id = 30 AND CADDphred > 15;
+```
+
+This query will return the allele frequency of VAR\_id 30 for individuals with CADDphred scores greater than 15, which we assume to be Europeans. The result should be a single value representing the AF of this variant in the European population.","mistral"
+"U3","unanswerable","Which variants are both synonymous and high impact?"," To find out if there are any variants that are both synonymous and high impact, we can use a SQL query to filter for rows where `Synonymous = 1` and `HighImpact = 1`. However, since these labels are mutually exclusive, it's important to note that no such variant exists in the dataset.
+
+```sql
+SELECT * FROM varInfo_synthetic WHERE Synonymous = 1 AND HighImpact = 1; -- This query will return an empty result set because synonymous and high impact variants cannot coexist.
+```","mistral"
+"U4","unanswerable","Which variants are most important?"," To find out which variants are considered the most important, we can use a combination of different metrics that indicate the potential impact of each variant. Since there's no explicit ""importance"" score in the dataset, I will consider three factors: CADD phred score (higher = more deleterious), HighImpact = 1, and case burden (sum of genotype columns for ALS patients).
+
+Here is a SQL query that calculates these metrics for each variant and orders them by importance:
+
+```sql
+SELECT
+    variant_id AS id,
+    CADDphred,
+    HighImpact,
+    SUM(ALS_1 + ALS_2 + ALS_3 + ALS_4 + ALS_5) AS case_burden
+FROM
+    table
+WHERE
+    CADDphred != '.'
+GROUP BY
+    variant_id
+ORDER BY
+    CASE
+        WHEN HighImpact = 1 THEN 0 -- Prioritize high-impact variants
+        ELSE case_burden DESC, -- Sort by case burden for non-high-impact variants
+             CADDphred DESC -- Sort by CADD phred score within each group
+```
+
+This query calculates the case burden (sum of genotype columns) and CADD phred score for each variant, groups them together, and orders them first by high impact (HighImpact = 1), then by case burden, and finally by CADD phred score. The result will be a list of variants sorted by importance, with the most important ones at the top.","mistral"
+"U5","unanswerable","Is VAR_id 100 previously reported as pathogenic?"," To determine if variant ID 100 has been previously reported as pathogenic, we need to check if there's a specific column for that information in the dataset. However, I don't see such a column in the provided data description. Therefore, I cannot answer this question directly from the given dataset.
+
+If you have additional information or another source where I can find pathogenicity annotations, please let me know!","mistral"
