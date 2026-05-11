@@ -1,0 +1,958 @@
+---
+title: "Project ALS — Natural Language Database Access"
+subtitle: "Benchmarking Local LLMs for Genomic Data Querying"
+author: "Projecticum Data Science"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 3
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 10,
+  fig.height = 6
+)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(knitr)
+library(kableExtra)
+library(DiagrammeR)
+
+# ── Paths to access final csv data ──────────────────────────
+graded_files <- c(
+  "~/project_ALS_databse/analysis/benchmark_grading/finalgraded_20260510_141103.csv",
+  "~/project_ALS_databse/analysis/benchmark_grading/finalgraded_20260511_010604.csv",
+  "~/project_ALS_databse/analysis/benchmark_grading/finalgraded_20260511_093437.csv"
+)
+# ────────────────────────────────────────────────────────────
+
+combined <- do.call(rbind, lapply(graded_files, read.csv))
+
+averaged <- combined %>%
+  group_by(model, id, category) %>%
+  summarise(
+    grade_answer           = mean(grade_answer,           na.rm = TRUE),
+    grade_minimal_response = mean(grade_minimal_response, na.rm = TRUE),
+    grade_hallucination    = mean(grade_hallucination,    na.rm = TRUE),
+    grade_sql              = mean(grade_sql,              na.rm = TRUE),
+    grade_total            = mean(grade_total,            na.rm = TRUE),
+    .groups = "drop"
+  )
+
+averaged$id <- factor(averaged$id,
+  levels = c("L1","L2","L3","L4","L5",
+             "A1","A2","A3","A4","A5",
+             "U1","U2","U3","U4","U5"))
+
+model_colors <- c(
+  "deepseek-r1:8b" = "#E63946",
+  "llama3.1:8b"    = "#F4A261",
+  "llama3.2"       = "#2A9D8F",
+  "mistral"        = "#457B9D",
+  "qwen3:8b"       = "#9B5DE5"
+)
+
+category_colors <- c(
+  "analytical"   = "#E9C46A",
+  "lookup"       = "#2A9D8F",
+  "unanswerable" = "#457B9D"
+)
+
+criterion_colors <- c(
+  "Answer"           = "#E63946",
+  "Hallucination"    = "#2A9D8F",
+  "Minimal_response" = "#457B9D",
+  "SQL"              = "#9B5DE5"
+)
+
+theme_als <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 15, margin = margin(b = 10)),
+    plot.subtitle    = element_text(color = "grey40", size = 11, margin = margin(b = 10)),
+    axis.title       = element_text(face = "bold"),
+    axis.text        = element_text(color = "grey20"),
+    axis.text.x      = element_text(angle = 45, hjust = 1),
+    legend.title     = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90"),
+    plot.caption     = element_text(color = "grey50", size = 9, margin = margin(t = 10))
+  )
+```
+
+---
+
+# 1. Project Background
+
+## What is Project MinE?
+
+[Project MinE](https://projectmine.com) is an international collaboration coordinated by the research group of **Kevin Kenna** at UMC Utrecht, involving 27 centers across 21 countries. The project sequences the genomes of ALS patients to map genetic variants associated with the disease.
+
+The genetic data is stored in **VCF format** inside an SQL database. Accessing this database currently requires:
+
+- Proficiency in SQL querying
+- Knowledge of VCF format and genomic annotation
+- Familiarity with the R package `rvat`
+
+This creates a significant barrier for researchers who are not bioinformaticians.
+
+## The Goal
+
+Make the database **accessible to a wider group of scientists** using natural language processing — allowing researchers to query the database in plain English, without writing a single line of SQL.
+
+---
+
+# 2. Pipeline Architecture
+
+## Technology Stack
+
+The pipeline is built from three core components:
+
+| Component | Role |
+|---|---|
+| `rvat` | R package by Kenna Lab — opens and manages the `.gdb` genomic database |
+| `querychat` | R package by Posit — converts natural language → SQL queries |
+| `rollama` / `ollama` | Runs a local LLM to power the NLP |
+
+## How It Works
+
+The user types a plain English question. The local LLM interprets the intent and generates an SQL query via `querychat`. The query is executed against the database and the results are returned as a natural language answer.
+
+```{r pipeline-diagram, echo=FALSE, fig.cap="Current querychat pipeline"}
+grViz("
+digraph current_pipeline {
+  graph [layout = dot, rankdir = LR, fontname = 'Helvetica']
+  node [fontname = 'Helvetica', fontsize = 12, style = filled, shape = roundedbox]
+  
+  User    [label = 'Researcher\\n(plain English)', fillcolor = '#E8F4FD', color = '#457B9D']
+  LLM     [label = 'Ollama\\n(local LLM)',         fillcolor = '#E1D5E7', color = '#9B5DE5']
+  QC      [label = 'querychat\\n(NL → SQL)',        fillcolor = '#FFF2CC', color = '#E9C46A']
+  DB      [label = 'GDB Database\\n(SQLite)',        fillcolor = '#FFE6CC', color = '#F4A261']
+  Answer  [label = 'Answer\\nto researcher',         fillcolor = '#D5E8D4', color = '#2A9D8F']
+
+  User   -> LLM    [label = 'question']
+  LLM    -> QC     [label = 'generates SQL']
+  QC     -> DB     [label = 'executes query']
+  DB     -> LLM    [label = 'results']
+  LLM    -> Answer [label = 'summarises']
+}
+")
+```
+
+## Example Query
+
+```r
+library(ellmer)
+library(querychat)
+library(rvat)
+library(DBI)
+
+# Connect to the ALS genomic database
+gdb <- gdb(rvat_example("rvatData.gdb"))
+
+# Set up the chat client with a local LLM
+ollama_client <- chat_ollama(
+  model  = "llama3.1:8b",
+  params = ellmer::params(temperature = 0.1, num_predict = 200)
+)
+
+# Initialise QueryChat
+qc <- QueryChat$new(
+  data_source      = gdb,
+  table_name       = "varInfo_synthetic",
+  client           = ollama_client,
+  data_description = data_description,
+  extra_instructions = extra_instructions
+)
+
+# Launch interactive console
+qc$console()
+```
+
+---
+
+# 3. The Database
+
+## Structure
+
+The `varInfo_synthetic` table used for benchmarking contains **1802 variants** with the following key columns:
+
+```{r db-structure, echo=FALSE}
+col_info <- data.frame(
+  Column = c("VAR_id", "CHROM", "POS", "gene_name", "HighImpact",
+             "ModerateImpact", "Synonymous", "CADDphred",
+             "PolyPhen", "SIFT", "ALS_1–ALS_5", "Control_1–Control_5"),
+  Description = c(
+    "Unique variant identifier",
+    "Chromosome (e.g. chr1)",
+    "Genomic position",
+    "Gene the variant falls in",
+    "1 = high impact (stop-gain, frameshift); 0 otherwise",
+    "1 = moderate impact (missense); 0 otherwise",
+    "1 = synonymous (silent); 0 otherwise",
+    "Deleteriousness score; higher = more deleterious; missing = '.'",
+    "D=probably damaging, P=possibly damaging, B=benign; missing = '.'",
+    "D=deleterious, T=tolerated; missing = '.'",
+    "Genotype of 5 ALS patients (0=hom ref, 1=het, 2=hom alt)",
+    "Genotype of 5 controls (same encoding)"
+  )
+)
+
+kable(col_info, align = c("l", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = TRUE) %>%
+  row_spec(0, bold = TRUE, background = "#457B9D", color = "white")
+```
+
+## Important Data Rules
+
+> - A variant **cannot** be both `Synonymous` and `HighImpact` simultaneously
+> - Missing values in `CADDphred`, `PolyPhen`, and `SIFT` are stored as `'.'` — **not** NULL
+> - `PolyPhen` and `SIFT` are **computational predictions only** — not evidence of pathogenicity
+> - Genotype values indicate zygosity only — **not** disease association
+
+---
+
+# 4. Benchmark Design
+
+## Question Categories
+
+The benchmark was designed to test three types of queries:
+
+```{r benchmark-table, echo=FALSE}
+bm <- data.frame(
+  Category = c("Lookup (L1–L5)", "Analytical (A1–A5)", "Unanswerable (U1–U5)"),
+  Description = c(
+    "Simple filtering and counting queries — e.g. 'How many variants are in NEK1?'",
+    "Aggregations and calculations — e.g. 'What is the total allele burden in cases vs controls?'",
+    "Questions the database cannot answer — tests hallucination avoidance"
+  ),
+  Example = c(
+    "How many variants in TARDBP are predicted deleterious by SIFT?",
+    "What is the average allele frequency for synonymous, moderate, and high-impact variants separately?",
+    "What is the average age of ALS cases?"
+  )
+)
+
+kable(bm, align = c("l", "l", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = TRUE) %>%
+  row_spec(0, bold = TRUE, background = "#2A9D8F", color = "white")
+```
+
+## Grading Criteria
+
+Each response was graded on **4 criteria** (pass/fail), giving a maximum score of 4 per question:
+
+| Criterion | What it tests |
+|---|---|
+| `grade_answer` | Is the final answer correct or appropriate? |
+| `grade_minimal_response` | Is the response concise (1–3 sentences)? |
+| `grade_hallucination` | Is the response free of hallucinations? |
+| `grade_sql` | Is the SQL query logically correct? |
+
+## Evaluation Methodology
+
+The benchmark was run **3 times** per model to account for variability. Responses were first **auto-graded** using a local LLM judge (`gemma3`) with the full benchmark document as ground truth, then **manually reviewed** for any rows the auto-grader could not parse.
+
+---
+
+# 5. Models Tested
+
+```{r models-table, echo=FALSE}
+models <- data.frame(
+  Model = c("llama3.1:8b", "llama3.2", "mistral", "qwen3:8b", "deepseek-r1:8b"),
+  Size = c("4.9 GB", "2.0 GB", "4.4 GB", "5.2 GB", "5.2 GB"),
+  Notes = c(
+    "Preferred by research group; good tool calling",
+    "Lighter version of llama3; faster but less capable",
+    "Strong instruction following; weaker tool calling",
+    "Strong reasoning; good structured output",
+    "Reasoning-focused; failed tool calling entirely"
+  )
+)
+
+kable(models, align = c("l", "l", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = TRUE) %>%
+  row_spec(0, bold = TRUE, background = "#9B5DE5", color = "white")
+```
+
+All models were run **locally** via Ollama on the Posit Workbench server — no external API calls, no data leaving the server.
+
+---
+
+# 6. Results
+
+## Overall Performance
+
+```{r plot-overall, echo=FALSE, fig.cap="Overall average score per model (out of 4)"}
+model_scores <- averaged %>%
+  group_by(model) %>%
+  summarise(mean_total = mean(grade_total, na.rm = TRUE), .groups = "drop")
+
+# for usage later in part 7
+mistral_score <- model_scores$mean_total[model_scores$model == "mistral"]
+llama_score   <- model_scores$mean_total[model_scores$model == "llama3.1:8b"]
+
+ggplot(model_scores, aes(x = reorder(model, mean_total),
+                          y = mean_total,
+                          fill = model)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  geom_text(aes(label = round(mean_total, 2)),
+            hjust = -0.2, size = 4, fontface = "bold") +
+  scale_fill_manual(values = model_colors) +
+  scale_y_continuous(limits = c(0, 4.5), breaks = 0:4) +
+  coord_flip() +
+  labs(
+    title    = "Overall average score per model",
+    subtitle = "Averaged across 3 benchmark runs, 15 questions each",
+    x        = NULL,
+    y        = "Average score (out of 4)",
+    caption  = "Scoring criteria: answer correctness, response conciseness, hallucination, SQL correctness"
+  ) +
+  theme_als +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 0))
+```
+
+## Score by Question Category
+
+```{r plot-category, echo=FALSE, fig.cap="Average score broken down by question category"}
+category_scores <- averaged %>%
+  group_by(model, category) %>%
+  summarise(mean_total = mean(grade_total, na.rm = TRUE), .groups = "drop")
+
+ggplot(category_scores, aes(x = model, y = mean_total, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_text(aes(label = round(mean_total, 1)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 3.2, fontface = "bold") +
+  scale_fill_manual(
+    values = category_colors,
+    labels = c("Analytical", "Lookup", "Unanswerable")
+  ) +
+  scale_y_continuous(limits = c(0, 4.8), breaks = 0:4) +
+  labs(
+    title    = "Average score per question category per model",
+    subtitle = "Averaged across 3 benchmark runs",
+    x        = "Model",
+    y        = "Average score (out of 4)",
+    fill     = "Category",
+    caption  = "Lookup = factual queries | Analytical = aggregations | Unanswerable = hallucination tests"
+  ) +
+  theme_als
+```
+
+## Score per Question (Heatmap)
+
+```{r plot-heatmap, echo=FALSE, fig.height=9, fig.cap="Score per question per model — red = low, green = high"}
+ggplot(averaged, aes(x = model, y = id, fill = grade_total)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = round(grade_total, 1)),
+            size = 3.5, fontface = "bold", color = "grey20") +
+  scale_fill_gradient2(
+    low      = "#E63946",
+    mid      = "#F4A261",
+    high     = "#2A9D8F",
+    midpoint = 2,
+    limits   = c(0, 4),
+    name     = "Score\n(0–4)"
+  ) +
+  scale_x_discrete(position = "top") +
+  labs(
+    title    = "Score per question per model",
+    subtitle = "Averaged across 3 benchmark runs",
+    x        = NULL,
+    y        = "Question ID",
+    caption  = "L = Lookup | A = Analytical | U = Unanswerable"
+  ) +
+  theme_als +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+        panel.grid  = element_blank())
+```
+
+## Score by Grading Criterion
+
+```{r plot-criteria, echo=FALSE, fig.cap="Performance broken down by grading criterion"}
+criterion_scores <- averaged %>%
+  group_by(model) %>%
+  summarise(
+    Answer           = mean(grade_answer,           na.rm = TRUE),
+    Minimal_response = mean(grade_minimal_response, na.rm = TRUE),
+    Hallucination    = mean(grade_hallucination,    na.rm = TRUE),
+    SQL              = mean(grade_sql,              na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(
+    cols      = c(Answer, Minimal_response, Hallucination, SQL),
+    names_to  = "criterion",
+    values_to = "score"
+  )
+
+ggplot(criterion_scores, aes(x = model, y = score, fill = criterion)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_text(aes(label = round(score, 2)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 3, fontface = "bold") +
+  scale_fill_manual(
+    values = criterion_colors,
+    labels = c("Answer correct", "Hallucination free", "Minimal response", "SQL correct")
+  ) +
+  scale_y_continuous(
+    limits = c(0, 1.15),
+    breaks = seq(0, 1, 0.25),
+    labels = percent
+  ) +
+  labs(
+    title    = "Score per grading criterion per model",
+    subtitle = "Averaged across 3 benchmark runs",
+    x        = "Model",
+    y        = "Proportion correct",
+    fill     = "Criterion",
+    caption  = "Each criterion scored as pass/fail per question"
+  ) +
+  theme_als
+```
+
+---
+
+# 7. Key Findings
+
+## What Worked Well
+
+- **SQL generation** was generally correct across all models that executed tool calls — the LLMs understood the schema and wrote valid queries
+- **Unanswerable questions** were handled better than expected — most models correctly refused questions about missing columns (age, population-specific AF, pathogenicity)
+- **llama3.1:8b** showed the lowest hallucination rate, consistent with the research group's prior experience
+- The pipeline is **fully local** — no data leaves the server, which is critical for sensitive genomic data
+
+## What Needs Improvement
+
+- **Response verbosity** — all models struggled with conciseness, often returning long rambling responses instead of a direct 1–3 sentence answer
+- **Instruction following** — smaller local models consistently ignored formatting rules despite explicit instructions in the system prompt
+- **Mistral's tool calling** — Mistral scored highest overall but does not actually execute queries; it writes SQL as text without running it, making it unsuitable for this pipeline despite good scores
+- **Ambiguous questions** — models rarely asked for clarification when terms like "most important" were used
+
+## The Mistral Paradox
+
+> Mistral achieved the highest benchmark score 
+> (`r round(mistral_score, 2)`/4) but is the least suitable model for production use, as it does not call the querychat tool and therefore never actually queries the database. 
+> **llama3.1:8b**, preferred by the research group, scores lower 
+> (`r round(llama_score, 2)`/4) but correctly executes the full pipeline.
+
+This highlights an important limitation of automated benchmarking — **scores do not always reflect real-world usefulness**.
+
+---
+
+# 8. Limitations
+
+- The benchmark was run on a **synthetic dataset** — specific values differ from the real Project MinE database, so only SQL logic correctness (not exact values) was fully verifiable
+- Only **5 ALS patients and 5 controls** were included in the synthetic data — real analyses involve thousands of samples
+- The auto-grader (`gemma3`) introduced some inconsistency — approximately 10–15% of rows required manual review
+- All models were tested with identical prompts — further prompt engineering per model might improve individual performance
+
+---
+
+# 9. Future Work — MCP Agent
+
+## Why querychat Has Limitations
+
+The current `querychat` pipeline is limited to **one input table** at a time. Real genomic analyses often require:
+
+- Joining variant data with phenotype data (`pheno` table)
+- Running RVAT association tests
+- Querying multiple tables simultaneously
+
+## The Proposed Solution: MCP Agent
+
+The next phase of the project involves building a **Model Context Protocol (MCP) agent** in Python that can:
+
+- Expose **multiple data sources** as separate tools the LLM can call
+- Integrate **RVAT functions** as callable tools (not just SQL)
+- Handle **multi-step reasoning** across tables
+- Give full control over response formatting
+
+```{r mcp-diagram, echo=FALSE}
+grViz("
+digraph mcp_agent {
+  graph [layout = dot, rankdir = TB, fontname = 'Helvetica']
+  node [fontname = 'Helvetica', fontsize = 12, style = filled, shape = roundedbox]
+
+  User   [label = 'User question',             fillcolor = '#E8F4FD', color = '#457B9D']
+  LLM    [label = 'Ollama (Llama 3.1)',         fillcolor = '#E1D5E7', color = '#9B5DE5']
+  MCP    [label = 'MCP Agent (Python)',         fillcolor = '#FFF2CC', color = '#E9C46A']
+  SQL    [label = 'Tool: VCF / SQL database',   fillcolor = '#FFE6CC', color = '#F4A261']
+  RVAT   [label = 'Tool: RVAT rare variant analysis', fillcolor = '#FFE6CC', color = '#F4A261']
+  Pheno  [label = 'Tool: Phenotype / metadata', fillcolor = '#FFE6CC', color = '#F4A261']
+  Answer [label = 'Answer to researcher',       fillcolor = '#D5E8D4', color = '#2A9D8F']
+
+  User -> LLM  [label = 'question']
+  LLM  -> MCP  [label = 'decides tool calls']
+  MCP  -> SQL
+  MCP  -> RVAT
+  MCP  -> Pheno
+  SQL  -> LLM  [label = 'results']
+  RVAT -> LLM
+  Pheno -> LLM
+  LLM  -> Answer [label = 'synthesises']
+
+  { rank = same; SQL; RVAT; Pheno }
+}
+")
+```
+
+## Why MCP Over querychat?
+
+| | querychat | MCP Agent |
+|---|---|---|
+| Multiple data sources | ✗ | ✓ |
+| RVAT integration | ✗ | ✓ |
+| Response formatting control | Limited | Full |
+| Extensibility | Limited | High |
+| Setup complexity | Low | Medium |
+
+## MCP first impression
+
+> schrijf ff wat shit op over python en moeilijkheidsgraad
+
+## MCP findings
+
+> zo veel mogelijk shit dat je al weet en dan uitleggen erover
+
+---
+
+---
+  
+# 9b. Alternative Approaches — Extending querychat
+  
+Before committing to the full MCP agent architecture, two lighter-weight 
+alternatives are worth exploring. Both stay entirely within R, avoiding the 
+added complexity of a Python backend and an HTTP layer between Shiny and the 
+agent.
+
+## Approach 1 — Forking querychat
+
+### How querychat works internally
+
+querychat is relatively thin. At its core it does three things:
+  
+1. Builds a system prompt describing the target tables schema and any extra 
+   instructions
+2. Passes the users question + that system prompt to an `ellmer` chat client
+3. Executes the returned SQL against the database and returns the result
+
+The key entry point is `QueryChat$new()`, which accepts a single `table_name` 
+and builds its schema description from that one table. The multi-table 
+limitation is therefore not architectural — it is simply a consequence of how 
+the system prompt is constructed.
+
+### The workaround
+
+By forking the querychat source and modifying the schema-building step, it 
+should be possible to:
+  
+- Accept a **list of tables** (e.g. `varInfo`, `pheno`) instead of a single 
+`table_name`
+- Describe **all table schemas and their relationships** in the system prompt 
+(primary keys, how tables join)
+- Allow the LLM to generate **multi-table SQL** (JOIN queries) rather than 
+single-table queries
+
+The rest of the pipeline — the ellmer chat client, the SQL execution step, the 
+Shiny integration — would remain unchanged.
+
+### What needs investigating
+
+> - Where exactly in the querychat source is the system prompt constructed? 
+  >   Which function or R6 method handles schema introspection?
+  > - Does querychat validate or sanitise the returned SQL before executing it? 
+  >   Would JOIN queries pass through unmodified?
+  > - Are there any hardcoded assumptions about a single table elsewhere in the 
+>   codebase (e.g. in how results are returned or displayed)?
+  > - How does querychat handle execution errors — would a malformed JOIN cause 
+>   a silent failure or a visible error?
+  
+### Relevant source to look at
+  
+```r
+# Install the development version to inspect source
+# install.packages("pak")
+pak::pak("posit-dev/querychat")
+
+# Browse the R6 class definition
+querychat:::QueryChat
+```
+
+---
+  
+## Approach 2 — Using ellmer directly
+  
+### What this means
+  
+Since querychat is itself a wrapper around `ellmer`, it is possible to bypass 
+querychat entirely and use ellmers tool-calling interface directly. This gives 
+full control over:
+
+- How many tables are described in the system prompt
+- What tools the LLM can call (SQL queries, RVAT functions, metadata lookups)
+- How responses are formatted before being returned to Shiny
+
+The tradeoff is that you are rebuilding what querychat already provides — SQL 
+execution, result handling, conversation history — from scratch in R.
+
+### Sketch of the approach
+
+```r
+library(ellmer)
+library(DBI)
+library(rvat)
+
+# Connect to database
+gdb <- gdb(rvat_example("rvatData.gdb"))
+
+# Define a SQL execution tool the LLM can call
+run_sql <- function(query) {
+  tryCatch(
+    dbGetQuery(gdb@db, query),
+    error = function(e) paste("SQL error:", e$message)
+  )
+}
+
+# Define an RVAT tool the LLM can call
+run_rvat_burden <- function(gene, group_col = "ALS_status") {
+  # placeholder — actual rvat call goes here
+  paste("RVAT burden test for", gene, "not yet implemented")
+}
+
+# Build a system prompt describing all available tables and tools
+system_prompt <- "
+You are a genomic data assistant with access to two tools:
+  - run_sql: executes a SQL query against the variant database
+  - run_rvat_burden: runs a rare variant burden test for a given gene
+
+The database contains the following tables:
+
+varInfo columns: VAR_id, CHROM, POS, gene_name, HighImpact, ModerateImpact,
+Synonymous, CADDphred, PolyPhen, SIFT, ALS_1 through ALS_5, Control_1 
+through Control_5.
+
+pheno columns: sample_id, ALS_status, age_at_onset, site_of_onset, sex.
+
+varInfo and pheno share no direct join key in SQL — use RVAT for 
+case/control analyses that require both tables.
+
+Always respond in 1-3 sentences. Do not hallucinate columns that are not listed.
+"
+
+# Initialise ellmer chat with tool definitions
+client <- chat_ollama(
+  model  = "llama3.1:8b",
+  system = system_prompt,
+  params = ellmer::params(temperature = 0.1)
+)
+
+# Register tools
+client$register_tool(tool(
+  run_sql,
+  "Execute a SQL query against the genomic variant database.",
+  query = type_string("A valid SQLite query.")
+))
+
+client$register_tool(tool(
+  run_rvat_burden,
+  "Run a rare variant burden test for a given gene using RVAT.",
+  gene     = type_string("The gene name to test."),
+  group_col = type_string("Column to use for case/control grouping.")
+))
+
+# Ask a question
+client$chat("How many high-impact variants are in NEK1?")
+```
+
+### What needs investigating
+
+> - Does `ellmer` support registering multiple tools and does `llama3.1:8b` 
+>   reliably select between them? Tool selection failures were already observed 
+>   with some models in the benchmark.
+> - What is the correct ellmer syntax for `register_tool` and `tool()` in the 
+>   current version — the API has been evolving and documentation is sparse.
+> - How does conversation history work in ellmer when tool calls are involved — 
+>   does it automatically maintain context across multi-turn queries?
+> - Can the Shiny integration from the current querychat app be adapted to work 
+>   with a raw ellmer client, or does it depend on querychat-specific internals?
+
+---
+
+## Comparison of approaches
+
+| | Fork querychat | ellmer directly | MCP Agent |
+|---|---|---|---|
+| Multi-table SQL | ✓ (with modification) | ✓ | ✓ |
+| RVAT integration | ✗ (SQL only) | ✓ | ✓ |
+| Stays in R | ✓ | ✓ | ✗ |
+| Shiny compatibility | ✓ (minimal changes) | Needs testing | Needs HTTP layer |
+| Implementation effort | Low–medium | Medium | High |
+| Modifies upstream package | Yes | No | No |
+
+The fork approach is the quickest path to multi-table SQL. The ellmer approach 
+is more powerful and avoids dependency on querychats internals, but requires 
+more groundwork. Both are worth prototyping before deciding whether the full 
+MCP architecture is necessary.
+
+---
+
+---
+
+# 9c. Implementation — MultiTableSource
+
+## Approach
+
+Rather than forking the querychat package or rebuilding the pipeline in Python,
+the multi-table limitation was resolved by implementing querychat's existing
+`DataSource` interface directly. This required no changes to the querychat
+source code and no new dependencies — everything stays within R.
+
+The entry point was `normalize_data_source()`, which contains an early exit:
+
+```r
+if (is_data_source(data_source)) {
+    return(data_source)
+}
+```
+
+Where `is_data_source()` simply checks:
+
+```r
+inherits(x, "DataSource")
+```
+
+This means any R6 class inheriting from `querychat:::DataSource` is accepted
+as-is, bypassing all single-table wrapping logic. The interface required is
+five methods: `get_schema()`, `execute_query()`, `test_query()`, `get_data()`,
+and `get_db_type()`.
+
+## What Was Built
+
+`MultiTableSource` is a ~60 line R6 class that:
+
+- Accepts a `DBIConnection` and a **vector** of table names instead of a single
+  table
+- Overrides `get_schema()` to call querychat's internal `get_schema_impl()`
+  once per table and concatenate the results — this is what gets injected into
+  the LLM system prompt
+- Treats the first table as the primary display table for `get_data()` and
+  `test_query(require_all_columns = TRUE)`
+- Delegates `execute_query()` and `test_query()` directly to DBI
+
+One additional change was required: the default querychat prompt template
+contains the line `"For security reasons, you may only query this specific
+table."` This is hardcoded outside any conditional block and would cause the
+LLM to ignore the second table despite it being present in the schema. The
+fix was to copy the template, replace that line with `"You may query any of
+the tables described in the schema above."`, and pass the custom template path
+via the `prompt_template` argument to `QueryChat$new()`.
+
+Two minor errors were encountered during setup:
+
+- `gdb@db` is not a valid slot — the `gdb` object itself is the
+  `DBIConnection` and should be passed directly
+- `QueryChat$new()` attempts to build an id string via
+  `sprintf("querychat_%s", table_name)`, which fails when `table_name` is a
+  vector; resolved by passing `id = "querychat_multi"` explicitly
+
+## Results
+
+The implementation was tested against three questions:
+
+| Question | Table queried | Result |
+|---|---|---|
+| What is the average age of ALS cases? | `pheno` | 60.1 years — correct |
+| What is the sex distribution of the cohort? | `pheno` | 51.6% / 48.4% — correct |
+| How many high-impact variants are in SOD1? | `varInfo_synthetic` | 4 — incorrect |
+
+The LLM correctly routed each query to the appropriate table without any
+explicit routing logic — schema description alone was sufficient. All
+previously unanswerable benchmark questions involving sample metadata (age,
+sex, population) are now answerable.
+
+## What This Means for the Benchmark
+
+Several questions graded as `unanswerable` in the original benchmark — and
+correctly refused by the models — are now answerable with this implementation.
+The benchmark results therefore represent a lower bound on what the pipeline
+can achieve; a re-run with `MultiTableSource` would be needed to assess
+performance on pheno-level questions.
+
+## Limitations
+
+- The `pheno` table has a column also named `pheno` (1 = ALS case, 0 =
+  control), which is potentially ambiguous for the LLM. This should be
+  clarified in `data_description`.
+- Dashboard filtering (`querychat_update_dashboard`) still operates on the
+  primary table only (`varInfo_synthetic`) — filtered views of the `pheno`
+  table are not supported in the current implementation.
+- The two tables are not directly joinable via a shared column value. `IID`
+  values in `pheno` (e.g. `ALS1`) correspond to column *names* in
+  `varInfo_synthetic` (e.g. `ALS_1`), not column values — cross-table
+  analyses therefore cannot be expressed as a single SQL JOIN.
+  
+---
+
+# 10. Shiny Application
+
+## What is Shiny?
+
+[Shiny](https://shiny.posit.co/) is an R framework for building interactive web applications directly from R code — no HTML, CSS, or JavaScript required. In the context of this project, Shiny provides the **graphical user interface** that researchers interact with, sitting on top of the querychat pipeline.
+
+Instead of typing queries in an R console, users get a clean web interface with a chat sidebar and a live data table — making the tool accessible to non-technical researchers.
+
+## Basic Shiny Structure
+
+The minimal Shiny app wrapping our QueryChat pipeline looks like this:
+
+```{r shiny-example, eval=FALSE}
+library(shiny)
+library(bslib)
+library(querychat)
+
+# gooi hier een basic pipeline van shiny
+```
+
+## Findings
+
+> shiny info, problemen waar je tegen bent gelopen.
+
+Belangrijke puntjes voor presentatie:
+
+- layout problemen?
+- UI 
+
+## Potential UI Improvements
+
+> reset knopje, makkelijk berijkbaar chatbox, etc
+
+---
+
+# 11. Proposed Production Architecture
+
+Combining the MCP agent backend with the Shiny frontend, the full proposed production pipeline would look as follows:
+  
+```{r mcp-full-diagram, echo=FALSE, fig.cap="Proposed production architecture"}
+
+grViz("
+digraph MCP_pipeline {
+
+  graph [layout = dot, rankdir = TB, fontname = 'Helvetica']
+  
+  node [fontname = 'Helvetica', fontsize = 12, style = filled, shape = roundedbox]
+
+  # User layer
+  User [label = 'Researcher\\n(plain English question)', 
+        fillcolor = '#E8F4FD', color = '#457B9D']
+
+  # Frontend layer
+  Shiny [label = 'Shiny Web App\\n(R frontend)', 
+         fillcolor = '#D5E8D4', color = '#2A9D8F']
+
+  # Agent layer
+  MCP [label = 'MCP Agent\\n(Python orchestrator)', 
+       fillcolor = '#FFF2CC', color = '#E9C46A']
+
+  # LLM layer
+  LLM [label = 'Ollama — Llama 3.1\\n(local LLM)', 
+       fillcolor = '#E1D5E7', color = '#9B5DE5']
+
+  # Tool layer
+  SQL  [label = 'Tool: VCF / SQL DB\\nvariant queries', 
+        fillcolor = '#FFE6CC', color = '#F4A261']
+  RVAT [label = 'Tool: RVAT (R)\\nrare variant analysis', 
+        fillcolor = '#FFE6CC', color = '#F4A261']
+  META [label = 'Tool: Phenotype / metadata\\ncohort information', 
+        fillcolor = '#FFE6CC', color = '#F4A261']
+
+  # Result layer
+  Synth [label = 'Result synthesis\\n(Llama 3.1)', 
+         fillcolor = '#E1D5E7', color = '#9B5DE5']
+
+  # Output layer
+  Answer [label = 'Answer + data table\\ndisplayed in Shiny', 
+          fillcolor = '#D5E8D4', color = '#2A9D8F']
+
+  # Edges — question flow
+  User   -> Shiny  [label = 'types question', color = '#457B9D']
+  Shiny  -> MCP    [label = 'HTTP request', color = '#2A9D8F']
+  MCP    -> LLM    [label = 'interprets intent', color = '#9B5DE5']
+  LLM    -> MCP    [label = 'decides tool calls', color = '#9B5DE5']
+  MCP    -> SQL    [color = '#F4A261']
+  MCP    -> RVAT   [color = '#F4A261']
+  MCP    -> META   [color = '#F4A261']
+  SQL    -> Synth  [color = '#F4A261']
+  RVAT   -> Synth  [color = '#F4A261']
+  META   -> Synth  [color = '#F4A261']
+  Synth  -> Shiny  [label = 'synthesized answer', color = '#2A9D8F']
+  Shiny  -> Answer [label = 'renders response', color = '#2A9D8F']
+  Answer -> User   [color = '#457B9D']
+
+  # Rank groupings
+  { rank = same; SQL; RVAT; META }
+}
+")
+```
+
+## Why This Architecture?
+
+```{r architecture-table, echo=FALSE}
+arch <- data.frame(
+  Layer = c("Shiny (R)", "MCP Agent (Python)", "Ollama / Llama 3.1", "Tools"),
+  Role = c(
+    "User-facing interface — chat sidebar, results table, SQL display",
+    "Orchestrates tool calls, manages context, routes requests",
+    "Understands natural language, decides which tools to call",
+    "Execute queries, run RVAT analyses, retrieve metadata"
+  ),
+  `Why this choice` = c(
+    "Native R integration, familiar to the research group, querychat-compatible",
+    "MCP is purpose-built for multi-tool LLM orchestration",
+    "Local model — no data leaves the server, free to run",
+    "Separating tools means new data sources can be added without rebuilding the pipeline"
+  )
+)
+
+kable(arch, col.names = c("Layer", "Role", "Why this choice"),
+      align = c("l", "l", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = TRUE) %>%
+  row_spec(0, bold = TRUE, background = "#9B5DE5", color = "white")
+```
+
+---
+
+# 12. Conclusions
+
+The proof-of-concept demonstrates that local LLMs can successfully translate natural language queries into SQL for genomic variant databases. The pipeline is:
+
+- **Functional** — queries execute correctly for most question types
+- **Private** — fully local, no external API calls
+- **Accessible** — researchers without SQL knowledge can retrieve data
+
+However, the current implementation has clear limitations that motivate the move to an MCP agent architecture for the production version.
+
+**Recommended model for current pipeline: `llama3.1:8b`** — lowest hallucination rate, correct tool calling, consistent with research group preference.
+
+---
+
+*This document was generated as part of the Projecticum Data Science course. All genomic data used in benchmarking is synthetic.*
