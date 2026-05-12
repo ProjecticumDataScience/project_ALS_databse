@@ -527,11 +527,50 @@ digraph mcp_agent {
 
 ## MCP first impression
 
-> schrijf ff wat shit op over python en moeilijkheidsgraad
+Setting up the MCP has been relatively straightforward after having overcome the early complexities of installing the right tools, and despite not knowing Python. The code for the MCP server was written with the support of commercially available AI. The basic structure of an MCP server is shown in the code below. Which tools the LLM has access to can be customized by adding tool registry chunks with a detailed description of the tool.
+
+```{python, eval=F}
+# import packages
+import sqlite3
+from mcp.server.fastmcp import FastMCP
+
+# database directory
+DB_PATH = "/Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library/rvatData/extdata/rvatData.gdb"
+
+# create the server
+mcp = FastMCP("rvatData")
+
+# connection to database used for toolcalling
+def get_con():
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    return con
+
+# example of tool registry
+@mcp.tool()
+def run_query(sql: str) -> list[dict]: # tool name and expected input
+    """...""" # enter tool description
+    con = get_con() # connect to databse
+    rows = con.execute(sql).fetchmany(200) # runs SQL querry
+    con.close() # close connection
+    return [dict(r) for r in rows] # result of rows that is returned to llm
+
+# Only runs server when file is run directly
+if __name__ == "__main__":
+    mcp.run()
+```
+
+Four programs are used to run the server. The MCP script with tool descriptions is the core of the server's functionality. Ollama is a local server which runs LLM models. A program called Open WebUI is used to host the LLM and provides an environment to ask questions. Lastly, mcpo is a program which bridges the LLM and the MCP script.
+
+Starting up the server requires all these programs to be running simultaneously. This seems complex but can easily be executed with a simple bash script. To access the server, the following URL is pasted in a web browser: http://localhost:8080.
 
 ## MCP findings
 
-> zo veel mogelijk shit dat je al weet en dan uitleggen erover
+The setup runs locally and thus privately on any device, though quite slowly. Mistral AI was used to test the setup but can easily be interchanged with any LLM provided by Ollama.
+
+Initially the LLM had trouble with tool calling and was not able to properly answer questions or started hallucinating. To ensure proper tool calling and avoid hallucination, more informative tool descriptions were added along with a detailed data description and a list of rules for answering questions. After some tweaking, the LLM was able to properly use tools and answer questions correctly, though this is not yet supported by quality control.
+
+One drawback of this MCP architecture is the fact that it runs on Python code. This makes it more complicated to add tools which are written for R, such as Rvat, but not unfeasable. Future directions to be explored include the addition of Rvat tools to the MCP and testing the server with a more complex mock database similar to the original ALS database. Finally, a way to efficiently extract answers from the LLM has to be developed so that quality control can be carried out using the existing scripts.
 
 ---
 
