@@ -986,12 +986,15 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-
+## screenshot of answer
+```{r, echo=FALSE, out.width="70%"}
+knitr::include_graphics("Schermafbeelding 2026-05-12 112524.png")
+```
 ## Findings
 
 > shiny info, problemen waar je tegen bent gelopen.
 
-Slow
+choosing the right bot
 
 ---
 
