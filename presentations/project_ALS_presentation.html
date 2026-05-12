@@ -11,7 +11,7 @@
 
 <meta name="author" content="Projecticum Data Science" />
 
-<meta name="date" content="2026-05-11" />
+<meta name="date" content="2026-05-12" />
 
 <title>Project ALS — Natural Language Database Access</title>
 
@@ -4404,7 +4404,7 @@ Access</h1>
 <h3 class="subtitle">Benchmarking Local LLMs for Genomic Data
 Querying</h3>
 <h4 class="author">Projecticum Data Science</h4>
-<h4 class="date">May 11, 2026</h4>
+<h4 class="date">May 12, 2026</h4>
 
 </div>
 
@@ -4478,8 +4478,8 @@ intent and generates an SQL query via <code>querychat</code>. The query
 is executed against the database and the results are returned as a
 natural language answer.</p>
 <div class="figure" style="text-align: center">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-d7250654815bd3bda40b" style="width:960px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-d7250654815bd3bda40b">{"x":{"diagram":"\ndigraph current_pipeline {\n  graph [layout = dot, rankdir = LR, fontname = \"Helvetica\"]\n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n  \n  User    [label = \"Researcher\\n(plain English)\", fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n  LLM     [label = \"Ollama\\n(local LLM)\",         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n  QC      [label = \"querychat\\n(NL → SQL)\",        fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n  DB      [label = \"GDB Database\\n(SQLite)\",        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Answer  [label = \"Answer\\nto researcher\",         fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  User   -> LLM    [label = \"question\"]\n  LLM    -> QC     [label = \"generates SQL\"]\n  QC     -> DB     [label = \"executes query\"]\n  DB     -> LLM    [label = \"results\"]\n  LLM    -> Answer [label = \"summarises\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-2024e6b6c79ab44ee89e" style="width:960px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-2024e6b6c79ab44ee89e">{"x":{"diagram":"\ndigraph current_pipeline {\n  graph [layout = dot, rankdir = LR, fontname = \"Helvetica\"]\n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n  \n  User    [label = \"Researcher\\n(plain English)\", fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n  LLM     [label = \"Ollama\\n(local LLM)\",         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n  QC      [label = \"querychat\\n(NL → SQL)\",        fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n  DB      [label = \"GDB Database\\n(SQLite)\",        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Answer  [label = \"Answer\\nto researcher\",         fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  User   -> LLM    [label = \"question\"]\n  LLM    -> QC     [label = \"generates SQL\"]\n  QC     -> DB     [label = \"executes query\"]\n  DB     -> LLM    [label = \"results\"]\n  LLM    -> Answer [label = \"summarises\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 Current querychat pipeline
 </p>
@@ -4959,8 +4959,8 @@ just SQL)</li>
 <li>Handle <strong>multi-step reasoning</strong> across tables</li>
 <li>Give full control over response formatting</li>
 </ul>
-<div class="grViz html-widget html-fill-item" id="htmlwidget-160f522095c61154821d" style="width:960px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-160f522095c61154821d">{"x":{"diagram":"\ndigraph mcp_agent {\n  graph [layout = dot, rankdir = TB, fontname = \"Helvetica\"]\n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n\n  User   [label = \"User question\",             fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n  LLM    [label = \"Ollama (Llama 3.1)\",         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n  MCP    [label = \"MCP Agent (Python)\",         fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n  SQL    [label = \"Tool: VCF / SQL database\",   fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  RVAT   [label = \"Tool: RVAT rare variant analysis\", fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Pheno  [label = \"Tool: Phenotype / metadata\", fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Answer [label = \"Answer to researcher\",       fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  User -> LLM  [label = \"question\"]\n  LLM  -> MCP  [label = \"decides tool calls\"]\n  MCP  -> SQL\n  MCP  -> RVAT\n  MCP  -> Pheno\n  SQL  -> LLM  [label = \"results\"]\n  RVAT -> LLM\n  Pheno -> LLM\n  LLM  -> Answer [label = \"synthesises\"]\n\n  { rank = same; SQL; RVAT; Pheno }\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-273152736071b22bbb29" style="width:960px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-273152736071b22bbb29">{"x":{"diagram":"\ndigraph mcp_agent {\n  graph [layout = dot, rankdir = TB, fontname = \"Helvetica\"]\n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n\n  User   [label = \"User question\",             fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n  LLM    [label = \"Ollama (Llama 3.1)\",         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n  MCP    [label = \"MCP Agent (Python)\",         fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n  SQL    [label = \"Tool: VCF / SQL database\",   fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  RVAT   [label = \"Tool: RVAT rare variant analysis\", fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Pheno  [label = \"Tool: Phenotype / metadata\", fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  Answer [label = \"Answer to researcher\",       fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  User -> LLM  [label = \"question\"]\n  LLM  -> MCP  [label = \"decides tool calls\"]\n  MCP  -> SQL\n  MCP  -> RVAT\n  MCP  -> Pheno\n  SQL  -> LLM  [label = \"results\"]\n  RVAT -> LLM\n  Pheno -> LLM\n  LLM  -> Answer [label = \"synthesises\"]\n\n  { rank = same; SQL; RVAT; Pheno }\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="why-mcp-over-querychat" class="section level2">
 <h2>Why MCP Over querychat?</h2>
@@ -5407,184 +5407,153 @@ accessible to non-technical researchers.</p>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co"># DATABASE</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>gdb_conn <span class="ot">&lt;-</span> <span class="fu">gdb</span>(<span class="fu">rvat_example</span>(<span class="st">&quot;rvatData.gdb&quot;</span>))</span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co"># LOCAL LLM</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>gdb_conn <span class="ot">&lt;-</span> <span class="fu">gdb</span>(</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="fu">rvat_example</span>(<span class="st">&quot;rvatData.gdb&quot;</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>client <span class="ot">&lt;-</span> <span class="fu">chat_ollama</span>(</span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">&quot;llama3.1:8b&quot;</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  <span class="at">params =</span> ellmer<span class="sc">::</span><span class="fu">params</span>(</span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>    <span class="at">temperature =</span> <span class="fl">0.1</span>,</span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>    <span class="at">num_predict =</span> <span class="dv">200</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  )</span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>)</span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co"># QUERYCHAT</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a></span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>qc <span class="ot">&lt;-</span> QueryChat<span class="sc">$</span><span class="fu">new</span>(</span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  <span class="at">data_source =</span> gdb_conn,</span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="at">table_name =</span> <span class="st">&quot;varInfo_synthetic&quot;</span>,</span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>  <span class="at">client =</span> client</span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>)</span>
-<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a></span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co"># UI</span></span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a></span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">page_sidebar</span>(</span>
-<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>  </span>
-<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Project ALS&quot;</span>,</span>
-<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a>  </span>
-<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a>  <span class="at">theme =</span> <span class="fu">bs_theme</span>(</span>
-<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a>    <span class="at">version =</span> <span class="dv">5</span>,</span>
-<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a>    <span class="at">bootswatch =</span> <span class="st">&quot;flatly&quot;</span></span>
-<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a>  ),</span>
-<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a>  </span>
-<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a>  <span class="at">sidebar =</span> <span class="fu">sidebar</span>(</span>
-<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>    </span>
-<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">350</span>,</span>
-<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>    </span>
-<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>    <span class="fu">h4</span>(<span class="st">&quot;Ask a Question&quot;</span>),</span>
-<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>    </span>
-<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>    <span class="fu">textAreaInput</span>(</span>
-<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>      <span class="at">inputId =</span> <span class="st">&quot;question&quot;</span>,</span>
-<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>      <span class="at">label =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>      <span class="at">placeholder =</span> <span class="st">&quot;Example:</span><span class="sc">\n</span><span class="st">How many high-impact variants are in SOD1?&quot;</span>,</span>
-<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>      <span class="at">rows =</span> <span class="dv">5</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co"># LOCAL LLM</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>client <span class="ot">&lt;-</span> <span class="fu">chat_ollama</span>(</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">&quot;llama3.1:8b&quot;</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  </span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  <span class="at">params =</span> ellmer<span class="sc">::</span><span class="fu">params</span>(</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>    <span class="at">temperature =</span> <span class="fl">0.1</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>    <span class="at">num_predict =</span> <span class="dv">200</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>  )</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>)</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co"># QUERYCHAT OBJECT</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>qc <span class="ot">&lt;-</span> QueryChat<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>  <span class="at">data_source =</span> gdb_conn,</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>  <span class="at">table_name =</span> <span class="st">&quot;varInfo_synthetic&quot;</span>,</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>  <span class="at">client =</span> client</span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>)</span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co"># UI</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">page_sidebar</span>(</span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a>  </span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Project ALS&quot;</span>,</span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a>  </span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a>  <span class="at">theme =</span> <span class="fu">bs_theme</span>(</span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a>    <span class="at">version =</span> <span class="dv">5</span>,</span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a>    <span class="at">bootswatch =</span> <span class="st">&quot;flatly&quot;</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>  ),</span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>  </span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>  <span class="at">sidebar =</span> <span class="fu">sidebar</span>(</span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>    </span>
+<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">350</span>,</span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>    </span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>    <span class="fu">h4</span>(<span class="st">&quot;Variant Assistant&quot;</span>),</span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>    </span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>    <span class="fu">p</span>(</span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>      <span class="st">&quot;Ask questions about ALS variants in the database.&quot;</span></span>
 <span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a>    ),</span>
 <span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>    </span>
-<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a>    <span class="fu">actionButton</span>(<span class="st">&quot;submit&quot;</span>, <span class="st">&quot;Run Query&quot;</span>, <span class="at">class =</span> <span class="st">&quot;btn-primary&quot;</span>),</span>
-<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a>    <span class="fu">br</span>(), <span class="fu">br</span>(),</span>
-<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a>    <span class="fu">actionButton</span>(<span class="st">&quot;reset_chat&quot;</span>, <span class="st">&quot;Reset Conversation&quot;</span>, <span class="at">class =</span> <span class="st">&quot;btn-danger&quot;</span>),</span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a>    <span class="fu">hr</span>(),</span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a>    </span>
+<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a>    <span class="fu">h5</span>(<span class="st">&quot;Example Questions&quot;</span>),</span>
 <span id="cb6-67"><a href="#cb6-67" tabindex="-1"></a>    </span>
-<span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a>    <span class="fu">hr</span>(),</span>
-<span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a>    </span>
-<span id="cb6-70"><a href="#cb6-70" tabindex="-1"></a>    <span class="fu">h5</span>(<span class="st">&quot;Example Questions&quot;</span>),</span>
-<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a>    tags<span class="sc">$</span><span class="fu">ul</span>(</span>
-<span id="cb6-72"><a href="#cb6-72" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;How many variants are in NEK1?&quot;</span>),</span>
-<span id="cb6-73"><a href="#cb6-73" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;Show all high-impact variants&quot;</span>),</span>
-<span id="cb6-74"><a href="#cb6-74" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;Which gene contains the most variants?&quot;</span>),</span>
-<span id="cb6-75"><a href="#cb6-75" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;How many variants are predicted deleterious by SIFT?&quot;</span>)</span>
-<span id="cb6-76"><a href="#cb6-76" tabindex="-1"></a>    )</span>
-<span id="cb6-77"><a href="#cb6-77" tabindex="-1"></a>  ),</span>
-<span id="cb6-78"><a href="#cb6-78" tabindex="-1"></a>  </span>
-<span id="cb6-79"><a href="#cb6-79" tabindex="-1"></a>  <span class="fu">layout_columns</span>(</span>
-<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a>    </span>
-<span id="cb6-81"><a href="#cb6-81" tabindex="-1"></a>    <span class="at">col_widths =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>),</span>
+<span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a>    tags<span class="sc">$</span><span class="fu">ul</span>(</span>
+<span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;How many variants are in NEK1?&quot;</span>),</span>
+<span id="cb6-70"><a href="#cb6-70" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;Show all high-impact variants&quot;</span>),</span>
+<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;Which gene contains the most variants?&quot;</span>),</span>
+<span id="cb6-72"><a href="#cb6-72" tabindex="-1"></a>      tags<span class="sc">$</span><span class="fu">li</span>(<span class="st">&quot;How many variants are predicted deleterious by SIFT?&quot;</span>)</span>
+<span id="cb6-73"><a href="#cb6-73" tabindex="-1"></a>    ),</span>
+<span id="cb6-74"><a href="#cb6-74" tabindex="-1"></a>    </span>
+<span id="cb6-75"><a href="#cb6-75" tabindex="-1"></a>    <span class="fu">hr</span>(),</span>
+<span id="cb6-76"><a href="#cb6-76" tabindex="-1"></a>    </span>
+<span id="cb6-77"><a href="#cb6-77" tabindex="-1"></a>    <span class="fu">h5</span>(<span class="st">&quot;Database&quot;</span>),</span>
+<span id="cb6-78"><a href="#cb6-78" tabindex="-1"></a>    <span class="fu">p</span>(<span class="st">&quot;varInfo_synthetic&quot;</span>)</span>
+<span id="cb6-79"><a href="#cb6-79" tabindex="-1"></a>  ),</span>
+<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a>  </span>
+<span id="cb6-81"><a href="#cb6-81" tabindex="-1"></a>  <span class="fu">layout_columns</span>(</span>
 <span id="cb6-82"><a href="#cb6-82" tabindex="-1"></a>    </span>
-<span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a>    <span class="fu">card</span>(</span>
-<span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a>      <span class="at">full_screen =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb6-85"><a href="#cb6-85" tabindex="-1"></a>      <span class="fu">card_header</span>(<span class="fu">h4</span>(<span class="st">&quot;Chat&quot;</span>)),</span>
-<span id="cb6-86"><a href="#cb6-86" tabindex="-1"></a>      </span>
-<span id="cb6-87"><a href="#cb6-87" tabindex="-1"></a>      <span class="fu">div</span>(</span>
-<span id="cb6-88"><a href="#cb6-88" tabindex="-1"></a>        <span class="at">style =</span> <span class="st">&quot;height:700px; overflow-y:auto; padding:15px; background:#f8f9fa;&quot;</span>,</span>
-<span id="cb6-89"><a href="#cb6-89" tabindex="-1"></a>        shinycssloaders<span class="sc">::</span><span class="fu">withSpinner</span>(<span class="fu">uiOutput</span>(<span class="st">&quot;chat_history&quot;</span>))</span>
-<span id="cb6-90"><a href="#cb6-90" tabindex="-1"></a>      )</span>
-<span id="cb6-91"><a href="#cb6-91" tabindex="-1"></a>    ),</span>
-<span id="cb6-92"><a href="#cb6-92" tabindex="-1"></a>    </span>
-<span id="cb6-93"><a href="#cb6-93" tabindex="-1"></a>    <span class="fu">card</span>(</span>
-<span id="cb6-94"><a href="#cb6-94" tabindex="-1"></a>      <span class="at">full_screen =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb6-95"><a href="#cb6-95" tabindex="-1"></a>      <span class="fu">card_header</span>(<span class="fu">h4</span>(<span class="st">&quot;Debug Information&quot;</span>)),</span>
-<span id="cb6-96"><a href="#cb6-96" tabindex="-1"></a>      </span>
-<span id="cb6-97"><a href="#cb6-97" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Available QueryChat methods&quot;</span>),</span>
-<span id="cb6-98"><a href="#cb6-98" tabindex="-1"></a>      <span class="fu">verbatimTextOutput</span>(<span class="st">&quot;methods_output&quot;</span>),</span>
-<span id="cb6-99"><a href="#cb6-99" tabindex="-1"></a>      </span>
-<span id="cb6-100"><a href="#cb6-100" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Last response&quot;</span>),</span>
-<span id="cb6-101"><a href="#cb6-101" tabindex="-1"></a>      <span class="fu">verbatimTextOutput</span>(<span class="st">&quot;raw_response&quot;</span>)</span>
-<span id="cb6-102"><a href="#cb6-102" tabindex="-1"></a>    )</span>
-<span id="cb6-103"><a href="#cb6-103" tabindex="-1"></a>  )</span>
-<span id="cb6-104"><a href="#cb6-104" tabindex="-1"></a>)</span>
-<span id="cb6-105"><a href="#cb6-105" tabindex="-1"></a></span>
-<span id="cb6-106"><a href="#cb6-106" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-107"><a href="#cb6-107" tabindex="-1"></a><span class="co"># SERVER</span></span>
-<span id="cb6-108"><a href="#cb6-108" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
-<span id="cb6-109"><a href="#cb6-109" tabindex="-1"></a></span>
-<span id="cb6-110"><a href="#cb6-110" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
-<span id="cb6-111"><a href="#cb6-111" tabindex="-1"></a>  </span>
-<span id="cb6-112"><a href="#cb6-112" tabindex="-1"></a>  rv <span class="ot">&lt;-</span> <span class="fu">reactiveValues</span>(<span class="at">messages =</span> <span class="fu">list</span>(), <span class="at">raw_response =</span> <span class="cn">NULL</span>)</span>
-<span id="cb6-113"><a href="#cb6-113" tabindex="-1"></a>  </span>
-<span id="cb6-114"><a href="#cb6-114" tabindex="-1"></a>  <span class="co"># Methods debug</span></span>
-<span id="cb6-115"><a href="#cb6-115" tabindex="-1"></a>  output<span class="sc">$</span>methods_output <span class="ot">&lt;-</span> <span class="fu">renderPrint</span>({</span>
-<span id="cb6-116"><a href="#cb6-116" tabindex="-1"></a>    <span class="fu">names</span>(qc)</span>
-<span id="cb6-117"><a href="#cb6-117" tabindex="-1"></a>  })</span>
-<span id="cb6-118"><a href="#cb6-118" tabindex="-1"></a>  </span>
-<span id="cb6-119"><a href="#cb6-119" tabindex="-1"></a>  <span class="co"># RUN QUERY</span></span>
-<span id="cb6-120"><a href="#cb6-120" tabindex="-1"></a>  <span class="fu">observeEvent</span>(input<span class="sc">$</span>submit, {</span>
-<span id="cb6-121"><a href="#cb6-121" tabindex="-1"></a>    </span>
-<span id="cb6-122"><a href="#cb6-122" tabindex="-1"></a>    <span class="fu">req</span>(input<span class="sc">$</span>question)</span>
-<span id="cb6-123"><a href="#cb6-123" tabindex="-1"></a>    </span>
-<span id="cb6-124"><a href="#cb6-124" tabindex="-1"></a>    response <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
-<span id="cb6-125"><a href="#cb6-125" tabindex="-1"></a>      {</span>
-<span id="cb6-126"><a href="#cb6-126" tabindex="-1"></a>        <span class="co"># ✅ FIX: correct QueryChat call</span></span>
-<span id="cb6-127"><a href="#cb6-127" tabindex="-1"></a>        qc<span class="sc">$</span>ui<span class="sc">$</span><span class="fu">chat</span>(input<span class="sc">$</span>question)</span>
-<span id="cb6-128"><a href="#cb6-128" tabindex="-1"></a>      },</span>
-<span id="cb6-129"><a href="#cb6-129" tabindex="-1"></a>      <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
-<span id="cb6-130"><a href="#cb6-130" tabindex="-1"></a>        <span class="fu">paste</span>(<span class="st">&quot;ERROR:&quot;</span>, e<span class="sc">$</span>message)</span>
-<span id="cb6-131"><a href="#cb6-131" tabindex="-1"></a>      }</span>
-<span id="cb6-132"><a href="#cb6-132" tabindex="-1"></a>    )</span>
-<span id="cb6-133"><a href="#cb6-133" tabindex="-1"></a>    </span>
-<span id="cb6-134"><a href="#cb6-134" tabindex="-1"></a>    rv<span class="sc">$</span>raw_response <span class="ot">&lt;-</span> response</span>
-<span id="cb6-135"><a href="#cb6-135" tabindex="-1"></a>    </span>
-<span id="cb6-136"><a href="#cb6-136" tabindex="-1"></a>    rv<span class="sc">$</span>messages <span class="ot">&lt;-</span> <span class="fu">append</span>(rv<span class="sc">$</span>messages, <span class="fu">list</span>(</span>
-<span id="cb6-137"><a href="#cb6-137" tabindex="-1"></a>      <span class="fu">list</span>(</span>
-<span id="cb6-138"><a href="#cb6-138" tabindex="-1"></a>        <span class="at">question =</span> input<span class="sc">$</span>question,</span>
-<span id="cb6-139"><a href="#cb6-139" tabindex="-1"></a>        <span class="at">answer =</span> <span class="fu">paste</span>(response, <span class="at">collapse =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-140"><a href="#cb6-140" tabindex="-1"></a>      )</span>
-<span id="cb6-141"><a href="#cb6-141" tabindex="-1"></a>    ))</span>
-<span id="cb6-142"><a href="#cb6-142" tabindex="-1"></a>    </span>
-<span id="cb6-143"><a href="#cb6-143" tabindex="-1"></a>    <span class="fu">updateTextAreaInput</span>(session, <span class="st">&quot;question&quot;</span>, <span class="at">value =</span> <span class="st">&quot;&quot;</span>)</span>
-<span id="cb6-144"><a href="#cb6-144" tabindex="-1"></a>  })</span>
-<span id="cb6-145"><a href="#cb6-145" tabindex="-1"></a>  </span>
-<span id="cb6-146"><a href="#cb6-146" tabindex="-1"></a>  <span class="co"># RESET</span></span>
-<span id="cb6-147"><a href="#cb6-147" tabindex="-1"></a>  <span class="fu">observeEvent</span>(input<span class="sc">$</span>reset_chat, {</span>
-<span id="cb6-148"><a href="#cb6-148" tabindex="-1"></a>    rv<span class="sc">$</span>messages <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb6-149"><a href="#cb6-149" tabindex="-1"></a>    rv<span class="sc">$</span>raw_response <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb6-150"><a href="#cb6-150" tabindex="-1"></a>  })</span>
-<span id="cb6-151"><a href="#cb6-151" tabindex="-1"></a>  </span>
-<span id="cb6-152"><a href="#cb6-152" tabindex="-1"></a>  <span class="co"># CHAT OUTPUT</span></span>
-<span id="cb6-153"><a href="#cb6-153" tabindex="-1"></a>  output<span class="sc">$</span>chat_history <span class="ot">&lt;-</span> <span class="fu">renderUI</span>({</span>
-<span id="cb6-154"><a href="#cb6-154" tabindex="-1"></a>    </span>
-<span id="cb6-155"><a href="#cb6-155" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(rv<span class="sc">$</span>messages) <span class="sc">==</span> <span class="dv">0</span>) {</span>
-<span id="cb6-156"><a href="#cb6-156" tabindex="-1"></a>      <span class="fu">return</span>(</span>
-<span id="cb6-157"><a href="#cb6-157" tabindex="-1"></a>        <span class="fu">div</span>(</span>
-<span id="cb6-158"><a href="#cb6-158" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">&quot;text-align:center; margin-top:50px; color:grey;&quot;</span>,</span>
-<span id="cb6-159"><a href="#cb6-159" tabindex="-1"></a>          <span class="fu">h4</span>(<span class="st">&quot;No conversation yet&quot;</span>),</span>
-<span id="cb6-160"><a href="#cb6-160" tabindex="-1"></a>          <span class="fu">p</span>(<span class="st">&quot;Ask a question to begin.&quot;</span>)</span>
-<span id="cb6-161"><a href="#cb6-161" tabindex="-1"></a>        )</span>
-<span id="cb6-162"><a href="#cb6-162" tabindex="-1"></a>      )</span>
-<span id="cb6-163"><a href="#cb6-163" tabindex="-1"></a>    }</span>
-<span id="cb6-164"><a href="#cb6-164" tabindex="-1"></a>    </span>
-<span id="cb6-165"><a href="#cb6-165" tabindex="-1"></a>    <span class="fu">tagList</span>(</span>
-<span id="cb6-166"><a href="#cb6-166" tabindex="-1"></a>      <span class="fu">lapply</span>(rv<span class="sc">$</span>messages, <span class="cf">function</span>(msg) {</span>
-<span id="cb6-167"><a href="#cb6-167" tabindex="-1"></a>        </span>
-<span id="cb6-168"><a href="#cb6-168" tabindex="-1"></a>        <span class="fu">div</span>(</span>
-<span id="cb6-169"><a href="#cb6-169" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">&quot;margin-bottom:25px;&quot;</span>,</span>
-<span id="cb6-170"><a href="#cb6-170" tabindex="-1"></a>          </span>
-<span id="cb6-171"><a href="#cb6-171" tabindex="-1"></a>          <span class="fu">div</span>(</span>
-<span id="cb6-172"><a href="#cb6-172" tabindex="-1"></a>            <span class="at">style =</span> <span class="st">&quot;background:#457B9D; color:white; padding:12px; border-radius:12px; margin-bottom:10px;&quot;</span>,</span>
-<span id="cb6-173"><a href="#cb6-173" tabindex="-1"></a>            tags<span class="sc">$</span><span class="fu">b</span>(<span class="st">&quot;You&quot;</span>), <span class="fu">br</span>(), msg<span class="sc">$</span>question</span>
-<span id="cb6-174"><a href="#cb6-174" tabindex="-1"></a>          ),</span>
-<span id="cb6-175"><a href="#cb6-175" tabindex="-1"></a>          </span>
-<span id="cb6-176"><a href="#cb6-176" tabindex="-1"></a>          <span class="fu">div</span>(</span>
-<span id="cb6-177"><a href="#cb6-177" tabindex="-1"></a>            <span class="at">style =</span> <span class="st">&quot;background:white; border:1px solid #dee2e6; padding:12px; border-radius:12px;&quot;</span>,</span>
-<span id="cb6-178"><a href="#cb6-178" tabindex="-1"></a>            tags<span class="sc">$</span><span class="fu">b</span>(<span class="st">&quot;Assistant&quot;</span>), <span class="fu">br</span>(), msg<span class="sc">$</span>answer</span>
-<span id="cb6-179"><a href="#cb6-179" tabindex="-1"></a>          )</span>
-<span id="cb6-180"><a href="#cb6-180" tabindex="-1"></a>        )</span>
-<span id="cb6-181"><a href="#cb6-181" tabindex="-1"></a>      })</span>
-<span id="cb6-182"><a href="#cb6-182" tabindex="-1"></a>    )</span>
-<span id="cb6-183"><a href="#cb6-183" tabindex="-1"></a>  })</span>
-<span id="cb6-184"><a href="#cb6-184" tabindex="-1"></a>  </span>
-<span id="cb6-185"><a href="#cb6-185" tabindex="-1"></a>  <span class="co"># RAW OUTPUT</span></span>
-<span id="cb6-186"><a href="#cb6-186" tabindex="-1"></a>  output<span class="sc">$</span>raw_response <span class="ot">&lt;-</span> <span class="fu">renderPrint</span>({</span>
-<span id="cb6-187"><a href="#cb6-187" tabindex="-1"></a>    rv<span class="sc">$</span>raw_response</span>
-<span id="cb6-188"><a href="#cb6-188" tabindex="-1"></a>  })</span>
-<span id="cb6-189"><a href="#cb6-189" tabindex="-1"></a>}</span>
-<span id="cb6-190"><a href="#cb6-190" tabindex="-1"></a></span>
-<span id="cb6-191"><a href="#cb6-191" tabindex="-1"></a><span class="fu">shinyApp</span>(ui, server)</span></code></pre></div>
+<span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a>    <span class="at">col_widths =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">4</span>),</span>
+<span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a>    </span>
+<span id="cb6-85"><a href="#cb6-85" tabindex="-1"></a>    <span class="co"># ─────────────────────────────────────────────</span></span>
+<span id="cb6-86"><a href="#cb6-86" tabindex="-1"></a>    <span class="co"># CHAT PANEL</span></span>
+<span id="cb6-87"><a href="#cb6-87" tabindex="-1"></a>    <span class="co"># ─────────────────────────────────────────────</span></span>
+<span id="cb6-88"><a href="#cb6-88" tabindex="-1"></a>    </span>
+<span id="cb6-89"><a href="#cb6-89" tabindex="-1"></a>    <span class="fu">card</span>(</span>
+<span id="cb6-90"><a href="#cb6-90" tabindex="-1"></a>      <span class="at">full_screen =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-91"><a href="#cb6-91" tabindex="-1"></a>      </span>
+<span id="cb6-92"><a href="#cb6-92" tabindex="-1"></a>      <span class="fu">card_header</span>(</span>
+<span id="cb6-93"><a href="#cb6-93" tabindex="-1"></a>        <span class="fu">h4</span>(<span class="st">&quot;Chat&quot;</span>)</span>
+<span id="cb6-94"><a href="#cb6-94" tabindex="-1"></a>      ),</span>
+<span id="cb6-95"><a href="#cb6-95" tabindex="-1"></a>      </span>
+<span id="cb6-96"><a href="#cb6-96" tabindex="-1"></a>      <span class="fu">div</span>(</span>
+<span id="cb6-97"><a href="#cb6-97" tabindex="-1"></a>        <span class="at">style =</span> <span class="st">&quot;</span></span>
+<span id="cb6-98"><a href="#cb6-98" tabindex="-1"></a><span class="st">          height:750px;</span></span>
+<span id="cb6-99"><a href="#cb6-99" tabindex="-1"></a><span class="st">          overflow-y:auto;</span></span>
+<span id="cb6-100"><a href="#cb6-100" tabindex="-1"></a><span class="st">          padding:10px;</span></span>
+<span id="cb6-101"><a href="#cb6-101" tabindex="-1"></a><span class="st">        &quot;</span>,</span>
+<span id="cb6-102"><a href="#cb6-102" tabindex="-1"></a>        </span>
+<span id="cb6-103"><a href="#cb6-103" tabindex="-1"></a>        qc<span class="sc">$</span><span class="fu">ui</span>()</span>
+<span id="cb6-104"><a href="#cb6-104" tabindex="-1"></a>      )</span>
+<span id="cb6-105"><a href="#cb6-105" tabindex="-1"></a>    ),</span>
+<span id="cb6-106"><a href="#cb6-106" tabindex="-1"></a>    </span>
+<span id="cb6-107"><a href="#cb6-107" tabindex="-1"></a>    <span class="co"># ─────────────────────────────────────────────</span></span>
+<span id="cb6-108"><a href="#cb6-108" tabindex="-1"></a>    <span class="co"># INFO PANEL</span></span>
+<span id="cb6-109"><a href="#cb6-109" tabindex="-1"></a>    <span class="co"># ─────────────────────────────────────────────</span></span>
+<span id="cb6-110"><a href="#cb6-110" tabindex="-1"></a>    </span>
+<span id="cb6-111"><a href="#cb6-111" tabindex="-1"></a>    <span class="fu">card</span>(</span>
+<span id="cb6-112"><a href="#cb6-112" tabindex="-1"></a>      <span class="at">full_screen =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-113"><a href="#cb6-113" tabindex="-1"></a>      </span>
+<span id="cb6-114"><a href="#cb6-114" tabindex="-1"></a>      <span class="fu">card_header</span>(</span>
+<span id="cb6-115"><a href="#cb6-115" tabindex="-1"></a>        <span class="fu">h4</span>(<span class="st">&quot;Information&quot;</span>)</span>
+<span id="cb6-116"><a href="#cb6-116" tabindex="-1"></a>      ),</span>
+<span id="cb6-117"><a href="#cb6-117" tabindex="-1"></a>      </span>
+<span id="cb6-118"><a href="#cb6-118" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Model&quot;</span>),</span>
+<span id="cb6-119"><a href="#cb6-119" tabindex="-1"></a>      <span class="fu">p</span>(<span class="st">&quot;llama3.1:8b&quot;</span>),</span>
+<span id="cb6-120"><a href="#cb6-120" tabindex="-1"></a>      </span>
+<span id="cb6-121"><a href="#cb6-121" tabindex="-1"></a>      <span class="fu">hr</span>(),</span>
+<span id="cb6-122"><a href="#cb6-122" tabindex="-1"></a>      </span>
+<span id="cb6-123"><a href="#cb6-123" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Connected Database&quot;</span>),</span>
+<span id="cb6-124"><a href="#cb6-124" tabindex="-1"></a>      <span class="fu">p</span>(<span class="st">&quot;rvatData.gdb&quot;</span>),</span>
+<span id="cb6-125"><a href="#cb6-125" tabindex="-1"></a>      </span>
+<span id="cb6-126"><a href="#cb6-126" tabindex="-1"></a>      <span class="fu">hr</span>(),</span>
+<span id="cb6-127"><a href="#cb6-127" tabindex="-1"></a>      </span>
+<span id="cb6-128"><a href="#cb6-128" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Table&quot;</span>),</span>
+<span id="cb6-129"><a href="#cb6-129" tabindex="-1"></a>      <span class="fu">p</span>(<span class="st">&quot;varInfo_synthetic&quot;</span>),</span>
+<span id="cb6-130"><a href="#cb6-130" tabindex="-1"></a>      </span>
+<span id="cb6-131"><a href="#cb6-131" tabindex="-1"></a>      <span class="fu">hr</span>(),</span>
+<span id="cb6-132"><a href="#cb6-132" tabindex="-1"></a>      </span>
+<span id="cb6-133"><a href="#cb6-133" tabindex="-1"></a>      <span class="fu">h5</span>(<span class="st">&quot;Status&quot;</span>),</span>
+<span id="cb6-134"><a href="#cb6-134" tabindex="-1"></a>      </span>
+<span id="cb6-135"><a href="#cb6-135" tabindex="-1"></a>      <span class="fu">div</span>(</span>
+<span id="cb6-136"><a href="#cb6-136" tabindex="-1"></a>        <span class="at">style =</span> <span class="st">&quot;</span></span>
+<span id="cb6-137"><a href="#cb6-137" tabindex="-1"></a><span class="st">          color:green;</span></span>
+<span id="cb6-138"><a href="#cb6-138" tabindex="-1"></a><span class="st">          font-weight:bold;</span></span>
+<span id="cb6-139"><a href="#cb6-139" tabindex="-1"></a><span class="st">        &quot;</span>,</span>
+<span id="cb6-140"><a href="#cb6-140" tabindex="-1"></a>        </span>
+<span id="cb6-141"><a href="#cb6-141" tabindex="-1"></a>        <span class="st">&quot;Connected&quot;</span></span>
+<span id="cb6-142"><a href="#cb6-142" tabindex="-1"></a>      )</span>
+<span id="cb6-143"><a href="#cb6-143" tabindex="-1"></a>    )</span>
+<span id="cb6-144"><a href="#cb6-144" tabindex="-1"></a>  )</span>
+<span id="cb6-145"><a href="#cb6-145" tabindex="-1"></a>)</span>
+<span id="cb6-146"><a href="#cb6-146" tabindex="-1"></a></span>
+<span id="cb6-147"><a href="#cb6-147" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-148"><a href="#cb6-148" tabindex="-1"></a><span class="co"># SERVER</span></span>
+<span id="cb6-149"><a href="#cb6-149" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-150"><a href="#cb6-150" tabindex="-1"></a></span>
+<span id="cb6-151"><a href="#cb6-151" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
+<span id="cb6-152"><a href="#cb6-152" tabindex="-1"></a>  </span>
+<span id="cb6-153"><a href="#cb6-153" tabindex="-1"></a>  qc<span class="sc">$</span><span class="fu">server</span>()</span>
+<span id="cb6-154"><a href="#cb6-154" tabindex="-1"></a>}</span>
+<span id="cb6-155"><a href="#cb6-155" tabindex="-1"></a></span>
+<span id="cb6-156"><a href="#cb6-156" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-157"><a href="#cb6-157" tabindex="-1"></a><span class="co"># RUN APP</span></span>
+<span id="cb6-158"><a href="#cb6-158" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────</span></span>
+<span id="cb6-159"><a href="#cb6-159" tabindex="-1"></a></span>
+<span id="cb6-160"><a href="#cb6-160" tabindex="-1"></a><span class="fu">shinyApp</span>(ui, server)</span></code></pre></div>
 </div>
 <div id="findings" class="section level2">
 <h2>Findings</h2>
@@ -5610,8 +5579,8 @@ accessible to non-technical researchers.</p>
 <p>Combining the MCP agent backend with the Shiny frontend, the full
 proposed production pipeline would look as follows:</p>
 <div class="figure" style="text-align: center">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-3f256a3840d261bc9fdf" style="width:960px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-3f256a3840d261bc9fdf">{"x":{"diagram":"\ndigraph MCP_pipeline {\n\n  graph [layout = dot, rankdir = TB, fontname = \"Helvetica\"]\n  \n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n\n  # User layer\n  User [label = \"Researcher\\n(plain English question)\", \n        fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n\n  # Frontend layer\n  Shiny [label = \"Shiny Web App\\n(R frontend)\", \n         fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  # Agent layer\n  MCP [label = \"MCP Agent\\n(Python orchestrator)\", \n       fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n\n  # LLM layer\n  LLM [label = \"Ollama — Llama 3.1\\n(local LLM)\", \n       fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n\n  # Tool layer\n  SQL  [label = \"Tool: VCF / SQL DB\\nvariant queries\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  RVAT [label = \"Tool: RVAT (R)\\nrare variant analysis\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  META [label = \"Tool: Phenotype / metadata\\ncohort information\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n\n  # Result layer\n  Synth [label = \"Result synthesis\\n(Llama 3.1)\", \n         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n\n  # Output layer\n  Answer [label = \"Answer + data table\\ndisplayed in Shiny\", \n          fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  # Edges — question flow\n  User   -> Shiny  [label = \"types question\", color = \"#457B9D\"]\n  Shiny  -> MCP    [label = \"HTTP request\", color = \"#2A9D8F\"]\n  MCP    -> LLM    [label = \"interprets intent\", color = \"#9B5DE5\"]\n  LLM    -> MCP    [label = \"decides tool calls\", color = \"#9B5DE5\"]\n  MCP    -> SQL    [color = \"#F4A261\"]\n  MCP    -> RVAT   [color = \"#F4A261\"]\n  MCP    -> META   [color = \"#F4A261\"]\n  SQL    -> Synth  [color = \"#F4A261\"]\n  RVAT   -> Synth  [color = \"#F4A261\"]\n  META   -> Synth  [color = \"#F4A261\"]\n  Synth  -> Shiny  [label = \"synthesized answer\", color = \"#2A9D8F\"]\n  Shiny  -> Answer [label = \"renders response\", color = \"#2A9D8F\"]\n  Answer -> User   [color = \"#457B9D\"]\n\n  # Rank groupings\n  { rank = same; SQL; RVAT; META }\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-351eea16604ccddb7e44" style="width:960px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-351eea16604ccddb7e44">{"x":{"diagram":"\ndigraph MCP_pipeline {\n\n  graph [layout = dot, rankdir = TB, fontname = \"Helvetica\"]\n  \n  node [fontname = \"Helvetica\", fontsize = 12, style = filled, shape = roundedbox]\n\n  # User layer\n  User [label = \"Researcher\\n(plain English question)\", \n        fillcolor = \"#E8F4FD\", color = \"#457B9D\"]\n\n  # Frontend layer\n  Shiny [label = \"Shiny Web App\\n(R frontend)\", \n         fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  # Agent layer\n  MCP [label = \"MCP Agent\\n(Python orchestrator)\", \n       fillcolor = \"#FFF2CC\", color = \"#E9C46A\"]\n\n  # LLM layer\n  LLM [label = \"Ollama — Llama 3.1\\n(local LLM)\", \n       fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n\n  # Tool layer\n  SQL  [label = \"Tool: VCF / SQL DB\\nvariant queries\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  RVAT [label = \"Tool: RVAT (R)\\nrare variant analysis\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n  META [label = \"Tool: Phenotype / metadata\\ncohort information\", \n        fillcolor = \"#FFE6CC\", color = \"#F4A261\"]\n\n  # Result layer\n  Synth [label = \"Result synthesis\\n(Llama 3.1)\", \n         fillcolor = \"#E1D5E7\", color = \"#9B5DE5\"]\n\n  # Output layer\n  Answer [label = \"Answer + data table\\ndisplayed in Shiny\", \n          fillcolor = \"#D5E8D4\", color = \"#2A9D8F\"]\n\n  # Edges — question flow\n  User   -> Shiny  [label = \"types question\", color = \"#457B9D\"]\n  Shiny  -> MCP    [label = \"HTTP request\", color = \"#2A9D8F\"]\n  MCP    -> LLM    [label = \"interprets intent\", color = \"#9B5DE5\"]\n  LLM    -> MCP    [label = \"decides tool calls\", color = \"#9B5DE5\"]\n  MCP    -> SQL    [color = \"#F4A261\"]\n  MCP    -> RVAT   [color = \"#F4A261\"]\n  MCP    -> META   [color = \"#F4A261\"]\n  SQL    -> Synth  [color = \"#F4A261\"]\n  RVAT   -> Synth  [color = \"#F4A261\"]\n  META   -> Synth  [color = \"#F4A261\"]\n  Synth  -> Shiny  [label = \"synthesized answer\", color = \"#2A9D8F\"]\n  Shiny  -> Answer [label = \"renders response\", color = \"#2A9D8F\"]\n  Answer -> User   [color = \"#457B9D\"]\n\n  # Rank groupings\n  { rank = same; SQL; RVAT; META }\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 Proposed production architecture
 </p>
