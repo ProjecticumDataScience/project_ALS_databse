@@ -123,7 +123,7 @@ server <- function(input, output, session) {
     
     response <- tryCatch(
       {
-        # ✅ FIX: correct QueryChat call
+        # fIX: correct QueryChat call
         qc$ui$chat(input$question)
       },
       error = function(e) {
