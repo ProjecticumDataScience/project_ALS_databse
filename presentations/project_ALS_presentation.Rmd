@@ -991,7 +991,7 @@ shinyApp(ui, server)
 
 > shiny info, problemen waar je tegen bent gelopen.
 
-Langzaam
+Slow
 
 ---
 
