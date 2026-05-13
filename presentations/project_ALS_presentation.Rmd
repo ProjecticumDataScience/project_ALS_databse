@@ -861,7 +861,7 @@ Instead of typing queries in an R console, users get a clean web interface with 
 
 ## Basic Shiny Structure
 
-The  Shiny app wrapping our QueryChat pipeline looks like this:
+The Shiny app wrapping a basic version of the QueryChat pipeline looks like this:
 
 ```{r shiny-example, eval=FALSE}
 library(shiny)
@@ -1025,13 +1025,14 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-## screenshot of answer
-```{r, echo=FALSE, out.width="70%"}
+
+## Screenshot of a possible answer
+
+```{r, echo=FALSE, out.width="100%", fig.cap="Shiny app — answering 'How many variants are in NEK1?'"}
 knitr::include_graphics("Schermafbeelding 2026-05-12 112524.png")
 ```
-## Findings
 
-> shiny info, problemen waar je tegen bent gelopen.
+## Findings
 
 choosing the right bot
 
