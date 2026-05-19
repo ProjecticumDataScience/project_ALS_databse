@@ -1,6 +1,7 @@
 import sqlite3
 from mcp.server.fastmcp import FastMCP
 
+# Directory to databse
 DB_PATH = "/Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library/rvatData/extdata/rvatData.gdb"
 
 mcp = FastMCP("rvatData")
