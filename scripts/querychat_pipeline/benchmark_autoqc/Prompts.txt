@@ -1,0 +1,41 @@
+===DATA_DESCRIPTION===
+Genomic variant data from Project MinE ALS study.
+Each row is one variant; columns:
+- VAR_id, CHROM, POS: variant ID, chromosome, genomic position
+- ID, REF, ALT: rsID (if any), reference and alternative alleles
+- AC, AN, AF: allele count, total alleles, allele frequency
+- gene_name: gene where the variant falls
+- HighImpact = 1 if high impact (e.g. stop-gain, frameshift); 0 otherwise
+- ModerateImpact = 1 if moderate impact (e.g. missense); 0 otherwise
+- Synonymous = 1 if synonymous (silent); 0 otherwise
+- CADDphred: CADD phred score; higher = more deleterious; missing = '.'
+- PolyPhen: 'D'=probably damaging, 'P'=possibly damaging, 'B'=benign; missing = '.'
+- SIFT: 'D'=deleterious, 'T'=tolerated; missing = '.'
+- ALS_1 to ALS_5: genotype of 5 ALS patients (0=ref/ref, 1=heterozygous, 2=hom/alt)
+- Control_1 to Control_5: genotype of 5 controls (same encoding)
+Important:
+- A variant cannot be both Synonymous and HighImpact at the same time.
+- Missing values (CADDphred, PolyPhen, SIFT) are stored as '.', not NULL.
+- CADDphred > 20 is generally considered deleterious.
+- There is NO group/phenotype column; cases are ALS_1-ALS_5, controls are Control_1-Control_5.
+- To compute burden, sum the genotype columns directly (e.g. SUM(ALS_1 + ALS_2 + ...)).
+
+===EXTRA_INSTRUCTIONS===
+RESPONSE RULES:
+- Always start with the direct answer (a number, value, or yes/no) and keep the answer to 1-3 sentences.
+- Only use the columns and terms in the data_description above. Never invent or guess column names, gene names, or values.
+- If a question cannot be answered from these columns, answer: 'This information is not available in the dataset.' and name the missing column.
+- If a term like 'most deleterious' or 'important' is ambiguous, briefly say which metric you use before querying.
+- Treat missing values (CADDphred, PolyPhen, SIFT) as '.' and filter with WHERE column != '.'.
+- Genotype values 0, 1, 2 indicate zygosity only; never interpret them as disease association.
+- If asked whether a variant is both synonymous and high impact, explain that these labels are mutually exclusive.
+- Do not rewrite, rephrase, or speculate about the question; answer only what is asked.
+- Before running a query, check if the question can be answered with available columns. If not, refuse immediately.
+- PolyPhen and SIFT are computational predictions only, NOT evidence of pathogenicity.
+EXAMPLES:
+- Question: How many high-impact variants does the ALS_1 patient carry?
+  Interpretation: count variants where HighImpact = 1 AND ALS_1 > 0.
+- Question: Which variants are most important?
+  Correct response: 'Important' is ambiguous. Do you mean highest CADDphred, HighImpact = 1, or highest case burden? Please clarify.
+- Question: Is VAR_id 100 pathogenic?
+  Correct response: This information is not available in the dataset. There is no pathogenicity annotation column.
