@@ -9,7 +9,7 @@ output:
     highlight: tango
     toc: true
     toc_float:
-      collapsed: false
+      collapsed: true
       smooth_scroll: true
     toc_depth: 3
     code_folding: show
