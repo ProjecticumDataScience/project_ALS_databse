@@ -43,17 +43,17 @@ benchmark_timestamp <- regmatches(
 ## ============================================================
 
 auto_grade_ollama <- function(csv_path, outfile_name, judge_model = JUDGE_MODEL) {
-
+  
   outfile_path <- file.path(grading_run_dir, outfile_name)
   file <- read.csv(csv_path)
-
+  
   file$grade_answer           <- NA
   file$grade_minimal_response <- NA
   file$grade_hallucination    <- NA
   file$grade_sql              <- NA
   file$grade_total            <- NA
   file$grade_reasoning        <- NA
-
+  
   rubric <- paste0(
     "You are grading a genomics chatbot's responses to questions about an ALS variant database.
 Genotype values (0,1,2) indicate zygosity only, NOT disease association.
@@ -92,17 +92,17 @@ Grade the response on 4 criteria, each true or false:
 Return a JSON object with exactly these keys:
 grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
   )
-
+  
   for (row in 1:nrow(file)) {
     cat("Grading row", row, "/", nrow(file), "-", file$id[row], "-", file$model[row], "\n")
-
+    
     prompt <- paste0(
       "Question category: ", file$category[row], "\n",
       "Question: ", file$question[row], "\n\n",
       "Full output (including SQL):\n", file$full[row], "\n\n",
       "Final response:\n", file$response[row]
     )
-
+    
     result <- tryCatch({
       resp <- ollamar::chat(
         model    = judge_model,
@@ -123,7 +123,7 @@ grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
       cat("  PARSE ERROR on row", row, "- marking as NA, review manually\n")
       NULL
     })
-
+    
     if (!is.null(result)) {
       file$grade_answer[row]           <- isTRUE(result$grade_answer)
       file$grade_minimal_response[row] <- isTRUE(result$grade_minimal_response)
@@ -139,16 +139,16 @@ grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
         isTRUE(result$grade_sql)
       )
     }
-
+    
     Sys.sleep(1)
   }
-
+  
   mean_grade <- round(mean(file$grade_total, na.rm = TRUE), digits = 1)
   cat("*******************************************\n")
   cat("Auto-grading done!\n")
   cat("Average score so far: (", mean_grade, "/4)\n", sep = "")
   cat("*******************************************\n")
-
+  
   out_csv <- paste0(outfile_path, ".csv")
   write.csv(file, out_csv, row.names = FALSE)
   cat("Auto-graded file saved to:", out_csv, "\n")
@@ -160,19 +160,19 @@ grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
 ## ============================================================
 
 manual_review <- function(graded_csv, outfile_name) {
-
+  
   outfile_path <- file.path(grading_run_dir, outfile_name)
   file <- read.csv(graded_csv)
-
+  
   na_rows <- which(
     is.na(file$grade_answer) |
-    is.na(file$grade_minimal_response) |
-    is.na(file$grade_hallucination) |
-    is.na(file$grade_sql)
+      is.na(file$grade_minimal_response) |
+      is.na(file$grade_hallucination) |
+      is.na(file$grade_sql)
   )
-
+  
   cat("Found", length(na_rows), "rows needing manual review\n\n")
-
+  
   if (length(na_rows) == 0) {
     cat("No manual review needed!\n")
   } else {
@@ -189,7 +189,7 @@ manual_review <- function(graded_csv, outfile_name) {
       cat("--- Auto-grade reasoning ---\n")
       cat(ifelse(is.na(file$grade_reasoning[row]), "No reasoning provided", file$grade_reasoning[row]), "\n")
       cat("======================================================================\n")
-
+      
       file$grade_answer[row]           <- toupper(readline("Answer correct? (T/F): ")) == "T"
       file$grade_minimal_response[row] <- toupper(readline("Minimal response? (T/F): ")) == "T"
       file$grade_hallucination[row]    <- toupper(readline("Hallucination free? (T/F): ")) == "T"
@@ -202,17 +202,17 @@ manual_review <- function(graded_csv, outfile_name) {
       )
     }
   }
-
+  
   mean_grade <- round(mean(file$grade_total, na.rm = TRUE), digits = 1)
   cat("*******************************************\n")
   cat("All done!\n")
   cat("Final average score: (", mean_grade, "/4)\n", sep = "")
   cat("*******************************************\n")
-
+  
   out_csv <- paste0(outfile_path, ".csv")
   write.csv(file, out_csv, row.names = FALSE)
   cat("Final graded file saved to:", out_csv, "\n")
-
+  
   ## Expose path for downstream scripts
   GRADED_FINAL_CSV <<- out_csv
 }
