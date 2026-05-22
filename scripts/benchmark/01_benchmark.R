@@ -22,10 +22,10 @@ data_description   <- trimws(sub(".*===DATA_DESCRIPTION===\n", "", parts[1]))
 extra_instructions <- trimws(parts[2])
 cat("Prompts loaded from:", PROMPTS_FILE, "\n")
 
-## ── Database setup (querychat + ellmer only) ─────────────────
+## ── Database setup (querychat, ellmer, dual only) ────────────
 ## MCP talks to the already-running mcpo server and never needs
-## a local gdb object. querychat and ellmer query the gdb directly.
-if (BACKEND %in% c("querychat", "ellmer")) {
+## a local gdb object. querychat, ellmer and dual query the gdb directly.
+if (BACKEND %in% c("querychat", "ellmer", "dual")) {
   library(DBI)
   library(rvat)
   library(rvatData)
@@ -74,6 +74,9 @@ setup_session <- function(model_name) {
               data_description, extra_instructions)
   } else if (BACKEND == "ellmer") {
     ellmer_setup(model_name, gdb, data_description, extra_instructions)
+  } else if (BACKEND == "dual") {
+    dual_setup(model_name, gdb, data_description, extra_instructions,
+               ORCHESTRATOR_MODEL, SUBAGENT_MODEL)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -86,6 +89,8 @@ ask_question <- function(session, question) {
     mcp_ask(session, question)
   } else if (BACKEND == "ellmer") {
     ellmer_ask(session, question)
+  } else if (BACKEND == "dual") {
+    dual_ask(session, question)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
