@@ -2,9 +2,9 @@ import sqlite3
 import os
 from mcp.server.fastmcp import FastMCP
 
-# ── Database pad ─────────────────────────────────────────────────────────────
-# Leest RVAT_GDB_PATH uit de omgeving als die gezet is (door start_services.sh),
-# anders valt het terug op het standaard pad.
+# ── Database path ─────────────────────────────────────────────────────────────
+# Reads RVAT_GDB_PATH from environment if set by start_services.sh,
+# otherwise falls back to the default path.
 DB_PATH = os.path.expanduser(
     os.environ.get("RVAT_GDB_PATH", "~/project_ALS_databse/references/rvatData.gdb")
 )
@@ -19,14 +19,14 @@ def get_con():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SCHEMA / EXPLORATIE TOOLS
+# SCHEMA / EXPLORATION TOOLS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def list_tables() -> list[str]:
     """
-    Lijst alle tabellen in de rvatData genomische database.
-    Roep dit eerst aan als je niet zeker weet welke tabellen beschikbaar zijn.
+    List all tables in the rvatData genomic database.
+    Call this first if you are unsure which tables are available.
     """
     con = get_con()
     rows = con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -37,8 +37,8 @@ def list_tables() -> list[str]:
 @mcp.tool()
 def describe_table(table_name: str) -> list[dict]:
     """
-    Beschrijf de kolommen van een tabel: naam, type en of null toegestaan is.
-    Gebruik dit om te begrijpen wat een tabel bevat vóór je een query uitvoert.
+    Describe the columns of a table: name, type, and whether null is allowed.
+    Use this to understand what a table contains before writing a query.
     """
     con = get_con()
     rows = con.execute(f"PRAGMA table_info({table_name})").fetchall()
@@ -49,8 +49,8 @@ def describe_table(table_name: str) -> list[dict]:
 @mcp.tool()
 def get_sample_rows(table_name: str, n: int = 5) -> list[dict]:
     """
-    Geef een kleine steekproef van rijen uit een tabel.
-    Handig om te verkennen hoe data eruit ziet vóór je een query schrijft.
+    Return a small sample of rows from a table.
+    Useful to explore what data looks like before writing a query.
     """
     con = get_con()
     rows = con.execute(f"SELECT * FROM {table_name} LIMIT {n}").fetchall()
@@ -59,34 +59,35 @@ def get_sample_rows(table_name: str, n: int = 5) -> list[dict]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GENERIEKE QUERY TOOLS
+# GENERIC QUERY TOOLS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def run_query(sql: str) -> list[dict]:
     """
-    Voer een read-only SELECT query uit op de rvatData SQLite database.
-    Maximaal 200 rijen worden teruggegeven. Alleen SELECT statements zijn toegestaan.
+    Execute a read-only SELECT query on the rvatData SQLite database.
+    Returns at most 200 rows. Only SELECT statements are allowed.
 
     DATABASE SCHEMA:
-    - varInfo_synthetic: hoofdtabel voor variant-analyse. Bevat:
-        VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER, AC, AN, AF (allelfrequentie),
+    - varInfo_synthetic: main table for variant analysis. Contains:
+        VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER, AC, AN, AF (allele frequency),
         gene_name, HighImpact (0/1), ModerateImpact (0/1), Synonymous (0/1),
-        CADDphred (deleteriousness score, hoger = schadelijker),
+        CADDphred (deleteriousness score, higher = more deleterious),
         PolyPhen ('D'=damaging, 'P'=possibly damaging, 'B'=benign),
         SIFT ('D'=deleterious, 'T'=tolerated),
-        ALS_1 t/m ALS_5 (genotypen voor 5 ALS-patiënten),
-        Control_1 t/m Control_5 (genotypen voor 5 controles).
-        Genotypewaarden: 0 = homozygoot referentie, 1 = heterozygoot, 2 = homozygoot alternatief.
+        ALS_1 through ALS_5 (genotypes for 5 ALS patients),
+        Control_1 through Control_5 (genotypes for 5 controls).
+        Genotype values: 0 = homozygous reference, 1 = heterozygous, 2 = homozygous alt.
+        Missing values for CADDphred, PolyPhen, SIFT are stored as '.' not NULL.
 
-    - varInfo: zelfde structuur als varInfo_synthetic maar zonder genotypekolommen.
-    - var: ruwe variant tabel (VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT).
-    - pheno: steekproef fenotype tabel (IID, sex, pheno, pop, superPop, PC1-PC4, age).
-    - SM: steekproef metadata (IID, sex).
-    - meta: database metadata (rvatVersion, genomeBuild). Genomebuild is GRCh38.
+    - varInfo: same structure as varInfo_synthetic but without genotype columns.
+    - var: raw variant table (VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT).
+    - pheno: sample phenotype table (IID, sex, pheno, pop, superPop, PC1-PC4, age).
+    - SM: sample metadata (IID, sex).
+    - meta: database metadata (rvatVersion, genomeBuild). Genome build is GRCh38.
     """
     if not sql.strip().upper().startswith("SELECT"):
-        raise ValueError("Alleen SELECT queries zijn toegestaan.")
+        raise ValueError("Only SELECT queries are allowed.")
     con = get_con()
     rows = con.execute(sql).fetchmany(200)
     con.close()
@@ -96,25 +97,25 @@ def run_query(sql: str) -> list[dict]:
 @mcp.tool()
 def query_variants(sql: str) -> list[dict]:
     """
-    Alias voor run_query — gebruikt door de Shiny app voor aangepaste SELECT queries.
-    Voer een read-only SELECT query uit. Maximaal 200 rijen.
+    Alias for run_query — used by the benchmark pipeline for custom SELECT queries.
+    Execute a read-only SELECT query. Returns at most 200 rows.
     """
     return run_query(sql)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GESPECIALISEERDE VARIANT TOOLS
+# SPECIALISED VARIANT TOOLS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def get_variants_by_gene(gene: str, limit: int = 200) -> list[dict]:
     """
-    Geef alle varianten voor een specifiek gen uit varInfo_synthetic.
-    Gebruik limit=500 of hoger voor telvragen.
+    Return all variants for a specific gene from varInfo_synthetic.
+    Use limit=500 or higher for count questions.
 
     Args:
-        gene:  Gennaam, bijv. 'NEK1', 'SOD1', 'C9orf72'
-        limit: Maximum aantal rijen (standaard 200)
+        gene:  Gene name, e.g. 'NEK1', 'SOD1', 'C9orf72'
+        limit: Maximum number of rows (default 200)
     """
     con = get_con()
     rows = con.execute(
@@ -128,10 +129,10 @@ def get_variants_by_gene(gene: str, limit: int = 200) -> list[dict]:
 @mcp.tool()
 def count_variants_by_gene(top_n: int = 20) -> list[dict]:
     """
-    Tel het aantal varianten per gen en geef de top N genen terug.
+    Count the number of variants per gene and return the top N genes.
 
     Args:
-        top_n: Aantal terug te geven genen (standaard 20)
+        top_n: Number of genes to return (default 20)
     """
     con = get_con()
     rows = con.execute(
@@ -153,11 +154,11 @@ def count_variants_by_gene(top_n: int = 20) -> list[dict]:
 @mcp.tool()
 def get_variants_by_impact(impact: str, limit: int = 100) -> list[dict]:
     """
-    Geef varianten gefilterd op impactniveau.
+    Return variants filtered by impact level.
 
     Args:
-        impact: 'HIGH' of 'MODERATE'
-        limit:  Maximum aantal rijen (standaard 100)
+        impact: 'HIGH' or 'MODERATE'
+        limit:  Maximum number of rows (default 100)
     """
     impact_upper = impact.strip().upper()
     if impact_upper == "HIGH":
@@ -165,7 +166,7 @@ def get_variants_by_impact(impact: str, limit: int = 100) -> list[dict]:
     elif impact_upper == "MODERATE":
         col = "ModerateImpact"
     else:
-        raise ValueError("impact moet 'HIGH' of 'MODERATE' zijn.")
+        raise ValueError("impact must be 'HIGH' or 'MODERATE'.")
 
     con = get_con()
     rows = con.execute(
@@ -184,11 +185,11 @@ def get_variants_by_impact(impact: str, limit: int = 100) -> list[dict]:
 @mcp.tool()
 def get_deleterious_variants(predictor: str = "SIFT", limit: int = 100) -> list[dict]:
     """
-    Geef schadelijke varianten op basis van SIFT of PolyPhen voorspelling.
+    Return harmful variants based on SIFT or PolyPhen prediction.
 
     Args:
-        predictor: 'SIFT' (D=deleterious) of 'PolyPhen' (D=damaging)
-        limit:     Maximum aantal rijen (standaard 100)
+        predictor: 'SIFT' (D=deleterious) or 'PolyPhen' (D=damaging)
+        limit:     Maximum number of rows (default 100)
     """
     pred_upper = predictor.strip().upper()
     if pred_upper == "SIFT":
@@ -196,7 +197,7 @@ def get_deleterious_variants(predictor: str = "SIFT", limit: int = 100) -> list[
     elif pred_upper == "POLYPHEN":
         where = "PolyPhen = 'D'"
     else:
-        raise ValueError("predictor moet 'SIFT' of 'PolyPhen' zijn.")
+        raise ValueError("predictor must be 'SIFT' or 'PolyPhen'.")
 
     con = get_con()
     rows = con.execute(
@@ -215,8 +216,8 @@ def get_deleterious_variants(predictor: str = "SIFT", limit: int = 100) -> list[
 @mcp.tool()
 def summarize_database() -> dict:
     """
-    Geef samenvattende statistieken van de varInfo_synthetic tabel.
-    Gebruik dit voor een overzicht of database-samenvatting.
+    Return summary statistics of the varInfo_synthetic table.
+    Use this for an overview or database summary.
     """
     con = get_con()
     total   = con.execute("SELECT COUNT(*) FROM varInfo_synthetic").fetchone()[0]
@@ -229,32 +230,32 @@ def summarize_database() -> dict:
     avg_af  = con.execute("SELECT ROUND(AVG(AF), 6) FROM varInfo_synthetic").fetchone()[0]
     con.close()
     return {
-        "totaal_varianten":       total,
-        "unieke_genen":           n_genes,
-        "high_impact":            n_high,
-        "moderate_impact":        n_mod,
-        "synonymous":             n_syn,
-        "sift_deleterious":       n_sift,
-        "polyphen_damaging":      n_pp,
-        "gemiddelde_allelfreq":   avg_af,
-        "database_pad":           DB_PATH,
-        "genome_build":           "GRCh38",
+        "total_variants":       total,
+        "unique_genes":         n_genes,
+        "high_impact":          n_high,
+        "moderate_impact":      n_mod,
+        "synonymous":           n_syn,
+        "sift_deleterious":     n_sift,
+        "polyphen_damaging":    n_pp,
+        "mean_allele_freq":     avg_af,
+        "database_path":        DB_PATH,
+        "genome_build":         "GRCh38",
     }
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CARRIER ANALYSE TOOLS
+# CARRIER ANALYSIS TOOLS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def get_carriers_by_gene(gene: str, group: str = "ALS") -> list[dict]:
     """
-    Geef varianten in een gen waarbij minstens één persoon in de opgegeven groep
-    drager is (genotype > 0).
+    Return variants in a gene where at least one person in the given group
+    is a carrier (genotype > 0).
 
     Args:
-        gene:  Gennaam, bijv. 'NEK1'
-        group: 'ALS' of 'Control'
+        gene:  Gene name, e.g. 'NEK1'
+        group: 'ALS' or 'Control'
     """
     group_upper = group.strip().upper()
     if group_upper == "ALS":
@@ -262,7 +263,7 @@ def get_carriers_by_gene(gene: str, group: str = "ALS") -> list[dict]:
     elif group_upper == "CONTROL":
         cols = ["Control_1", "Control_2", "Control_3", "Control_4", "Control_5"]
     else:
-        raise ValueError("group moet 'ALS' of 'Control' zijn.")
+        raise ValueError("group must be 'ALS' or 'Control'.")
 
     carrier_filter = " OR ".join([f"{c} > 0" for c in cols])
     con = get_con()

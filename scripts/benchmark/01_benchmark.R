@@ -1,12 +1,8 @@
 ## ============================================================
 ## 01_benchmark.R
 ## Run LLM benchmark across all models defined in config.R.
-## Supports BACKEND = "querychat" or "mcp" from config.R.
+## Supports BACKEND = "querychat", "mcp", or "ellmer"
 ## ============================================================
-
-library(DBI)
-library(rvat)
-library(rvatData)
 
 ## ── Load backend ─────────────────────────────────────────────
 if (!exists("BACKEND"))    BACKEND    <- "querychat"
@@ -18,7 +14,7 @@ stopifnot(file.exists(backend_file))
 source(backend_file)
 cat("Backend loaded:", BACKEND, "\n")
 
-## ── Load prompts from prompts.txt ────────────────────────────
+## ── Load prompts ─────────────────────────────────────────────
 stopifnot(file.exists(path.expand(PROMPTS_FILE)))
 raw   <- paste(readLines(path.expand(PROMPTS_FILE)), collapse = "\n")
 parts <- strsplit(raw, "===EXTRA_INSTRUCTIONS===")[[1]]
@@ -26,17 +22,29 @@ data_description   <- trimws(sub(".*===DATA_DESCRIPTION===\n", "", parts[1]))
 extra_instructions <- trimws(parts[2])
 cat("Prompts loaded from:", PROMPTS_FILE, "\n")
 
-## ── Setup database ───────────────────────────────────────────
-gdb <- gdb(rvat_example("rvatData.gdb"))
-vi  <- dbGetQuery(gdb, "SELECT * FROM varInfo")
-set.seed(123)
-n_rows       <- nrow(vi)
-geno_als     <- replicate(5, sample(0:2, n_rows, replace = TRUE))
-colnames(geno_als)     <- paste0("ALS_", 1:5)
-geno_control <- replicate(5, sample(0:2, n_rows, replace = TRUE))
-colnames(geno_control) <- paste0("Control_", 1:5)
-vi_updated <- cbind(vi, geno_als, geno_control)
-dbWriteTable(gdb, "varInfo_synthetic", vi_updated, overwrite = TRUE)
+## ── Database setup (querychat + ellmer only) ─────────────────
+## MCP talks to the already-running mcpo server and never needs
+## a local gdb object. querychat and ellmer query the gdb directly.
+if (BACKEND %in% c("querychat", "ellmer")) {
+  library(DBI)
+  library(rvat)
+  library(rvatData)
+  
+  gdb <- gdb(rvat_example("rvatData.gdb"))
+  vi  <- dbGetQuery(gdb, "SELECT * FROM varInfo")
+  set.seed(123)
+  n_rows       <- nrow(vi)
+  geno_als     <- replicate(5, sample(0:2, n_rows, replace = TRUE))
+  colnames(geno_als)     <- paste0("ALS_", 1:5)
+  geno_control <- replicate(5, sample(0:2, n_rows, replace = TRUE))
+  colnames(geno_control) <- paste0("Control_", 1:5)
+  vi_updated <- cbind(vi, geno_als, geno_control)
+  dbWriteTable(gdb, "varInfo_synthetic", vi_updated, overwrite = TRUE)
+  cat("Database ready.\n")
+} else {
+  gdb <- NULL
+  cat("MCP backend: skipping local database setup.\n")
+}
 
 ## ── Benchmark questions ───────────────────────────────────────
 benchmark_questions <- list(
@@ -58,15 +66,14 @@ benchmark_questions <- list(
 )
 
 ## ── Backend dispatcher ────────────────────────────────────────
-## Each backend exposes: <name>_setup() and <name>_ask()
-## Both return the same shapes so everything below is identical.
-
 setup_session <- function(model_name) {
   if (BACKEND == "querychat") {
     querychat_setup(model_name, gdb, data_description, extra_instructions)
   } else if (BACKEND == "mcp") {
     mcp_setup(model_name, MCP_URL, OLLAMA_URL,
               data_description, extra_instructions)
+  } else if (BACKEND == "ellmer") {
+    ellmer_setup(model_name, gdb, data_description, extra_instructions)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -77,6 +84,8 @@ ask_question <- function(session, question) {
     querychat_ask(session, question)
   } else if (BACKEND == "mcp") {
     mcp_ask(session, question)
+  } else if (BACKEND == "ellmer") {
+    ellmer_ask(session, question)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -87,20 +96,18 @@ run_benchmark <- function(model_name, questions) {
   cat("\n\n========================================\n")
   cat("Backend:", BACKEND, "| Model:", model_name, "\n")
   cat("========================================\n")
-
+  
   session <- setup_session(model_name)
   if (is.null(session)) {
     cat("Skipping", model_name, "- session setup failed\n")
     return(NULL)
   }
-
+  
   results <- list()
-
+  
   for (q in questions) {
     cat("  Running:", q$id, "-", q$question, "\n")
-
     out <- ask_question(session, q$question)
-
     results[[q$id]] <- list(
       id       = q$id,
       category = q$category,
@@ -110,10 +117,9 @@ run_benchmark <- function(model_name, questions) {
       model    = model_name,
       backend  = BACKEND
     )
-
     Sys.sleep(3)
   }
-
+  
   return(results)
 }
 
@@ -142,10 +148,9 @@ all_results <- data.frame(
 for (model_name in MODELS_TO_TEST) {
   results <- run_benchmark(model_name, benchmark_questions)
   if (is.null(results)) next
-
+  
   model_name_clean <- gsub("[^a-zA-Z0-9_]", "_", model_name)
-
-  ## Save individual TXT
+  
   output <- c(
     "BENCHMARK RESULTS",
     paste("Backend:", BACKEND),
@@ -155,18 +160,18 @@ for (model_name in MODELS_TO_TEST) {
   )
   for (r in results) {
     output <- c(output,
-      paste("ID:      ", r$id),
-      paste("Category:", r$category),
-      paste("Question:", r$question),
-      "--- Full output ---", r$full,
-      "--- Final response ---", r$response,
-      "------------------------------------------------", ""
+                paste("ID:      ", r$id),
+                paste("Category:", r$category),
+                paste("Question:", r$question),
+                "--- Full output ---", r$full,
+                "--- Final response ---", r$response,
+                "------------------------------------------------", ""
     )
   }
   txt_file <- file.path(output_dir, paste0(model_name_clean, ".txt"))
   writeLines(output, txt_file)
   cat("TXT saved:", txt_file, "\n")
-
+  
   for (r in results) {
     all_results <- rbind(all_results, data.frame(
       id       = r$id,

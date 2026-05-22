@@ -115,12 +115,20 @@ grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
         num_predict = 300,
         temperature = 0
       )
-      clean      <- gsub("```json|```", "", resp)
-      clean      <- trimws(clean)
-      json_match <- regmatches(clean, regexpr("\\{.*\\}", clean, perl = TRUE))
+      ## Strip <think>...</think> blocks (qwen3 reasoning mode)
+      clean <- gsub("<think>.*?</think>", "", resp, perl = TRUE)
+      ## Strip markdown code fences
+      clean <- gsub("```json|```", "", clean)
+      clean <- trimws(clean)
+      ## Extract first {...} JSON block — handles text before/after
+      json_match <- regmatches(clean, regexpr("\\{[^{}]*\\}", clean, perl = TRUE))
+      ## Fallback: try DOTALL match for nested/multiline JSON
+      if (length(json_match) == 0) {
+        json_match <- regmatches(clean, regexpr("\\{.*\\}", clean, perl = TRUE))
+      }
       if (length(json_match) > 0) jsonlite::fromJSON(json_match[[1]]) else jsonlite::fromJSON(clean)
     }, error = function(e) {
-      cat("  PARSE ERROR on row", row, "- marking as NA, review manually\n")
+      cat("  PARSE ERROR on row", row, ":", conditionMessage(e), "\n")
       NULL
     })
     
@@ -223,7 +231,20 @@ autograded_file <- auto_grade_ollama(
   outfile_name = paste0("autograded_", benchmark_timestamp)
 )
 
-manual_review(
-  graded_csv   = autograded_file,
-  outfile_name = paste0("finalgraded_", benchmark_timestamp)
-)
+## Skip manual review when non-interactive (e.g. Rscript from terminal).
+## NA rows will remain in the autograded CSV.
+## Run manual_review.R separately in RStudio to grade them interactively.
+if (interactive()) {
+  manual_review(
+    graded_csv   = autograded_file,
+    outfile_name = paste0("finalgraded_", benchmark_timestamp)
+  )
+} else {
+  cat("Non-interactive session detected — skipping manual review.\n")
+  cat("NA rows saved in:", autograded_file, "\n")
+  cat("Run manual_review.R in RStudio to complete grading.\n")
+  ## Copy autograded as finalgraded so downstream steps still work
+  GRADED_FINAL_CSV <<- sub("autograded_", "finalgraded_", autograded_file)
+  file.copy(autograded_file, GRADED_FINAL_CSV, overwrite = TRUE)
+  cat("Copied to:", GRADED_FINAL_CSV, "\n")
+}

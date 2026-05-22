@@ -9,7 +9,7 @@ SCRIPT_DIR="$PROJECT_DIR/scripts/shiney_mcpv1"
 SERVER_PY="$SCRIPT_DIR/server.py"
 CONDA_BASE="$HOME/miniconda3"
 
-export RVAT_GDB_PATH="$PROJECT_DIR/rvatData.gdb"
+export RVAT_GDB_PATH="$PROJECT_DIR/references/rvatData.gdb"
 export RVAT_TABLE="varInfo_synthetic"
 
 echo "================================================"

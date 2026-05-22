@@ -1,0 +1,801 @@
+BENCHMARK RESULTS
+Backend: ellmer
+Model:   llama3.1:8b
+Date:    2026-05-22 06:30:30
+================================================
+
+ID:       L1
+Category: lookup
+Question: How many variants are in NEK1?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       L2
+Category: lookup
+Question: Select variants in NEK1 with HighImpact and a CADDphred > 20
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       L3
+Category: lookup
+Question: How many variants in TARDBP are predicted deleterious by SIFT?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       L4
+Category: lookup
+Question: Which high-impact variants have at least one ALS patient that is homozygous for the variant?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       L5
+Category: lookup
+Question: What are the ten most deleterious variants in ABCA4?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       A1
+Category: analytical
+Question: What is the variant with the highest allele frequency?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       A2
+Category: analytical
+Question: What is the average allele frequency for synonymous, moderate, and high-impact variants separately?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       A3
+Category: analytical
+Question: How many high-impact variants does the ALS_1 patient carry?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       A4
+Category: analytical
+Question: What is the total burden of cases versus controls?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       A5
+Category: analytical
+Question: Are there more variants in cases than controls?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       U1
+Category: unanswerable
+Question: What is the average age of ALS cases?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       U2
+Category: unanswerable
+Question: What is the allele frequency of VAR_id 30 in Europeans?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       U3
+Category: unanswerable
+Question: Which variants are both synonymous and high impact?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       U4
+Category: unanswerable
+Question: Which variants are most important?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+
+ID:       U5
+Category: unanswerable
+Question: Is VAR_id 100 previously reported as pathogenic?
+--- Full output ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+--- Final response ---
+TIMEOUT/ERROR: unused arguments (fun = function(sql) {
+    if (!grepl("^\\s*SELECT", sql, ignore.case = TRUE)) {
+        tool_log$error <<- "Only SELECT queries are allowed."
+        return("Error: only SELECT queries are allowed.")
+    }
+    tool_log$sql <<- sql
+    result <- tryCatch({
+        dbGetQuery(session$gdb, sql)
+    }, error = function(e) {
+        tool_log$error <<- e$message
+        return(NULL)
+    })
+    if (is.null(result)) {
+        err_msg <- paste("Query error:", tool_log$error)
+        tool_log$raw_result <<- err_msg
+        return(err_msg)
+    }
+    if (nrow(result) > 200) result <- result[1:200, ]
+    json_out <- toJSON(result, auto_unbox = TRUE)
+    tool_log$raw_result <<- as.character(json_out)
+    return(as.character(json_out))
+}, name = "query_variants", description = paste0("Run a SELECT query on the varInfo_synthetic ALS variant database. ", "Returns JSON. Max 200 rows. ", "Use for any question answerable with SQL. ", "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ", "gene_name, HighImpact, ModerateImpact, Synonymous, ", "CADDphred, PolyPhen, SIFT, ", "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ", "Control_1..Control_5 (control genotypes 0/1/2). ", "Missing values for CADDphred/PolyPhen/SIFT stored as '.' not NULL."), arguments = list(sql = list(type = "string", 
+    description = "A valid SQLite SELECT statement querying varInfo_synthetic.", required = TRUE)))
+------------------------------------------------
+

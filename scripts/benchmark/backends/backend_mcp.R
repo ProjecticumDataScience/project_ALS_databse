@@ -5,15 +5,10 @@
 ##   mcp_setup() → session object
 ##   mcp_ask(session, question) → list(response, full)
 ##
-## Available MCP routes (from server.py):
-##   /list_tables            – list tables in the database
-##   /get_schema             – column names + types (no arguments)
-##   /query_variants  { sql }  – run arbitrary SELECT SQL
-##   /summarize_database     – high-level DB statistics
-##   /get_variants_by_gene { gene, limit }
-##   /count_variants_by_gene { top_n }
-##   /get_variants_by_impact { impact, limit }
-##   /get_deleterious_variants { predictor, limit }
+## Compatible with server.py (shiney_mcpv1):
+##   /describe_table { table_name }  – column names + types
+##   /query_variants { sql }         – run arbitrary SELECT SQL
+##   /run_query { sql }              – alias for query_variants
 ## ============================================================
 
 library(httr2)
@@ -47,7 +42,7 @@ library(jsonlite)
   )
   if (!is.null(system_prompt)) body$system <- system_prompt
   if (json_mode)               body$format <- "json"
-  
+
   tryCatch({
     resp <- request(ollama_url) |>
       req_url_path("/api/generate") |>
@@ -60,20 +55,22 @@ library(jsonlite)
   })
 }
 
-## Fetch schema via /get_schema (no arguments — matches server.py).
+## Fetch schema via /describe_table (matches server.py v1).
 .get_schema_string <- function(mcp_url) {
   tryCatch({
-    raw  <- .call_mcp("get_schema", body = list(), mcp_url = mcp_url)
+    raw  <- .call_mcp("describe_table",
+                      body = list(table_name = "varInfo_synthetic"),
+                      mcp_url = mcp_url)
     cols <- fromJSON(raw)
-    if (is.data.frame(cols) && all(c("name", "type") %in% names(cols))) {
-      paste(apply(cols, 1, function(r) paste0(r["name"], " (", r["type"], ")")),
+    if (is.data.frame(cols) && "name" %in% names(cols)) {
+      type_col <- if ("type" %in% names(cols)) "type" else names(cols)[2]
+      paste(apply(cols, 1, function(r) paste0(r["name"], " (", r[type_col], ")")),
             collapse = ", ")
     } else {
-      ## Server returned something unexpected – fall back
-      stop("unexpected get_schema response")
+      stop("unexpected describe_table response")
     }
   }, error = function(e) {
-    ## Hardcoded fallback so the pipeline keeps running even if the call fails
+    cat("  Warning: could not fetch schema from MCP, using hardcoded fallback.\n")
     paste(
       "VAR_id (TEXT), CHROM (TEXT), POS (INTEGER), ID (TEXT),",
       "REF (TEXT), ALT (TEXT), AC (INTEGER), AN (INTEGER), AF (REAL),",
@@ -88,9 +85,8 @@ library(jsonlite)
 }
 
 ## Classify a question → { tool, params } using Ollama.
-## Only two tools exist on this server:
-##   query_variants  { sql }   – for anything answerable with SQL
-##   none                 – for unanswerable questions
+## Strategy: query_variants for anything answerable with SQL, none otherwise.
+## This keeps MCP strictly comparable to querychat in the benchmark.
 .classify_question <- function(question, schema_info, model,
                                ollama_url, data_description, extra_instructions) {
   sys <- paste0(
@@ -101,21 +97,23 @@ library(jsonlite)
     "Data description:\n", data_description, "\n\n",
     "Additional rules:\n", extra_instructions, "\n\n",
     "TOOL SELECTION — only two tools are available:\n\n",
-    "1. query_variants — use for ANY question that can be answered with SQL.\n",
+    "1. query_variants — use for ANY question answerable with SQL.\n",
     "   Always query the table varInfo_synthetic.\n",
+    "   Missing values for CADDphred, PolyPhen, SIFT are stored as '.' not NULL.\n",
+    "   Filter them with: WHERE CADDphred != '.'\n",
     "   Examples:\n",
     '   {"tool":"query_variants","params":{"sql":"SELECT COUNT(*) FROM varInfo_synthetic WHERE gene_name = \'NEK1\'"}}\n',
-    '   {"tool":"query_variants","params":{"sql":"SELECT * FROM varInfo_synthetic WHERE HighImpact = 1 AND CAST(CADDphred AS REAL) > 20 AND gene_name = \'NEK1\'"}}\n',
-    '   {"tool":"query_variants","params":{"sql":"SELECT AVG(AF) FROM varInfo_synthetic WHERE Synonymous = 1"}}\n\n',
+    '   {"tool":"query_variants","params":{"sql":"SELECT * FROM varInfo_synthetic WHERE HighImpact = 1 AND CADDphred != \'.\' AND CAST(CADDphred AS REAL) > 20"}}\n',
+    '   {"tool":"query_variants","params":{"sql":"SELECT SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) AS case_burden, SUM(Control_1+Control_2+Control_3+Control_4+Control_5) AS control_burden FROM varInfo_synthetic"}}\n\n',
     "2. none — use ONLY when the question cannot be answered from this database\n",
-    "   (e.g. age, ethnicity, ClinVar/pathogenicity, anything not in the columns above).\n",
+    "   (e.g. age, ethnicity, pathogenicity, anything not in the columns above).\n",
     '   {"tool":"none","params":{"reason":"This information is not available in the dataset."}}\n\n',
     "Return ONLY the JSON object, nothing else."
   )
-  
+
   raw <- .call_ollama(question, system_prompt = sys,
                       json_mode = TRUE, model = model, ollama_url = ollama_url)
-  
+
   tryCatch({
     clean  <- gsub("```json|```", "", raw)
     clean  <- trimws(clean)
@@ -136,18 +134,19 @@ library(jsonlite)
   sys <- paste(
     "You are an ALS bioinformatics assistant.",
     "Give a short, clear answer in English (max 2 sentences).",
-    "Start directly with the conclusion. No SQL, JSON, or jargon."
+    "Start directly with the conclusion. No SQL, JSON, or jargon.",
+    "If the result is a count query, state the number explicitly."
   )
-  
-  preview    <- if (nchar(result_json) > 3000) {
+
+  preview <- if (nchar(result_json) > 3000) {
     paste0(substr(result_json, 1, 3000), "\n... [result truncated]")
   } else result_json
-  
+
   count_hint <- if (!is.null(row_count)) {
     paste0("\nThe exact number of rows found is: ", row_count,
            ". State this number in your answer.\n")
   } else ""
-  
+
   prompt <- paste0(
     "Question: ", question,   "\n",
     "Tool used: ", tool_name, "\n",
@@ -155,19 +154,17 @@ library(jsonlite)
     "Result:\n", preview, "\n\n",
     "Give a short English summary."
   )
-  
+
   .call_ollama(prompt, system_prompt = sys,
                model = model, ollama_url = ollama_url)
 }
 
 ## ── Public interface ──────────────────────────────────────────
 
-## Called once per model. Returns a session list with everything
-## needed to ask questions (mirrors querychat_setup).
+## Called once per model. Returns a session list.
 mcp_setup <- function(model_name, mcp_url, ollama_url,
                       data_description, extra_instructions) {
-  
-  ## Sanity-check: is mcpo reachable?
+
   reachable <- tryCatch({
     resp <- request(mcp_url) |>
       req_url_path("/openapi.json") |>
@@ -175,16 +172,16 @@ mcp_setup <- function(model_name, mcp_url, ollama_url,
       req_perform()
     resp_status(resp) == 200
   }, error = function(e) FALSE)
-  
+
   if (!reachable) {
     cat("ERROR: MCP server not reachable at", mcp_url,
         "- is your bash launcher running?\n")
     return(NULL)
   }
-  
+
   schema_info <- .get_schema_string(mcp_url)
-  cat("  MCP schema loaded. Columns:", substr(schema_info, 1, 80), "...\n")
-  
+  cat("  MCP schema loaded:", substr(schema_info, 1, 80), "...\n")
+
   list(
     model_name         = model_name,
     mcp_url            = mcp_url,
@@ -198,8 +195,8 @@ mcp_setup <- function(model_name, mcp_url, ollama_url,
 ## Called once per question. Returns list(response, full).
 mcp_ask <- function(session, question) {
   tryCatch({
-    
-    ## Step 1: classify question → tool + params
+
+    ## Step 1: classify → tool + params
     cl <- .classify_question(
       question           = question,
       schema_info        = session$schema_info,
@@ -208,12 +205,12 @@ mcp_ask <- function(session, question) {
       data_description   = session$data_description,
       extra_instructions = session$extra_instructions
     )
-    
+
     if (!cl$ok) {
       msg <- paste("Could not classify question:", cl$error)
       return(list(response = msg, full = msg))
     }
-    
+
     ## Unanswerable: model correctly refused
     if (cl$tool == "none") {
       reason <- cl$params$reason %||%
@@ -223,25 +220,25 @@ mcp_ask <- function(session, question) {
         full     = paste0("[tool=none] ", reason)
       ))
     }
-    
-    ## Step 2: call query_variants (the only answerable-question tool)
-    ## Guard against the model hallucinating a different tool name
-    if (cl$tool != "query_variants") {
+
+    ## Guard against hallucinated tool names
+    if (!cl$tool %in% c("query_variants", "run_query")) {
       msg <- paste0("Model chose unknown tool '", cl$tool,
-                    "' – only query_variants and none are valid.")
+                    "' — only query_variants and none are valid.")
       return(list(response = msg, full = msg))
     }
-    
+
+    ## Step 2: call query_variants
     params     <- as.list(cl$params)
     raw_result <- .call_mcp("query_variants", params, mcp_url = session$mcp_url)
-    
-    ## Step 3: count rows if result is tabular
+
+    ## Step 3: count rows if tabular
     row_count <- tryCatch({
       parsed <- fromJSON(raw_result, flatten = TRUE)
       if (is.data.frame(parsed)) nrow(parsed) else NULL
     }, error = function(e) NULL)
-    
-    ## Step 4: summarise in plain English
+
+    ## Step 4: summarise
     summary_text <- .summarize_result(
       question    = question,
       tool_name   = "query_variants",
@@ -250,7 +247,7 @@ mcp_ask <- function(session, question) {
       ollama_url  = session$ollama_url,
       row_count   = row_count
     )
-    
+
     full_log <- paste0(
       "[tool=query_variants] sql=", params$sql, "\n",
       "--- raw result (first 2000 chars) ---\n",
@@ -258,14 +255,14 @@ mcp_ask <- function(session, question) {
       "--- summary ---\n",
       summary_text
     )
-    
+
     list(response = summary_text, full = full_log)
-    
+
   }, error = function(e) {
     msg <- paste("MCP backend error:", e$message)
     list(response = msg, full = msg)
   })
 }
 
-## Null-coalescing helper (mirrors Shiny app)
+## Null-coalescing helper
 `%||%` <- function(a, b) if (!is.null(a)) a else b
