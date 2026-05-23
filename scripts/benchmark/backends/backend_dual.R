@@ -1,21 +1,15 @@
 ## ============================================================
 ## backends/backend_dual.R
-## Two-LLM pipeline:
-##   Orchestrator (qwen3:8b) — understands the question,
-##     resolves ambiguity, catches unanswerable questions,
-##     and summarises the final answer for the user.
-##   Subagent (llama3.1:8b) — receives a structured intent
-##     from the orchestrator, calls the database tool, and
-##     returns raw results.
+## Two-LLM pipeline — three steps, no validation/retry:
+##   1. Orchestrator interprets question → structured intent
+##   2. Subagent executes SQL tool → raw result
+##   3. Orchestrator summarises result → final answer
 ##
-## Flow per question:
-##   1. Orchestrator interprets user question → structured intent
-##   2. Subagent calls query_variants tool → raw result
-##   3. Orchestrator summarises result → final user-facing answer
+## The subagent is trusted to do its job. The orchestrator stays
+## in its lane: language understanding and final summary only.
 ##
-## Mirrors the standard adapter interface:
-##   dual_setup()             → session object
-##   dual_ask(session, q)     → list(response, full)
+## model_name format: "orch_model -> sub_model"
+## e.g. "mistral -> llama3.1:8b"
 ## ============================================================
 
 library(ellmer)
@@ -24,13 +18,23 @@ library(jsonlite)
 library(R.utils)
 
 dual_setup <- function(model_name, gdb, data_description, extra_instructions,
-                       orchestrator_model, subagent_model) {
+                       orchestrator_model = NULL, subagent_model = NULL) {
   
-  ## Test both models are reachable
+  ## Parse "orch -> sub" label
+  if (is.null(orchestrator_model) || is.null(subagent_model)) {
+    parts <- strsplit(model_name, " -> ", fixed = TRUE)[[1]]
+    if (length(parts) != 2) {
+      cat("ERROR: dual model_name must be 'orch -> sub', got:", model_name, "\n")
+      return(NULL)
+    }
+    orchestrator_model <- trimws(parts[1])
+    subagent_model     <- trimws(parts[2])
+  }
+  
   for (m in c(orchestrator_model, subagent_model)) {
     ok <- tryCatch({
-      chat_ollama(model = m,
-                  params = ellmer::params(temperature = 0.1, num_predict = 10),
+      chat_ollama(model    = m,
+                  params   = ellmer::params(temperature = 0.1, num_predict = 10),
                   api_args = list(timeout = 60))
       TRUE
     }, error = function(e) {
@@ -40,11 +44,11 @@ dual_setup <- function(model_name, gdb, data_description, extra_instructions,
     if (!ok) return(NULL)
   }
   
-  cat("  Dual backend: orchestrator =", orchestrator_model,
+  cat("  Dual: orchestrator =", orchestrator_model,
       "| subagent =", subagent_model, "\n")
   
   list(
-    model_name         = model_name,          ## used for CSV grouping
+    model_name         = model_name,
     orchestrator_model = orchestrator_model,
     subagent_model     = subagent_model,
     gdb                = gdb,
@@ -57,55 +61,55 @@ dual_ask <- function(session, question) {
   tryCatch({
     withTimeout({
       
-      log_parts <- list()
-      
       ## ── Orchestrator system prompt ────────────────────────
-      ## Focused entirely on language and intent — no SQL knowledge needed.
       orchestrator_system <- paste0(
         session$data_description, "\n\n",
         session$extra_instructions, "\n\n",
-        "You are the ORCHESTRATOR in a two-model pipeline.\n",
-        "Your job in this step is to analyse the user's question and produce\n",
-        "a single clear, precise instruction for a SQL subagent.\n\n",
-        "Rules:\n",
-        "- If the question asks for something NOT available in the database columns,\n",
+        "You are the ORCHESTRATOR in a two-model pipeline.\n\n",
+        "Your role has two parts — you will be called twice:\n\n",
+        
+        "CALL 1 — INTENT:\n",
+        "Analyse the user question and produce one precise instruction\n",
+        "for a SQL subagent. Rules:\n",
+        "- If unanswerable (age, ethnicity, ClinVar pathogenicity,\n",
+        "  population-stratified frequencies, anything not in the schema):\n",
         "  respond with exactly: UNANSWERABLE: <reason>\n",
-        "  Examples of unanswerable: age, ethnicity, ClinVar pathogenicity,\n",
-        "  population-stratified frequencies, anything not in the schema.\n",
-        "- If the question is ambiguous (e.g. 'most important'), clarify which\n",
-        "  metric you will use and include that decision in your instruction.\n",
-        "- Otherwise, write a precise one-sentence instruction for the subagent,\n",
-        "  e.g. 'Count the number of variants in varInfo_synthetic where gene_name\n",
-        "  = NEK1 and HighImpact = 1 and CAST(CADDphred AS REAL) > 20.'\n",
-        "- Do NOT write SQL yourself. Do NOT call any tools.\n",
-        "- Respond with only the instruction or UNANSWERABLE line. Nothing else."
+        "- If ambiguous ('most important', 'best', etc.):\n",
+        "  respond with exactly: AMBIGUOUS: <what clarification is needed>\n",
+        "- Always spell out exact column names. Never say 'cases' without\n",
+        "  specifying ALS_1+ALS_2+ALS_3+ALS_4+ALS_5. Never say 'controls'\n",
+        "  without specifying Control_1+Control_2+Control_3+Control_4+Control_5.\n",
+        "- Burden comparisons (cases vs controls) ARE answerable — use\n",
+        "  SUM or COUNT of the ALS/Control columns.\n",
+        "- If separate results per category are needed, say 'grouped by category'.\n",
+        "- Do NOT write SQL. Do NOT call tools. One instruction only.\n\n",
+        
+        "CALL 2 — SUMMARY:\n",
+        "You will receive the database result. Summarise it for the user\n",
+        "in 1-3 sentences. Start with the answer. No SQL, no JSON, no jargon.\n",
+        "Trust the result — do not second-guess it."
       )
       
-      ## ── Step 1: Orchestrator interprets the question ──────
-      orchestrator <- chat_ollama(
-        model         = session$orchestrator_model,
-        system_prompt = orchestrator_system,
-        params        = ellmer::params(temperature = 0.1, num_predict = 200),
-        api_args      = list(timeout = 300)
+      ## ── Subagent system prompt ────────────────────────────
+      subagent_system <- paste0(
+        "You are a SQL subagent. You receive a precise instruction and must\n",
+        "call the query_variants tool with correct SQL. Do not explain.\n\n",
+        "Database: varInfo_synthetic\n",
+        "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ",
+        "gene_name, HighImpact (0/1), ModerateImpact (0/1), Synonymous (0/1), ",
+        "CADDphred (TEXT), PolyPhen (TEXT), SIFT (TEXT), ",
+        "ALS_1..ALS_5 (INTEGER 0/1/2), Control_1..Control_5 (INTEGER 0/1/2).\n\n",
+        "SQL rules:\n",
+        "- Only add CADDphred != '.' if the question specifically involves CADDphred.\n",
+        "- For simple counts (e.g. how many variants in gene X): no CADDphred filter.\n",
+        "- Numeric CADD comparison: CAST(CADDphred AS REAL) > 20\n",
+        "- Burden: SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5)\n",
+        "- Homozygous: column = 2\n",
+        "- Separate categories: GROUP BY or CASE WHEN\n",
+        "- Call the tool exactly once."
       )
       
-      intent <- orchestrator$chat(question, echo = "none")
-      log_parts$intent <- intent
-      cat("    [orchestrator intent]:", substr(intent, 1, 120), "\n")
-      
-      ## ── Check if orchestrator refused ─────────────────────
-      if (grepl("^UNANSWERABLE:", intent, ignore.case = TRUE)) {
-        reason <- trimws(sub("^UNANSWERABLE:\\s*", "", intent, ignore.case = TRUE))
-        
-        full_log <- paste0(
-          "[orchestrator] UNANSWERABLE\n",
-          "Reason: ", reason, "\n"
-        )
-        
-        return(list(response = reason, full = full_log))
-      }
-      
-      ## ── Tool definition for subagent ──────────────────────
+      ## ── Tool definition ───────────────────────────────────
       tool_log <- list(sql = NULL, raw_result = NULL, error = NULL)
       
       query_fun <- function(sql) {
@@ -137,38 +141,51 @@ dual_ask <- function(session, question) {
           "Run a SELECT query on the varInfo_synthetic ALS variant database. ",
           "Returns JSON. Max 200 rows. ",
           "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ",
-          "gene_name, HighImpact, ModerateImpact, Synonymous, ",
-          "CADDphred, PolyPhen, SIFT, ",
-          "ALS_1..ALS_5 (ALS patient genotypes 0/1/2), ",
-          "Control_1..Control_5 (control genotypes 0/1/2). ",
-          "Missing values stored as '.' not NULL — filter with != '.'"
+          "gene_name, HighImpact (0/1), ModerateImpact (0/1), Synonymous (0/1), ",
+          "CADDphred (TEXT, missing='.'), PolyPhen (TEXT, missing='.'), ",
+          "SIFT (TEXT, missing='.'), ",
+          "ALS_1..ALS_5 (INTEGER 0/1/2), Control_1..Control_5 (INTEGER 0/1/2). ",
+          "Only filter CADDphred != '.' when the question requires CADD scores."
         ),
         name      = "query_variants",
         arguments = list(
-          sql = type_string("A valid SQLite SELECT statement querying varInfo_synthetic.")
+          sql = type_string(
+            "A valid SQLite SELECT statement querying varInfo_synthetic."
+          )
         )
       )
       
-      ## ── Subagent system prompt ────────────────────────────
-      ## Focused entirely on SQL and tool execution.
-      subagent_system <- paste0(
-        "You are a SQL subagent. You will receive a precise instruction from an orchestrator.\n",
-        "Your ONLY job is to call the query_variants tool with the correct SQL to fulfil\n",
-        "that instruction. Do not explain. Do not summarise. Just call the tool.\n\n",
-        "Database table: varInfo_synthetic\n",
-        "Columns: VAR_id, CHROM, POS, ID, REF, ALT, AC, AN, AF, ",
-        "gene_name, HighImpact (0/1), ModerateImpact (0/1), Synonymous (0/1), ",
-        "CADDphred (TEXT, missing='.'), PolyPhen (TEXT, missing='.'), SIFT (TEXT, missing='.'), ",
-        "ALS_1..ALS_5 (INTEGER 0/1/2), Control_1..Control_5 (INTEGER 0/1/2).\n\n",
-        "Rules:\n",
-        "- Always filter missing values with != '.' before using CADDphred/PolyPhen/SIFT.\n",
-        "- Use CAST(CADDphred AS REAL) for numeric comparisons.\n",
-        "- For burden: SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5).\n",
-        "- For homozygous: column = 2.\n",
-        "- Call the tool exactly once. Return nothing else."
+      ## ── STEP 1: Orchestrator interprets ───────────────────
+      orchestrator <- chat_ollama(
+        model         = session$orchestrator_model,
+        system_prompt = orchestrator_system,
+        params        = ellmer::params(temperature = 0.1, num_predict = 300),
+        api_args      = list(timeout = 300)
       )
       
-      ## ── Step 2: Subagent executes the tool ───────────────
+      intent <- orchestrator$chat(
+        paste0("Question: ", question), echo = "none"
+      )
+      cat("    [orchestrator intent]:", substr(intent, 1, 120), "\n")
+      
+      ## Stop if unanswerable or ambiguous
+      if (grepl("^UNANSWERABLE:", intent, ignore.case = TRUE)) {
+        reason <- trimws(sub("^UNANSWERABLE:\\s*", "", intent, ignore.case = TRUE))
+        return(list(
+          response = reason,
+          full     = paste0("[orchestrator] UNANSWERABLE\nReason: ", reason, "\n")
+        ))
+      }
+      
+      if (grepl("^AMBIGUOUS:", intent, ignore.case = TRUE)) {
+        clarification <- trimws(sub("^AMBIGUOUS:\\s*", "", intent, ignore.case = TRUE))
+        return(list(
+          response = paste0("This question is ambiguous — ", clarification),
+          full     = paste0("[orchestrator] AMBIGUOUS\n", clarification, "\n")
+        ))
+      }
+      
+      ## ── STEP 2: Subagent executes ─────────────────────────
       subagent <- chat_ollama(
         model         = session$subagent_model,
         system_prompt = subagent_system,
@@ -178,34 +195,31 @@ dual_ask <- function(session, question) {
       subagent$register_tool(query_tool)
       subagent$chat(intent, echo = "none")
       
-      raw_result <- tool_log$raw_result %||% "No tool was called."
       sql_used   <- tool_log$sql        %||% "No SQL generated."
+      raw_result <- tool_log$raw_result %||% "No tool was called."
       cat("    [subagent sql]:", substr(sql_used, 1, 120), "\n")
       
-      ## ── Step 3: Orchestrator summarises for the user ─────
+      ## ── STEP 3: Orchestrator summarises ───────────────────
       summary_prompt <- paste0(
         "Original user question: ", question, "\n\n",
         "Database result:\n", substr(raw_result, 1, 2000), "\n\n",
-        "Give a direct, concise answer in 1-3 sentences. ",
-        "Start with the answer. No SQL, no JSON, no jargon."
+        "Summarise in 1-3 sentences. Start with the answer. ",
+        "No SQL, no JSON, no jargon. Trust the result."
       )
       
       final_answer <- orchestrator$chat(summary_prompt, echo = "none")
       cat("    [orchestrator final]:", substr(final_answer, 1, 120), "\n")
       
-      ## ── Build full log ────────────────────────────────────
       full_log <- paste0(
-        "[orchestrator] intent: ", intent, "\n",
-        "[subagent tool=query_variants] sql: ", sql_used, "\n",
-        "[subagent result (first 1000 chars)]\n",
-        substr(raw_result, 1, 1000), "\n",
-        "[orchestrator final]\n",
-        final_answer
+        "[orchestrator intent]\n", intent, "\n\n",
+        "[subagent sql]\n", sql_used, "\n\n",
+        "[subagent result (first 1000 chars)]\n", substr(raw_result, 1, 1000), "\n\n",
+        "[orchestrator final]\n", final_answer
       )
       
       list(response = final_answer, full = full_log)
       
-    }, timeout = 600, onTimeout = "error")   ## longer timeout — 3 LLM calls
+    }, timeout = 600, onTimeout = "error")
     
   }, error = function(e) {
     msg <- paste("TIMEOUT/ERROR:", e$message)

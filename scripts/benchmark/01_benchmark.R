@@ -75,8 +75,8 @@ setup_session <- function(model_name) {
   } else if (BACKEND == "ellmer") {
     ellmer_setup(model_name, gdb, data_description, extra_instructions)
   } else if (BACKEND == "dual") {
-    dual_setup(model_name, gdb, data_description, extra_instructions,
-               ORCHESTRATOR_MODEL, SUBAGENT_MODEL)
+    ## model_name carries "orch -> sub" — dual_setup parses it
+    dual_setup(model_name, gdb, data_description, extra_instructions)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -149,8 +149,23 @@ all_results <- data.frame(
   stringsAsFactors = FALSE
 )
 
+## ── Build model list for this backend ───────────────────────
+## Dual backend iterates over all ORCH x SUB combinations.
+## All other backends use MODELS_TO_TEST.
+models_for_this_backend <- if (BACKEND == "dual") {
+  orch_sub_pairs <- expand.grid(
+    orch = ORCH_MODELS_TO_TEST,
+    sub  = SUB_MODELS_TO_TEST,
+    stringsAsFactors = FALSE
+  )
+  ## Label format: "orch -> sub" — used as the model name in results
+  paste0(orch_sub_pairs$orch, " -> ", orch_sub_pairs$sub)
+} else {
+  MODELS_TO_TEST
+}
+
 ## ── Run all models ────────────────────────────────────────────
-for (model_name in MODELS_TO_TEST) {
+for (model_name in models_for_this_backend) {
   results <- run_benchmark(model_name, benchmark_questions)
   if (is.null(results)) next
   

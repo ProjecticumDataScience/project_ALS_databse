@@ -3,24 +3,32 @@
 ## ============================================================
 
 ## ── Backends ─────────────────────────────────────────────────
-## Which backends to run. All three run in sequence and their
-## results are combined before grading and visualisation.
+## Which backends to run. All run in sequence and their results
+## are combined before grading and visualisation.
 ## Options: "querychat", "mcp", "ellmer", "dual"
-BACKENDS_TO_RUN <- c("querychat", "mcp", "ellmer", "dual")
+BACKENDS_TO_RUN <- c("mcp", "dual")
 
-## ── Dual backend model pairing ───────────────────────────────
-## Only used when "dual" is in BACKENDS_TO_RUN
-ORCHESTRATOR_MODEL <- "qwen3:8b"
-SUBAGENT_MODEL     <- "llama3.1:8b"
-
-## ── Models ───────────────────────────────────────────────────
-## Any model available in your local Ollama installation works.
+## ── Models (single-model backends) ───────────────────────────
+## Used by querychat, mcp, and ellmer backends.
 MODELS_TO_TEST <- c(
   "llama3.1:8b",
-  "mistral",
-  "deepseek-r1:8b",
-  "qwen3:8b",
-  "llama3.2"
+  "mistral"
+)
+
+## ── Dual backend model grid ───────────────────────────────────
+## All combinations of ORCH x SUB are benchmarked automatically.
+## Each combination is labelled "orch -> sub" in the results.
+## Pull before using: ollama pull <model>
+ORCH_MODELS_TO_TEST <- c(
+  "phi4-mini",
+  "llama3.2",
+  "mistral"
+)
+
+SUB_MODELS_TO_TEST <- c(
+  "llama3.1:8b",
+  "duckdb-nsql",
+  "sqlcoder"     
 )
 
 ## ── Judge model (for auto-grading) ───────────────────────────

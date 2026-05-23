@@ -42,7 +42,7 @@ library(jsonlite)
   )
   if (!is.null(system_prompt)) body$system <- system_prompt
   if (json_mode)               body$format <- "json"
-
+  
   tryCatch({
     resp <- request(ollama_url) |>
       req_url_path("/api/generate") |>
@@ -110,10 +110,10 @@ library(jsonlite)
     '   {"tool":"none","params":{"reason":"This information is not available in the dataset."}}\n\n',
     "Return ONLY the JSON object, nothing else."
   )
-
+  
   raw <- .call_ollama(question, system_prompt = sys,
                       json_mode = TRUE, model = model, ollama_url = ollama_url)
-
+  
   tryCatch({
     clean  <- gsub("```json|```", "", raw)
     clean  <- trimws(clean)
@@ -137,16 +137,16 @@ library(jsonlite)
     "Start directly with the conclusion. No SQL, JSON, or jargon.",
     "If the result is a count query, state the number explicitly."
   )
-
+  
   preview <- if (nchar(result_json) > 3000) {
     paste0(substr(result_json, 1, 3000), "\n... [result truncated]")
   } else result_json
-
+  
   count_hint <- if (!is.null(row_count)) {
     paste0("\nThe exact number of rows found is: ", row_count,
            ". State this number in your answer.\n")
   } else ""
-
+  
   prompt <- paste0(
     "Question: ", question,   "\n",
     "Tool used: ", tool_name, "\n",
@@ -154,7 +154,7 @@ library(jsonlite)
     "Result:\n", preview, "\n\n",
     "Give a short English summary."
   )
-
+  
   .call_ollama(prompt, system_prompt = sys,
                model = model, ollama_url = ollama_url)
 }
@@ -164,7 +164,7 @@ library(jsonlite)
 ## Called once per model. Returns a session list.
 mcp_setup <- function(model_name, mcp_url, ollama_url,
                       data_description, extra_instructions) {
-
+  
   reachable <- tryCatch({
     resp <- request(mcp_url) |>
       req_url_path("/openapi.json") |>
@@ -172,16 +172,16 @@ mcp_setup <- function(model_name, mcp_url, ollama_url,
       req_perform()
     resp_status(resp) == 200
   }, error = function(e) FALSE)
-
+  
   if (!reachable) {
     cat("ERROR: MCP server not reachable at", mcp_url,
         "- is your bash launcher running?\n")
     return(NULL)
   }
-
+  
   schema_info <- .get_schema_string(mcp_url)
   cat("  MCP schema loaded:", substr(schema_info, 1, 80), "...\n")
-
+  
   list(
     model_name         = model_name,
     mcp_url            = mcp_url,
@@ -195,7 +195,7 @@ mcp_setup <- function(model_name, mcp_url, ollama_url,
 ## Called once per question. Returns list(response, full).
 mcp_ask <- function(session, question) {
   tryCatch({
-
+    
     ## Step 1: classify → tool + params
     cl <- .classify_question(
       question           = question,
@@ -205,12 +205,12 @@ mcp_ask <- function(session, question) {
       data_description   = session$data_description,
       extra_instructions = session$extra_instructions
     )
-
+    
     if (!cl$ok) {
       msg <- paste("Could not classify question:", cl$error)
       return(list(response = msg, full = msg))
     }
-
+    
     ## Unanswerable: model correctly refused
     if (cl$tool == "none") {
       reason <- cl$params$reason %||%
@@ -220,24 +220,24 @@ mcp_ask <- function(session, question) {
         full     = paste0("[tool=none] ", reason)
       ))
     }
-
+    
     ## Guard against hallucinated tool names
     if (!cl$tool %in% c("query_variants", "run_query")) {
       msg <- paste0("Model chose unknown tool '", cl$tool,
                     "' — only query_variants and none are valid.")
       return(list(response = msg, full = msg))
     }
-
+    
     ## Step 2: call query_variants
     params     <- as.list(cl$params)
     raw_result <- .call_mcp("query_variants", params, mcp_url = session$mcp_url)
-
+    
     ## Step 3: count rows if tabular
     row_count <- tryCatch({
       parsed <- fromJSON(raw_result, flatten = TRUE)
       if (is.data.frame(parsed)) nrow(parsed) else NULL
     }, error = function(e) NULL)
-
+    
     ## Step 4: summarise
     summary_text <- .summarize_result(
       question    = question,
@@ -247,7 +247,7 @@ mcp_ask <- function(session, question) {
       ollama_url  = session$ollama_url,
       row_count   = row_count
     )
-
+    
     full_log <- paste0(
       "[tool=query_variants] sql=", params$sql, "\n",
       "--- raw result (first 2000 chars) ---\n",
@@ -255,9 +255,9 @@ mcp_ask <- function(session, question) {
       "--- summary ---\n",
       summary_text
     )
-
+    
     list(response = summary_text, full = full_log)
-
+    
   }, error = function(e) {
     msg <- paste("MCP backend error:", e$message)
     list(response = msg, full = msg)

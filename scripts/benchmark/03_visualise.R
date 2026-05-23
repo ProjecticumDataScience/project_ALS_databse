@@ -85,7 +85,8 @@ model_colors <- setNames(palette_pool[seq_len(n_models)], models_in_data)
 backend_colors <- c(
   "querychat" = "#2A9D8F",
   "mcp"       = "#E63946",
-  "ellmer"    = "#F4A261"
+  "ellmer"    = "#F4A261",
+  "dual"      = "#9B5DE5"
 )
 
 category_colors <- c(
@@ -204,8 +205,14 @@ averaged$id <- factor(averaged$id,
                                  "A1","A2","A3","A4","A5",
                                  "U1","U2","U3","U4","U5"))
 
+## For dual backend, model already contains "orch -> sub" so just use it.
+## For other backends, append (backend) only when multiple backends are present.
 averaged <- averaged %>%
-  mutate(model_backend = if (multi_backend) paste0(model, "\n(", backend, ")") else model)
+  mutate(model_backend = case_when(
+    backend == "dual"  ~ paste0(model, "\n[dual]"),
+    multi_backend      ~ paste0(model, "\n(", backend, ")"),
+    TRUE               ~ model
+  ))
 
 p3 <- ggplot(averaged, aes(x = model_backend, y = id, fill = grade_total)) +
   geom_tile(color = "white", linewidth = 0.8) +
@@ -224,8 +231,10 @@ p3 <- ggplot(averaged, aes(x = model_backend, y = id, fill = grade_total)) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5), panel.grid = element_blank())
 
 n_cols <- length(unique(averaged$model_backend))
+## Dual labels are wider — give them more space per column
+col_width <- if ("dual" %in% backends_in_data) 2.0 else 1.4
 ggsave(file.path(output_dir, "plot_heatmap.png"), p3,
-       width = max(7, 2 + n_cols * 1.4), height = 9, dpi = 300)
+       width = max(7, 2 + n_cols * col_width), height = 9, dpi = 300)
 cat("Plot 3 saved!\n")
 
 ## ── Plot 4: Score per criterion per model ─────────────────────

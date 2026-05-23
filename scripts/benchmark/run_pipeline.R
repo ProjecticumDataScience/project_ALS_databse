@@ -61,7 +61,7 @@ if ("--all-backends" %in% cli_args) {
 flag_value_positions <- if (length(backend_flag_idx) > 0) backend_flag_idx + 1 else integer(0)
 cli_models <- cli_args[
   !cli_args %in% known_flags &
-  !seq_along(cli_args) %in% flag_value_positions
+    !seq_along(cli_args) %in% flag_value_positions
 ]
 if (length(cli_models) > 0) {
   cat("CLI override: models =", paste(cli_models, collapse = ", "), "\n")
@@ -70,7 +70,7 @@ if (length(cli_models) > 0) {
 
 ## ── Step 1: Benchmark all backends, combine into one CSV ─────
 if (!visualise_only) {
-
+  
   all_combined <- data.frame(
     id       = character(),
     category = character(),
@@ -81,7 +81,7 @@ if (!visualise_only) {
     backend  = character(),
     stringsAsFactors = FALSE
   )
-
+  
   RUN_TIMESTAMP <- format(Sys.time(), "%Y%m%d_%H%M%S")
   combined_dir  <- path.expand(file.path(
     BENCHMARK_DIR,
@@ -91,27 +91,27 @@ if (!visualise_only) {
   cat("\nRun folder:", combined_dir, "\n")
   cat("Backends  :", paste(BACKENDS_TO_RUN, collapse = ", "), "\n")
   cat("Models    :", paste(MODELS_TO_TEST,  collapse = ", "), "\n\n")
-
+  
   for (backend in BACKENDS_TO_RUN) {
     cat("\n========== BENCHMARK [", backend, "] ==========\n")
     BACKEND <- backend
     source(file.path(script_dir, "01_benchmark.R"))
-
+    
     ## Read back what 01_benchmark.R wrote and append to combined
     backend_results <- read.csv(BENCHMARK_CSV)
     all_combined    <- rbind(all_combined, backend_results)
     cat("  Added", nrow(backend_results), "rows from", backend, "\n")
   }
-
+  
   ## Single combined CSV — this is what grading and visualisation use
   BENCHMARK_CSV <- file.path(combined_dir, "all_backends_combined.csv")
   write.csv(all_combined, BENCHMARK_CSV, row.names = FALSE)
   cat("\nCombined CSV (", nrow(all_combined), "rows ):", BENCHMARK_CSV, "\n")
-
+  
   ## ── Step 2: Grade ─────────────────────────────────────────
   cat("\n========== GRADE ==========\n")
   source(file.path(script_dir, "02_grade.R"))
-
+  
   GRADED_FILES <- GRADED_FINAL_CSV
 }
 

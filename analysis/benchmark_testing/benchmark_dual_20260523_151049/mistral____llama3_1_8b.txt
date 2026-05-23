@@ -1,0 +1,141 @@
+BENCHMARK RESULTS
+Backend: dual
+Model:   mistral -> llama3.1:8b
+Date:    2026-05-23 15:13:07
+================================================
+
+ID:       L1
+Category: lookup
+Question: How many variants are in NEK1?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       L2
+Category: lookup
+Question: Select variants in NEK1 with HighImpact and a CADDphred > 20
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       L3
+Category: lookup
+Question: How many variants in TARDBP are predicted deleterious by SIFT?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       L4
+Category: lookup
+Question: Which high-impact variants have at least one ALS patient that is homozygous for the variant?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       L5
+Category: lookup
+Question: What are the ten most deleterious variants in ABCA4?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       A1
+Category: analytical
+Question: What is the variant with the highest allele frequency?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       A2
+Category: analytical
+Question: What is the average allele frequency for synonymous, moderate, and high-impact variants separately?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       A3
+Category: analytical
+Question: How many high-impact variants does the ALS_1 patient carry?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       A4
+Category: analytical
+Question: What is the total burden of cases versus controls?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       A5
+Category: analytical
+Question: Are there more variants in cases than controls?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       U1
+Category: unanswerable
+Question: What is the average age of ALS cases?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       U2
+Category: unanswerable
+Question: What is the allele frequency of VAR_id 30 in Europeans?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       U3
+Category: unanswerable
+Question: Which variants are both synonymous and high impact?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       U4
+Category: unanswerable
+Question: Which variants are most important?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
+ID:       U5
+Category: unanswerable
+Question: Is VAR_id 100 previously reported as pathogenic?
+--- Full output ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+--- Final response ---
+TIMEOUT/ERROR: `arguments$sql` must be a <Type>, not a <rollama_type_string> object.
+------------------------------------------------
+
