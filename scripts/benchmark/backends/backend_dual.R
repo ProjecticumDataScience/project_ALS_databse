@@ -149,7 +149,7 @@ dual_ask <- function(session, question) {
         ),
         name      = "query_variants",
         arguments = list(
-          sql = type_string(
+          sql = ellmer::type_string(
             "A valid SQLite SELECT statement querying varInfo_synthetic."
           )
         )

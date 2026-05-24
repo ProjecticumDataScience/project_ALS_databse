@@ -1,0 +1,356 @@
+BENCHMARK RESULTS
+Backend: mcp_dual
+Model:   llama3.1:8b -> phi4-mini
+Date:    2026-05-24 16:20:54
+================================================
+
+ID:       L1
+Category: lookup
+Question: How many variants are in NEK1?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where gene_name equals NEK1.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count FROM varInfo_synthetic WHERE gene_name = 'NEK1';
+
+[mcpo result (first 1000 chars)]
+{"variant_count":190}
+
+[orchestrator summary]
+There are 190 variants in the gene NEK1.
+
+This information is available in the dataset because we can count the number of rows where gene_name equals NEK1.
+--- Final response ---
+There are 190 variants in the gene NEK1.
+
+This information is available in the dataset because we can count the number of rows where gene_name equals NEK1.
+------------------------------------------------
+
+ID:       L2
+Category: lookup
+Question: Select variants in NEK1 with HighImpact and a CADDphred > 20
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where gene_name equals NEK1 AND HighImpact equals 1 AND CADDphred is not '.' and CADDphred > 20.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count FROM varInfo_synthetic WHERE gene_name = 'NEK1' AND HighImpact = '1' AND CADDphred != '.' AND CAST(CADDphred AS REAL) > 20;
+
+[mcpo result (first 1000 chars)]
+{"variant_count":13}
+
+[orchestrator summary]
+There are 13 variants in the gene NEK1 that have high impact and a CADDphred score greater than 20. These variants meet both of these criteria.
+--- Final response ---
+There are 13 variants in the gene NEK1 that have high impact and a CADDphred score greater than 20. These variants meet both of these criteria.
+------------------------------------------------
+
+ID:       L3
+Category: lookup
+Question: How many variants in TARDBP are predicted deleterious by SIFT?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where gene_name equals TARDBP AND SIFT is not equal to '.' AND SIFT equals 'D'.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count FROM varInfo_synthetic WHERE gene_name = 'TARDBP' AND SIFT != '.' AND SIFT = 'D';
+
+[mcpo result (first 1000 chars)]
+{"variant_count":4}
+
+[orchestrator summary]
+There are 4 variants in TARDBP where SIFT predicts a deleterious effect. 
+
+Note: This answer is based on the assumption that the database result indicates the count of variants meeting the specified condition.
+--- Final response ---
+There are 4 variants in TARDBP where SIFT predicts a deleterious effect. 
+
+Note: This answer is based on the assumption that the database result indicates the count of variants meeting the specified condition.
+------------------------------------------------
+
+ID:       L4
+Category: lookup
+Question: Which high-impact variants have at least one ALS patient that is homozygous for the variant?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where HighImpact equals 1 AND ALS_1, ALS_2, ALS_3, ALS_4, or ALS_5 equals 2.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count FROM varInfo_synthetic WHERE HighImpact = '1' AND (ALS_1 = 2 OR ALS_2 = 2 OR ALS_3 = 2 OR ALS_4 = 2 OR ALS_5 = 2);
+
+[mcpo result (first 1000 chars)]
+{"variant_count":102}
+
+[orchestrator summary]
+There are 102 high-impact variants where at least one ALS patient has a genotype of 2 (homozygous) for that variant.
+
+To query this information, count the number of variants where HighImpact equals 1 AND ALS_1 through ALS_5 contain at least one value equal to 2.
+--- Final response ---
+There are 102 high-impact variants where at least one ALS patient has a genotype of 2 (homozygous) for that variant.
+
+To query this information, count the number of variants where HighImpact equals 1 AND ALS_1 through ALS_5 contain at least one value equal to 2.
+------------------------------------------------
+
+ID:       L5
+Category: lookup
+Question: What are the ten most deleterious variants in ABCA4?
+--- Full output ---
+[orchestrator intent]
+This information is not available in the dataset. There is no column for gene name or variant pathogenicity, and CADDphred > 20 is considered deleterious but there's no column to filter by gene name.
+
+[subagent sql]
+SELECT * FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+[{"VAR_id":1,"CHROM":"chr1","POS":"11013912","ID":null,"REF":"A","ALT":"G","QUAL":"722.13","FILTER":null,"AC":"1","AN":"45484","AF":"2.19858e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","CADDphred":"24.8","PolyPhen":"P","SIFT":"D","ALS_1":2,"ALS_2":0,"ALS_3":2,"ALS_4":0,"ALS_5":1,"Control_1":1,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":2},{"VAR_id":2,"CHROM":"chr1","POS":"11013928","ID":"rs755357622","REF":"C","ALT":"T","QUAL":"2598.23","FILTER":null,"AC":"1","AN":"49194","AF":"2.03277e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"0","Synonymous":"1","CADDphred":".","PolyPhen":".","SIFT":".","ALS_1":2,"ALS_2":0,"ALS_3":1,"ALS_4":1,"ALS_5":0,"Control_1":2,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":0},{"VAR_id":3,"CHROM":"chr1","POS":"11013936","ID":null,"REF":"A","ALT":"C","QUAL":"4135.36","FILTER":null,"AC":"1","AN":"50000","AF":"2e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","C
+
+[orchestrator summary]
+This information is not available in the dataset.
+
+The reason is that there is no column for ABCA4 gene name or variants associated with it. The provided data only includes variants related to TARDBP gene.
+--- Final response ---
+This information is not available in the dataset.
+
+The reason is that there is no column for ABCA4 gene name or variants associated with it. The provided data only includes variants related to TARDBP gene.
+------------------------------------------------
+
+ID:       A1
+Category: analytical
+Question: What is the variant with the highest allele frequency?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where AF is greater than all other AF values.
+
+[subagent sql]
+SELECT COUNT(*) FROM varInfo_synthetic WHERE AF NOT IN (SELECT MAX(AF) FROM varInfo_synthetic GROUP BY VAR_id HAVING COUNT(*) = 1);
+
+[mcpo result (first 1000 chars)]
+{"COUNT(*)":0}
+
+[orchestrator summary]
+There are no variants in this dataset.
+
+This information is not available in the dataset because there is no column for population allele frequency or sample size to calculate it from.
+--- Final response ---
+There are no variants in this dataset.
+
+This information is not available in the dataset because there is no column for population allele frequency or sample size to calculate it from.
+------------------------------------------------
+
+ID:       A2
+Category: analytical
+Question: What is the average allele frequency for synonymous, moderate, and high-impact variants separately?
+--- Full output ---
+[orchestrator intent]
+Calculate the average of AF separately for rows where Synonymous equals 1, where ModerateImpact equals 1, and where HighImpact equals 1.
+
+[subagent sql]
+SELECT 
+    AVG(CASE WHEN Synonymous = '1' THEN CAST(AF AS REAL) END) as Avg_AF_Synonymous,
+    AVG(CASE WHEN ModerateImpact = '1' THEN CAST(AF AS REAL) END) as Avg_AF_ModerateImpact,
+    AVG(CASE WHEN HighImpact = '1' THEN CAST(AF AS REAL) END) as Avg_AF_HighImpact
+FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+{"Avg_AF_Synonymous":0.0032284728493433396,"Avg_AF_ModerateImpact":0.000967629741673932,"Avg_AF_HighImpact":0.00019878279016393444}
+
+[orchestrator summary]
+The average allele frequency for synonymous variants is approximately 0.0032, for moderate impact variants is about 0.001, and for high-impact variants is roughly 0.0002. These values are based on the provided database results. The frequencies are calculated separately for each variant type.
+--- Final response ---
+The average allele frequency for synonymous variants is approximately 0.0032, for moderate impact variants is about 0.001, and for high-impact variants is roughly 0.0002. These values are based on the provided database results. The frequencies are calculated separately for each variant type.
+------------------------------------------------
+
+ID:       A3
+Category: analytical
+Question: How many high-impact variants does the ALS_1 patient carry?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where HighImpact equals 1 AND ALS_1 is greater than 0.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count FROM varInfo_synthetic WHERE HighImpact = '1' AND CAST(ALS_1 AS REAL) > 0;
+
+[mcpo result (first 1000 chars)]
+{"variant_count":75}
+
+[orchestrator summary]
+The ALS_1 patient carries 75 high-impact variants. This count is based on variants where HighImpact equals 1 AND ALS_1 > 0. The total number of such variants is 75.
+--- Final response ---
+The ALS_1 patient carries 75 high-impact variants. This count is based on variants where HighImpact equals 1 AND ALS_1 > 0. The total number of such variants is 75.
+------------------------------------------------
+
+ID:       A4
+Category: analytical
+Question: What is the total burden of cases versus controls?
+--- Full output ---
+[orchestrator intent]
+Sum ALS_1 through ALS_5 as case_burden, and sum Control_1 through Control_5 as control_burden.
+
+[subagent sql]
+SELECT 
+    SUM(CASE WHEN VAR_id IN (2) THEN 1 ELSE 0 END) AS homozygous_count,
+    SUM(CASE WHEN VAR_id > 0 AND POS = 'Homozygous' THEN 1 ELSE 0 END) AS carrier_count, -- Assuming there's a column for carriers
+    CAST(SUM(ALS_1 + ALS_2 + ALS_3 + ALS_4 + ALS_5) AS REAL) AS case_burden,
+    SUM(CASE WHEN VAR_id IN (2) THEN Control_1 ELSE 0 END) +
+       SUM(CASE WHEN POS = 'Homozygous' AND VAR_id > 0 THEN Control_1 ELSE 0 END) AS control_homozygous_count, -- Assuming there's a column for carriers
+    CAST(SUM(Control_1 + Control_2 + Control_3 + Control_4 + Control_5) AS REAL) AS control_burden
+FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+{"homozygous_count":1,"carrier_count":0,"case_burden":9083.0,"control_homozygous_count":2,"control_burden":8974.0}
+
+[orchestrator summary]
+The total burden of cases is 9083, while the total burden of controls is 8974. This indicates that cases have a slightly higher burden than controls. The difference between case and control burdens is 109 units.
+--- Final response ---
+The total burden of cases is 9083, while the total burden of controls is 8974. This indicates that cases have a slightly higher burden than controls. The difference between case and control burdens is 109 units.
+------------------------------------------------
+
+ID:       A5
+Category: analytical
+Question: Are there more variants in cases than controls?
+--- Full output ---
+[orchestrator intent]
+Sum ALS_1 through ALS_5 as case_burden, and sum Control_1 through Control_5 as control_burden.
+
+[subagent sql]
+SELECT 
+    SUM(CASE WHEN VAR_id IN (2) THEN 1 ELSE 0 END) AS homozygous_count,
+    SUM(CASE WHEN VAR_id > 0 AND POS = 'Homozygous' THEN 1 ELSE 0 END) AS carrier_count, -- Assuming there's a column for carriers
+    CAST(SUM(ALS_1 + ALS_2 + ALS_3 + ALS_4 + ALS_5) AS REAL) AS case_burden,
+    SUM(CASE WHEN VAR_id IN (2) THEN Control_1 ELSE 0 END) +
+       SUM(CASE WHEN POS = 'Homozygous' AND VAR_id > 0 THEN Control_1 ELSE 0 END) AS control_homozygous_count, -- Assuming there's a column for carriers
+    CAST(SUM(Control_1 + Control_2 + Control_3 + Control_4 + Control_5) AS REAL) AS control_burden
+FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+{"homozygous_count":1,"carrier_count":0,"case_burden":9083.0,"control_homozygous_count":2,"control_burden":8974.0}
+
+[orchestrator summary]
+The case burden is higher than the control burden, indicating more variants in cases than controls. The difference between them is 109 units (case_burden - control_burden).
+--- Final response ---
+The case burden is higher than the control burden, indicating more variants in cases than controls. The difference between them is 109 units (case_burden - control_burden).
+------------------------------------------------
+
+ID:       U1
+Category: unanswerable
+Question: What is the average age of ALS cases?
+--- Full output ---
+[orchestrator] UNANSWERABLE
+Reason: The dataset does not contain information about the age of ALS cases.
+
+--- Final response ---
+The dataset does not contain information about the age of ALS cases.
+------------------------------------------------
+
+ID:       U2
+Category: unanswerable
+Question: What is the allele frequency of VAR_id 30 in Europeans?
+--- Full output ---
+[orchestrator intent]
+This information is not available in the dataset. The column for population-specific frequencies is missing.
+
+[subagent sql]
+SELECT * FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+[{"VAR_id":1,"CHROM":"chr1","POS":"11013912","ID":null,"REF":"A","ALT":"G","QUAL":"722.13","FILTER":null,"AC":"1","AN":"45484","AF":"2.19858e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","CADDphred":"24.8","PolyPhen":"P","SIFT":"D","ALS_1":2,"ALS_2":0,"ALS_3":2,"ALS_4":0,"ALS_5":1,"Control_1":1,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":2},{"VAR_id":2,"CHROM":"chr1","POS":"11013928","ID":"rs755357622","REF":"C","ALT":"T","QUAL":"2598.23","FILTER":null,"AC":"1","AN":"49194","AF":"2.03277e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"0","Synonymous":"1","CADDphred":".","PolyPhen":".","SIFT":".","ALS_1":2,"ALS_2":0,"ALS_3":1,"ALS_4":1,"ALS_5":0,"Control_1":2,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":0},{"VAR_id":3,"CHROM":"chr1","POS":"11013936","ID":null,"REF":"A","ALT":"C","QUAL":"4135.36","FILTER":null,"AC":"1","AN":"50000","AF":"2e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","C
+
+[orchestrator summary]
+The allele frequency of VAR_id 30 is not available in the dataset.
+
+This information is not available in the dataset because there is no column for VAR_id or any other identifier that can be used to look up a specific variant by ID.
+--- Final response ---
+The allele frequency of VAR_id 30 is not available in the dataset.
+
+This information is not available in the dataset because there is no column for VAR_id or any other identifier that can be used to look up a specific variant by ID.
+------------------------------------------------
+
+ID:       U3
+Category: unanswerable
+Question: Which variants are both synonymous and high impact?
+--- Full output ---
+[orchestrator intent]
+This information is not available in the dataset because HighImpact = 1 and Synonymous = 1 are mutually exclusive labels.
+
+However, if you'd like to know which variants are neither synonymous nor high-impact, that would be a queryable question: 'Count the number of variants where Synonymous equals 0 AND HighImpact equals 0'.
+
+[subagent sql]
+SELECT COUNT(*) AS variant_count
+FROM varInfo_synthetic
+WHERE Synonymous = 0 AND HighImpact = 0;
+
+[mcpo result (first 1000 chars)]
+{"variant_count":1147}
+
+[orchestrator summary]
+There are no variants that are both synonymous and high impact because these labels are mutually exclusive.
+
+This information is not available in the dataset. The column for Synonymous is separate from HighImpact.
+--- Final response ---
+There are no variants that are both synonymous and high impact because these labels are mutually exclusive.
+
+This information is not available in the dataset. The column for Synonymous is separate from HighImpact.
+------------------------------------------------
+
+ID:       U4
+Category: unanswerable
+Question: Which variants are most important?
+--- Full output ---
+[orchestrator intent]
+Important is ambiguous. Do you mean highest CADDphred, HighImpact = 1, or highest case burden? Please clarify.
+
+[subagent sql]
+SELECT VAR_id,
+       CHROM,
+       POS,
+       ID,
+       REF,
+       ALT,
+       QUAL,
+       FILTER,
+       AC,
+       AN,
+       AF,
+       gene_name
+FROM varInfo_synthetic
+WHERE (CASE WHEN CADDphred != '.' THEN CAST(CADDphred AS REAL) > 20 ELSE TRUE END)
+AND HighImpact = '1'
+OR SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) IS NOT NULL;
+
+[mcpo result (first 1000 chars)]
+{"error":"HTTP 500 Internal Server Error."}
+
+[orchestrator summary]
+This information is not available in the dataset.
+
+The column for importance is ambiguous and cannot be queried without further clarification. 
+
+Please clarify what you mean by "most important".
+--- Final response ---
+This information is not available in the dataset.
+
+The column for importance is ambiguous and cannot be queried without further clarification. 
+
+Please clarify what you mean by "most important".
+------------------------------------------------
+
+ID:       U5
+Category: unanswerable
+Question: Is VAR_id 100 previously reported as pathogenic?
+--- Full output ---
+[orchestrator intent]
+This information is not available in the dataset. There is no pathogenicity annotation column.
+
+[subagent sql]
+SELECT * FROM varInfo_synthetic;
+
+[mcpo result (first 1000 chars)]
+[{"VAR_id":1,"CHROM":"chr1","POS":"11013912","ID":null,"REF":"A","ALT":"G","QUAL":"722.13","FILTER":null,"AC":"1","AN":"45484","AF":"2.19858e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","CADDphred":"24.8","PolyPhen":"P","SIFT":"D","ALS_1":2,"ALS_2":0,"ALS_3":2,"ALS_4":0,"ALS_5":1,"Control_1":1,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":2},{"VAR_id":2,"CHROM":"chr1","POS":"11013928","ID":"rs755357622","REF":"C","ALT":"T","QUAL":"2598.23","FILTER":null,"AC":"1","AN":"49194","AF":"2.03277e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"0","Synonymous":"1","CADDphred":".","PolyPhen":".","SIFT":".","ALS_1":2,"ALS_2":0,"ALS_3":1,"ALS_4":1,"ALS_5":0,"Control_1":2,"Control_2":0,"Control_3":1,"Control_4":1,"Control_5":0},{"VAR_id":3,"CHROM":"chr1","POS":"11013936","ID":null,"REF":"A","ALT":"C","QUAL":"4135.36","FILTER":null,"AC":"1","AN":"50000","AF":"2e-05","gene_name":"TARDBP","HighImpact":"0","ModerateImpact":"1","Synonymous":"0","C
+
+[orchestrator summary]
+This information is not available in the dataset. There is no pathogenicity annotation column.
+--- Final response ---
+This information is not available in the dataset. There is no pathogenicity annotation column.
+------------------------------------------------
+

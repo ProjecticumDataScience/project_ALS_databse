@@ -5,14 +5,13 @@
 ## ── Backends ─────────────────────────────────────────────────
 ## Which backends to run. All run in sequence and their results
 ## are combined before grading and visualisation.
-## Options: "querychat", "mcp", "ellmer", "dual"
-BACKENDS_TO_RUN <- c("mcp", "dual")
+## Options: "querychat", "mcp", "ellmer", "dual", "mcp_dual"
+BACKENDS_TO_RUN <- c("mcp_dual", "querychat", "mcp", "ellmer", "dual")
 
 ## ── Models (single-model backends) ───────────────────────────
 ## Used by querychat, mcp, and ellmer backends.
 MODELS_TO_TEST <- c(
-  "llama3.1:8b",
-  "mistral"
+  "llama3.1:8b"
 )
 
 ## ── Dual backend model grid ───────────────────────────────────
@@ -20,15 +19,11 @@ MODELS_TO_TEST <- c(
 ## Each combination is labelled "orch -> sub" in the results.
 ## Pull before using: ollama pull <model>
 ORCH_MODELS_TO_TEST <- c(
-  "phi4-mini",
-  "llama3.2",
-  "mistral"
+  "llama3.1:8b"
 )
 
 SUB_MODELS_TO_TEST <- c(
-  "llama3.1:8b",
-  "duckdb-nsql",
-  "sqlcoder"     
+  "duckdb-nsql"
 )
 
 ## ── Judge model (for auto-grading) ───────────────────────────

@@ -25,7 +25,7 @@ cat("Prompts loaded from:", PROMPTS_FILE, "\n")
 ## ── Database setup (querychat, ellmer, dual only) ────────────
 ## MCP talks to the already-running mcpo server and never needs
 ## a local gdb object. querychat, ellmer and dual query the gdb directly.
-if (BACKEND %in% c("querychat", "ellmer", "dual")) {
+if (BACKEND %in% c("querychat", "ellmer", "dual")) {  ## mcp_dual uses mcpo, not local gdb
   library(DBI)
   library(rvat)
   library(rvatData)
@@ -77,6 +77,9 @@ setup_session <- function(model_name) {
   } else if (BACKEND == "dual") {
     ## model_name carries "orch -> sub" — dual_setup parses it
     dual_setup(model_name, gdb, data_description, extra_instructions)
+  } else if (BACKEND == "mcp_dual") {
+    mcp_dual_setup(model_name, MCP_URL, OLLAMA_URL,
+                   data_description, extra_instructions)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -91,6 +94,8 @@ ask_question <- function(session, question) {
     ellmer_ask(session, question)
   } else if (BACKEND == "dual") {
     dual_ask(session, question)
+  } else if (BACKEND == "mcp_dual") {
+    mcp_dual_ask(session, question)
   } else {
     stop("Unknown BACKEND: ", BACKEND)
   }
@@ -152,7 +157,7 @@ all_results <- data.frame(
 ## ── Build model list for this backend ───────────────────────
 ## Dual backend iterates over all ORCH x SUB combinations.
 ## All other backends use MODELS_TO_TEST.
-models_for_this_backend <- if (BACKEND == "dual") {
+models_for_this_backend <- if (BACKEND %in% c("dual", "mcp_dual")) {
   orch_sub_pairs <- expand.grid(
     orch = ORCH_MODELS_TO_TEST,
     sub  = SUB_MODELS_TO_TEST,

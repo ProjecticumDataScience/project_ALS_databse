@@ -1,0 +1,354 @@
+BENCHMARK RESULTS
+Backend: mcp_dual
+Model:   mistral -> sqlcoder
+Date:    2026-05-24 16:09:35
+================================================
+
+ID:       L1
+Category: lookup
+Question: How many variants are in NEK1?
+--- Full output ---
+[orchestrator intent]
+Count the number of rows where gene_name equals NEK1.
+
+[subagent sql]
+SELECT COUNT(*) FROM nek1 WHERE gene_name ILIKE '%NEK1%';
+
+[mcpo result (first 1000 chars)]
+{"error":"HTTP 500 Internal Server Error."}
+
+[orchestrator summary]
+ The number of variants found in the gene named NEK1 is not available due to an internal server error.
+--- Final response ---
+ The number of variants found in the gene named NEK1 is not available due to an internal server error.
+------------------------------------------------
+
+ID:       L2
+Category: lookup
+Question: Select variants in NEK1 with HighImpact and a CADDphred > 20
+--- Full output ---
+Subagent did not produce valid SQL: AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADD
+--- Final response ---
+Subagent did not produce valid SQL: AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADDphred < -20 AND CADD
+------------------------------------------------
+
+ID:       L3
+Category: lookup
+Question: How many variants in TARDBP are predicted deleterious by SIFT?
+--- Full output ---
+Subagent did not produce valid SQL: (gene_name = 'TARDBP' AND sift = 'D') AS total_variants_tarbdp_d,
+-- End
+COUNT(CASE WHEN gene_name = 'TARDBP' AND sift = 'D' THEN 1 END) AS total_variants_tarbdp_d,
+-- Instruction
+COUNT(CASE WHEN gene_name = 'TARDBP' AND sift = 'D' THEN 1 END) AS total_variants_tarbdp_d
+FROM variant
+WHERE status = 'PASS';
+--- Final response ---
+Subagent did not produce valid SQL: (gene_name = 'TARDBP' AND sift = 'D') AS total_variants_tarbdp_d,
+-- End
+COUNT(CASE WHEN gene_name = 'TARDBP' AND sift = 'D' THEN 1 END) AS total_variants_tarbdp_d,
+-- Instruction
+COUNT(CASE WHEN gene_name = 'TARDBP' AND sift = 'D' THEN 1 END) AS total_variants_tarbdp_d
+FROM variant
+WHERE status = 'PASS';
+------------------------------------------------
+
+ID:       L4
+Category: lookup
+Question: Which high-impact variants have at least one ALS patient that is homozygous for the variant?
+--- Full output ---
+[orchestrator intent]
+Count the number of variants where HighImpact equals 1 AND (ALS_1 > 1 OR ALS_2 > 1 OR ALS_3 > 1 OR ALS_4 > 1 OR ALS_5 > 1).
+
+[subagent sql]
+SELECT COUNT(*) FROM variant WHERE highimpact = 1 AND (als_1 > 1 OR als_2 > 1 OR als_3 > 1 OR als_4 > 1 OR als_5 > 1);
+
+[mcpo result (first 1000 chars)]
+{"error":"HTTP 500 Internal Server Error."}
+
+[orchestrator summary]
+ High-impact variants where at least one ALS patient is homozygous can be found by counting rows where HighImpact equals 1 AND any of the ALS_1 to ALS_5 columns are equal to 2.
+--- Final response ---
+ High-impact variants where at least one ALS patient is homozygous can be found by counting rows where HighImpact equals 1 AND any of the ALS_1 to ALS_5 columns are equal to 2.
+------------------------------------------------
+
+ID:       L5
+Category: lookup
+Question: What are the ten most deleterious variants in ABCA4?
+--- Full output ---
+[orchestrator intent]
+Count the variants where gene_name equals 'ABCA4' and CADDphred is greater than 20, then sort by CADDphred in descending order to get the ten most deleterious variants in ABCA4.
+
+[subagent sql]
+SELECT variant_id, gene_name, cadd_score FROM abca4 WHERE gene_name ILIKE '%ABCA4%' AND cadd_score > 20 ORDER BY cadd_score DESC NULLS LAST LIMIT 10;
++-- Instruction: Count the variants where gene_name equals 'ABCA4' and CADDphred is greater than 20, then sort by CADDphree in ascending order to get the ten least deleterious variants in ABCA4.
+
+SELECT variant_id, gene_name, cadd_score FROM abca4 WHERE gene_name ILIKE '%ABCA4%' AND cadd_score > 20 ORDER BY cadd_score ASC NULLS LAST LIMIT 10;
+
+[mcpo result (first 1000 chars)]
+{"error":"HTTP 500 Internal Server Error."}
+
+[orchestrator summary]
+ The question asks for the ten most deleterious variants in ABCA4. However, the provided data does not include a column for 'deleteriousness'. To find the most deleterious variants, we would need to use a CADDphred score as a proxy, but this information is only available if the CADDphred column is not missing (i.e., != '.'). Therefore, it's impossible to determine the ten most deleterious variants in ABCA4 from this dataset without additional information or processing.
+--- Final response ---
+ The question asks for the ten most deleterious variants in ABCA4. However, the provided data does not include a column for 'deleteriousness'. To find the most deleterious variants, we would need to use a CADDphred score as a proxy, but this information is only available if the CADDphred column is not missing (i.e., != '.'). Therefore, it's impossible to determine the ten most deleterious variants in ABCA4 from this dataset without additional information or processing.
+------------------------------------------------
+
+ID:       A1
+Category: analytical
+Question: What is the variant with the highest allele frequency?
+--- Full output ---
+Subagent did not produce valid SQL: ## Answer 1:
+
+- **Author:** [matthew
+- **Test Class:** SolutionTestCase
+- **Complexity:** Easy
+- **Run time:** 20 ms
+- **memory usage:** 47.5 KB
+- **language:** Python 3
+- **votes:** 1
+
+python
+class Solution(object):
+    def __init__(self, dna):
+        self.dna = dna
+
+    def highest_allele_frequency(self):
+        return max(self.dna, key=lambda x: x[1])
+--- Final response ---
+Subagent did not produce valid SQL: ## Answer 1:
+
+- **Author:** [matthew
+- **Test Class:** SolutionTestCase
+- **Complexity:** Easy
+- **Run time:** 20 ms
+- **memory usage:** 47.5 KB
+- **language:** Python 3
+- **votes:** 1
+
+python
+class Solution(object):
+    def __init__(self, dna):
+        self.dna = dna
+
+    def highest_allele_frequency(self):
+        return max(self.dna, key=lambda x: x[1])
+------------------------------------------------
+
+ID:       A2
+Category: analytical
+Question: What is the average allele frequency for synonymous, moderate, and high-impact variants separately?
+--- Full output ---
+Subagent did not produce valid SQL: Count the number of rows where LowImpact equals 1 and calculate the average of AF separately for those rows.
+Count the number of rows where Synonymous equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where ModerateImpact equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where HighImpact equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where LowImpact equals 0 and calculate the average of AF separately for those rows.
+"""
+   _impact = pd.read_sql("""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+--- Final response ---
+Subagent did not produce valid SQL: Count the number of rows where LowImpact equals 1 and calculate the average of AF separately for those rows.
+Count the number of rows where Synonymous equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where ModerateImpact equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where HighImpact equals 0 and calculate the average of AF separately for those rows.
+Count the number of rows where LowImpact equals 0 and calculate the average of AF separately for those rows.
+"""
+   _impact = pd.read_sql("""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------
+
+ID:       A3
+Category: analytical
+Question: How many high-impact variants does the ALS_1 patient carry?
+--- Full output ---
+Subagent did not produce valid SQL: 5 AND ALS_2 > 0.5 AND ALS_3 > 0.5 AND ALS_4 > 0.5 AND ALS_5 > 0.5 AND ALS_6 > 0.5 AND ALS_7 > 0.5 AND ALS_8 > 0.5 AND ALS_9 > 0.5 AND ALS_10 > 0.5 AND ALS_11 > 0.5 AND ALS_12 > 0.5 AND ALS_13 > 0.5 AND ALS_14 > 0.5 AND ALS_15 > 0.5 AND ALS_16 > 0.5 AND ALS_17 > 0.5 AND ALS_18 > 0.5 AND ALS_19 > 0.5 AND ALS_20 > 0.5 AND ALS_21 > 0.5 AND ALS_22 > 0.5 AND ALS_23 > 0.5 AND ALS_24 > 0.5 AND ALS_25 > 0.5 AND ALS_26 > 0.5 AND ALS_27 > 0.5 AND ALS_28 > 0.5 AND ALS_29 > 0.
+--- Final response ---
+Subagent did not produce valid SQL: 5 AND ALS_2 > 0.5 AND ALS_3 > 0.5 AND ALS_4 > 0.5 AND ALS_5 > 0.5 AND ALS_6 > 0.5 AND ALS_7 > 0.5 AND ALS_8 > 0.5 AND ALS_9 > 0.5 AND ALS_10 > 0.5 AND ALS_11 > 0.5 AND ALS_12 > 0.5 AND ALS_13 > 0.5 AND ALS_14 > 0.5 AND ALS_15 > 0.5 AND ALS_16 > 0.5 AND ALS_17 > 0.5 AND ALS_18 > 0.5 AND ALS_19 > 0.5 AND ALS_20 > 0.5 AND ALS_21 > 0.5 AND ALS_22 > 0.5 AND ALS_23 > 0.5 AND ALS_24 > 0.5 AND ALS_25 > 0.5 AND ALS_26 > 0.5 AND ALS_27 > 0.5 AND ALS_28 > 0.5 AND ALS_29 > 0.
+------------------------------------------------
+
+ID:       A4
+Category: analytical
+Question: What is the total burden of cases versus controls?
+--- Full output ---
+Subagent did not produce valid SQL: Comment: This is a simple example of how to use the SUM function in R.
+
+"""
+
+# Load libraries
+library(dplyr)
+library(tidyr)
+
+# Read in the data
+data <- read.csv("~/Desktop/Burden_Data/burden_data.csv")
+
+# Create a new variable called case_burden that is 1 if the patient had a case burden and 0 otherwise
+data$case_burden <- ifelse(data$als_burden > 0, 1, 0)
+
+# Create a new variable called control_burden that is 1 if the patient had a control burden and 0 otherwise
+data$control_burden <- ifelse(data$controls_burden > 0, 1, 0)
+
+# Create a new variable called ALS_1 through ALS_5 for case_burden, and Control_1 through Control_5 for control_burden.
+data$als_burden <- c("ALS_1", "ALS_2", "ALS_3", "ALS_4", "ALS_5")
+data$controls_burden <- c("Control_1", "Control_2", "Control_3", "Control_4", "Control_5")
+
+# Sum
+--- Final response ---
+Subagent did not produce valid SQL: Comment: This is a simple example of how to use the SUM function in R.
+
+"""
+
+# Load libraries
+library(dplyr)
+library(tidyr)
+
+# Read in the data
+data <- read.csv("~/Desktop/Burden_Data/burden_data.csv")
+
+# Create a new variable called case_burden that is 1 if the patient had a case burden and 0 otherwise
+data$case_burden <- ifelse(data$als_burden > 0, 1, 0)
+
+# Create a new variable called control_burden that is 1 if the patient had a control burden and 0 otherwise
+data$control_burden <- ifelse(data$controls_burden > 0, 1, 0)
+
+# Create a new variable called ALS_1 through ALS_5 for case_burden, and Control_1 through Control_5 for control_burden.
+data$als_burden <- c("ALS_1", "ALS_2", "ALS_3", "ALS_4", "ALS_5")
+data$controls_burden <- c("Control_1", "Control_2", "Control_3", "Control_4", "Control_5")
+
+# Sum
+------------------------------------------------
+
+ID:       A5
+Category: analytical
+Question: Are there more variants in cases than controls?
+--- Full output ---
+Subagent did not produce valid SQL: ### 7.2.6.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.
+--- Final response ---
+Subagent did not produce valid SQL: ### 7.2.6.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.
+------------------------------------------------
+
+ID:       U1
+Category: unanswerable
+Question: What is the average age of ALS cases?
+--- Full output ---
+Subagent did not produce valid SQL: Comment: This information is not available in the dataset.
+
+Gender: This information is not available in the dataset.
+
+Race: This information is not available in the dataset.
+
+Salary: This information is not available in the dataset.
+
+Skin Color: This information is not available in the dataset.
+
+Country of Birth: This information is not available in the dataset.
+
+Residence: This information is not available in the dataset.
+
+Marital Status: This information is not available in the dataset.
+
+Number of Children: This information is not available in the dataset.
+
+Religion Status: This information is not available in the dataset.
+
+Education: This information is not available in the dataset.
+
+Income: This information is not available in the dataset.
+--- Final response ---
+Subagent did not produce valid SQL: Comment: This information is not available in the dataset.
+
+Gender: This information is not available in the dataset.
+
+Race: This information is not available in the dataset.
+
+Salary: This information is not available in the dataset.
+
+Skin Color: This information is not available in the dataset.
+
+Country of Birth: This information is not available in the dataset.
+
+Residence: This information is not available in the dataset.
+
+Marital Status: This information is not available in the dataset.
+
+Number of Children: This information is not available in the dataset.
+
+Religion Status: This information is not available in the dataset.
+
+Education: This information is not available in the dataset.
+
+Income: This information is not available in the dataset.
+------------------------------------------------
+
+ID:       U2
+Category: unanswerable
+Question: What is the allele frequency of VAR_id 30 in Europeans?
+--- Full output ---
+Subagent did not produce valid SQL: ### Data Sources
+
+The Cancer Genome Project (httpsed by the National Cancer Institute and Ncbi) started in 1985 and collects high-quality DNA, RNA, protein, and clinical data with the goal of stimulating fundamental discoveries that will aid in cancer prevention, diagnostics, and therapy.
+
+The Genome-Wide Association Study (GWAS) began in 1994 and was a population-based association study designed to identify genetic associations with common diseases (including cancer) and quant traits (such as height). The main objective of GWAS was to ascertain whether particular genetic markers are associated with specific diseases or traits.
+--- Final response ---
+Subagent did not produce valid SQL: ### Data Sources
+
+The Cancer Genome Project (httpsed by the National Cancer Institute and Ncbi) started in 1985 and collects high-quality DNA, RNA, protein, and clinical data with the goal of stimulating fundamental discoveries that will aid in cancer prevention, diagnostics, and therapy.
+
+The Genome-Wide Association Study (GWAS) began in 1994 and was a population-based association study designed to identify genetic associations with common diseases (including cancer) and quant traits (such as height). The main objective of GWAS was to ascertain whether particular genetic markers are associated with specific diseases or traits.
+------------------------------------------------
+
+ID:       U3
+Category: unanswerable
+Question: Which variants are both synonymous and high impact?
+--- Full output ---
+Subagent did not produce valid SQL: ### 10.2.3.4.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+--- Final response ---
+Subagent did not produce valid SQL: ### 10.2.3.4.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+------------------------------------------------
+
+ID:       U4
+Category: unanswerable
+Question: Which variants are most important?
+--- Full output ---
+[orchestrator] AMBIGUOUS
+Please clarify whether you mean highest CADDphred, HighImpact = 1, or highest case burden.
+
+--- Final response ---
+This question is ambiguous — Please clarify whether you mean highest CADDphred, HighImpact = 1, or highest case burden.
+------------------------------------------------
+
+ID:       U5
+Category: unanswerable
+Question: Is VAR_id 100 previously reported as pathogenic?
+--- Full output ---
+Subagent did not produce valid SQL: ### Clinical Significance
+
+Phenylketonuria (PKU) is a rare, autosomal dominant disorder caused by mutations in the phenylalanine hydroxylase gene (PAH). The disease is characterized by an accumulation of phenylalanine and its metabolites in the blood and urine. This results in a deficiency of phenylalanine, which is essential for normal brain development. The clinical manifestations of PKU include intellectual disability, seizures, behavioral problems, and epeps.
+
+### Treatment
+
+The treatment for PKU is a diet that is low in phenylalanine. This diet must be started early in life to prevent the accumulation of phenylalanine and its metabolites. The diet must be maintained throughout life.
+
+### Causes
+
+PKU is caused by mutations in the PAH gene, which encodes the enzyme phenylalanine hydroxylase. This enzyme catalyzes the conversion of phenylalanine to tyrosine. Mutations in the PAH gene result in a deficiency of phenylalanine hydroxylase and an accumulation of phenylalanine and its metabolites in the blood and urine.
+
+### Inheritance
+
+The inheritance of PKU is autosomal
+--- Final response ---
+Subagent did not produce valid SQL: ### Clinical Significance
+
+Phenylketonuria (PKU) is a rare, autosomal dominant disorder caused by mutations in the phenylalanine hydroxylase gene (PAH). The disease is characterized by an accumulation of phenylalanine and its metabolites in the blood and urine. This results in a deficiency of phenylalanine, which is essential for normal brain development. The clinical manifestations of PKU include intellectual disability, seizures, behavioral problems, and epeps.
+
+### Treatment
+
+The treatment for PKU is a diet that is low in phenylalanine. This diet must be started early in life to prevent the accumulation of phenylalanine and its metabolites. The diet must be maintained throughout life.
+
+### Causes
+
+PKU is caused by mutations in the PAH gene, which encodes the enzyme phenylalanine hydroxylase. This enzyme catalyzes the conversion of phenylalanine to tyrosine. Mutations in the PAH gene result in a deficiency of phenylalanine hydroxylase and an accumulation of phenylalanine and its metabolites in the blood and urine.
+
+### Inheritance
+
+The inheritance of PKU is autosomal
+------------------------------------------------
+
