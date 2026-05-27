@@ -1,41 +1,38 @@
 ## ============================================================
-## config.R  –  Edit this file to configure the pipeline
+## config.R  –  benchmark_multi pipeline
+## Multi-table + rvat extension of the base benchmark.
+## Outputs go to separate directories from the base benchmark.
 ## ============================================================
 
 ## ── Backends ─────────────────────────────────────────────────
-## Which backends to run. All run in sequence and their results
-## are combined before grading and visualisation.
 ## Options: "querychat", "mcp", "ellmer", "dual", "mcp_dual"
-BACKENDS_TO_RUN <- c("mcp_dual", "mcp", "ellmer", "dual", "querychat")
+BACKENDS_TO_RUN <- c("mcp", "ellmer", "mcp_dual")
 
 ## ── Models (single-model backends) ───────────────────────────
-## Used by querychat, mcp, and ellmer backends.
 MODELS_TO_TEST <- c(
   "llama3.1:8b"
 )
 
 ## ── Dual backend model grid ───────────────────────────────────
-## All combinations of ORCH x SUB are benchmarked automatically.
-## Each combination is labelled "orch -> sub" in the results.
-## Pull before using: ollama pull <model>
 ORCH_MODELS_TO_TEST <- c(
   "llama3.1:8b"
 )
 
 SUB_MODELS_TO_TEST <- c(
-  "duckdb-nsql"
+  "llama3.1:8b"
 )
 
-## ── Judge model (for auto-grading) ───────────────────────────
+## ── Judge model ───────────────────────────────────────────────
 JUDGE_MODEL <- "gemma3"
 
 ## ── Service URLs ─────────────────────────────────────────────
-## Only used when "mcp" is in BACKENDS_TO_RUN
-MCP_URL    <- "http://localhost:8000"
+MCP_URL    <- "http://localhost:8002"
 OLLAMA_URL <- "http://localhost:11434"
 
 ## ── Paths ────────────────────────────────────────────────────
-PROMPTS_FILE  <- "~/project_ALS_databse/scripts/benchmark/prompts.txt"
-BENCHMARKS_MD <- "~/project_ALS_databse/references/benchmarks.md"
-BENCHMARK_DIR <- "~/project_ALS_databse/analysis/benchmark_testing"
-GRADING_DIR   <- "~/project_ALS_databse/analysis/benchmark_grading"
+## Note: BENCHMARKS_MD points to a new file benchmarks_multi.md
+## that includes expected SQL/rvat approaches for all backends.
+PROMPTS_FILE  <- "~/project_ALS_databse/scripts/benchmark_multi/prompts.txt"
+BENCHMARKS_MD <- "~/project_ALS_databse/references/benchmarks_multi.md"
+BENCHMARK_DIR <- "~/project_ALS_databse/analysis/benchmark_multi_testing"
+GRADING_DIR   <- "~/project_ALS_databse/analysis/benchmark_multi_grading"

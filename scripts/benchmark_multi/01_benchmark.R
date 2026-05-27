@@ -70,7 +70,25 @@ benchmark_questions <- list(
   list(id = "E2", category = "expert",
        question = "In which gene does patient ALS_1 have the most pathogenic mutations?"),
   list(id = "E3", category = "expert",
-       question = "In which genes are more variants present in cases compared to controls, and what is the ratio?")
+       question = "In which genes are more variants present in cases compared to controls, and what is the ratio?"),
+  
+  ## ── Multi-table / rvat questions ──────────────────────────
+  ## These require joining multiple tables (varInfo, pheno, SM)
+  ## or rvat functions. Backends differ in capability here:
+  ##   mcp       — requires new multi-table tools in server.py
+  ##   ellmer    — can use rvat tools directly via R
+  ##   mcp_dual  — orchestrator routes to appropriate tool
+  ##   querychat — cannot answer (locked to varInfo_synthetic)
+  list(id = "R1", category = "rvat",
+       question = "What is the MAF for moderate impact variants in TARDBP?"),
+  list(id = "R2", category = "rvat",
+       question = "How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?"),
+  list(id = "R3", category = "rvat",
+       question = "Summarize variant info for each gene. Only select genes that have more than 10 variants. Order the results by the number of variants."),
+  list(id = "R4", category = "rvat",
+       question = "What is the sex distribution of variant carriers in the dataset?"),
+  list(id = "R5", category = "rvat",
+       question = "Which population has the highest number of high-impact variant carriers?")
 )
 
 ## ── Backend dispatcher ────────────────────────────────────────

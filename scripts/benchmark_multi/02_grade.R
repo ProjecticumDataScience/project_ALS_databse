@@ -77,6 +77,13 @@ Grade the response on 4 criteria, each true or false:
      the model states which interpretation it uses and the answer matches that
      interpretation. E1 has two valid interpretations (variant count OR burden).
      Either is acceptable if clearly stated.
+   - For rvat questions (R1-R5): these require multi-table access (pheno, SM tables)
+     or rvat functions. Accept any approach that produces a correct answer:
+     SQL joins, rvat R code, or MCP multi-table tools.
+     If the backend cannot answer (e.g. querychat locked to varInfo_synthetic),
+     a correct refusal explaining the limitation scores TRUE for grade_answer.
+     grade_sql should be TRUE if the SQL/code logic is sound, even if the exact
+     syntax differs between rvat and SQL approaches.
 
 2. grade_minimal_response: Is the response concise (1-3 sentences)?
    - true if brief and to the point
