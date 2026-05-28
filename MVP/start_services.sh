@@ -1,0 +1,71 @@
+#!/bin/bash
+# ─────────────────────────────────────────────────────
+# Project ALS  —  service launcher
+# ─────────────────────────────────────────────────────
+
+# Correct paths based on actual directory structure
+PROJECT_DIR="$HOME/project_ALS_databse"
+SCRIPT_DIR="$PROJECT_DIR/MVP"
+SERVER_PY="$SCRIPT_DIR/server.py"
+CONDA_BASE="$HOME/miniconda3"
+
+export RVAT_GDB_PATH="$PROJECT_DIR/references/rvatData.gdb"
+export RVAT_TABLE="varInfo_synthetic"
+
+echo "================================================"
+echo " Project ALS — starting services"
+echo "================================================"
+echo " Project dir : $PROJECT_DIR"
+echo " server.py   : $SERVER_PY"
+echo " Database    : $RVAT_GDB_PATH"
+echo "================================================"
+
+# ── Sanity checks ──────────────────────────────────
+if [ ! -f "$SERVER_PY" ]; then
+  echo "ERROR: server.py not found at $SERVER_PY"
+  exit 1
+fi
+
+if [ ! -f "$RVAT_GDB_PATH" ]; then
+  echo "WARNING: database not found at $RVAT_GDB_PATH"
+  echo "  Set RVAT_GDB_PATH to the correct path."
+fi
+
+if [ ! -f "$CONDA_BASE/bin/activate" ]; then
+  echo "ERROR: conda not found at $CONDA_BASE"
+  exit 1
+fi
+
+# ── Kill any leftover processes ────────────────────
+pkill -f "open-webui"
+pkill -f "mcpo"
+pkill -f "server.py"
+sleep 2
+
+# ── 2. mcpo + MCP server ───────────────────────────
+source "$CONDA_BASE/bin/activate" mcp_env
+mcpo --port 8005 -- python3 "$SERVER_PY" &
+MCPO_PID=$!
+echo "mcpo started (pid $MCPO_PID)"
+echo "  → wrapping: $SERVER_PY"
+
+# ── 3. Health check ────────────────────────────────
+echo "Waiting for mcpo..."
+for i in $(seq 1 15); do
+  if curl -sf http://localhost:8005/openapi.json > /dev/null 2>&1; then
+    echo "mcpo health check ✓  (ready after ${i}s)"
+    break
+  fi
+  sleep 1
+  if [ "$i" -eq 15 ]; then
+    echo "WARNING: mcpo not responding after 15s"
+    echo "Check logs above for errors."
+  fi
+done
+
+echo ""
+echo "================================================"
+echo " All services started"
+echo "  MCP/mcpo   → http://localhost:8005"
+echo "  Shiny app  → open app.R in RStudio"
+echo "================================================"

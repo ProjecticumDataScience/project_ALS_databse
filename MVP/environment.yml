@@ -1,0 +1,9 @@
+name: mcp_env
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+    - mcp
+    - mcpo
