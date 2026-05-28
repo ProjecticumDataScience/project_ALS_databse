@@ -73,6 +73,10 @@ Grade the response on 4 criteria, each true or false:
 1. grade_answer: Is the final answer correct or appropriate?
    - Compare against the expected answer in the benchmark document above
    - For unanswerable questions: did it correctly refuse and explain why?
+   - For expert questions (E1-E3): accept any reasonable interpretation as long as
+     the model states which interpretation it uses and the answer matches that
+     interpretation. E1 has two valid interpretations (variant count OR burden).
+     Either is acceptable if clearly stated.
 
 2. grade_minimal_response: Is the response concise (1-3 sentences)?
    - true if brief and to the point
@@ -89,8 +93,12 @@ Grade the response on 4 criteria, each true or false:
    - false if wrong columns, wrong logic, or no SQL when one was needed
    - true if question is unanswerable and no SQL was correctly not generated
 
-Return a JSON object with exactly these keys:
-grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
+You MUST respond with ONLY a JSON object. No preamble. No explanation. No markdown.
+Start your response with { and end with }.
+Example of the exact format required:
+{grade_answer: true, grade_minimal_response: true, grade_hallucination: true, grade_sql: true, reasoning: the answer is correct}
+
+The keys must be exactly: grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
   )
   
   for (row in 1:nrow(file)) {
@@ -112,21 +120,23 @@ grade_answer, grade_minimal_response, grade_hallucination, grade_sql, reasoning"
         ),
         format      = "json",
         output      = "text",
-        num_predict = 300,
+        num_predict = 400,
         temperature = 0
       )
-      ## Strip <think>...</think> blocks (qwen3 reasoning mode)
-      clean <- gsub("<think>.*?</think>", "", resp, perl = TRUE)
-      ## Strip markdown code fences
-      clean <- gsub("```json|```", "", clean)
-      clean <- trimws(clean)
-      ## Extract first {...} JSON block — handles text before/after
-      json_match <- regmatches(clean, regexpr("\\{[^{}]*\\}", clean, perl = TRUE))
-      ## Fallback: try DOTALL match for nested/multiline JSON
-      if (length(json_match) == 0) {
-        json_match <- regmatches(clean, regexpr("\\{.*\\}", clean, perl = TRUE))
+      
+      ## ── Robust JSON extraction ───────────────────────────
+      ## Find the first { and last } to extract the JSON block,
+      ## ignoring any preamble gemma3 adds before the JSON.
+      start <- regexpr("\\{", resp)[[1]]
+      end   <- tail(gregexpr("\\}", resp)[[1]], 1)
+      
+      if (start == -1 || end == -1 || end < start) {
+        stop("No JSON object found in response")
       }
-      if (length(json_match) > 0) jsonlite::fromJSON(json_match[[1]]) else jsonlite::fromJSON(clean)
+      
+      json_str <- substr(resp, start, end)
+      jsonlite::fromJSON(json_str)
+      
     }, error = function(e) {
       cat("  PARSE ERROR on row", row, ":", conditionMessage(e), "\n")
       NULL

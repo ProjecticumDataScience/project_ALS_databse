@@ -62,7 +62,15 @@ benchmark_questions <- list(
   list(id = "U2", category = "unanswerable", question = "What is the allele frequency of VAR_id 30 in Europeans?"),
   list(id = "U3", category = "unanswerable", question = "Which variants are both synonymous and high impact?"),
   list(id = "U4", category = "unanswerable", question = "Which variants are most important?"),
-  list(id = "U5", category = "unanswerable", question = "Is VAR_id 100 previously reported as pathogenic?")
+  list(id = "U5", category = "unanswerable", question = "Is VAR_id 100 previously reported as pathogenic?"),
+  
+  ## ── Expert questions ─────────────────────────────────────────
+  list(id = "E1", category = "expert",
+       question = "Are moderate and high-impact mutations in TARDBP enriched in cases versus controls?"),
+  list(id = "E2", category = "expert",
+       question = "In which gene does patient ALS_1 have the most pathogenic mutations?"),
+  list(id = "E3", category = "expert",
+       question = "In which genes are more variants present in cases compared to controls, and what is the ratio?")
 )
 
 ## ── Backend dispatcher ────────────────────────────────────────

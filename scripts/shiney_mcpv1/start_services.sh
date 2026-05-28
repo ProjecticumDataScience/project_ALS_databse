@@ -37,9 +37,9 @@ if [ ! -f "$CONDA_BASE/bin/activate" ]; then
 fi
 
 # ── Kill any leftover processes ────────────────────
-echo "Cleaning up old processes..."
-pkill -f "open-webui" 2>/dev/null && echo "  Stopped old Open WebUI" || true
-pkill -f "mcpo"       2>/dev/null && echo "  Stopped old mcpo"       || true
+pkill -f "open-webui"
+pkill -f "mcpo"
+pkill -f "server.py"
 sleep 2
 
 # ── 1. Open WebUI ──────────────────────────────────

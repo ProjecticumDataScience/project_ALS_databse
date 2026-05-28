@@ -93,7 +93,8 @@ if (length(missing_backends) > 0) {
 category_colors <- c(
   "analytical"   = "#E9C46A",
   "lookup"       = "#2A9D8F",
-  "unanswerable" = "#457B9D"
+  "unanswerable" = "#457B9D",
+  "expert"       = "#E76F51"
 )
 
 criterion_colors <- c(
@@ -204,7 +205,8 @@ if (multi_backend) {
 averaged$id <- factor(averaged$id,
                       levels = c("L1","L2","L3","L4","L5",
                                  "A1","A2","A3","A4","A5",
-                                 "U1","U2","U3","U4","U5"))
+                                 "U1","U2","U3","U4","U5",
+                                 "E1","E2","E3"))
 
 ## Sort columns: single-model backends first, dual last
 col_order <- averaged %>%
@@ -241,7 +243,7 @@ p3 <- ggplot(averaged, aes(x = label, y = id, fill = grade_total)) +
   scale_x_discrete(position = "top") +
   scale_y_discrete(limits = rev) +
   ## Horizontal separators between L/A/U groups
-  geom_hline(yintercept = c(5.5, 10.5),
+  geom_hline(yintercept = c(5.5, 10.5, 15.5),
              color = "white", linewidth = 2) +
   labs(
     title   = "Score per question per model",
@@ -274,8 +276,8 @@ cat_scores <- averaged %>%
   group_by(backend, category) %>%
   summarise(mean_total = mean(grade_total, na.rm = TRUE), .groups = "drop") %>%
   mutate(category = factor(category,
-                           levels = c("lookup","analytical","unanswerable"),
-                           labels = c("Lookup","Analytical","Unanswerable")))
+                           levels = c("lookup","analytical","unanswerable","expert"),
+                           labels = c("Lookup","Analytical","Unanswerable","Expert")))
 
 p4 <- ggplot(cat_scores,
              aes(x = backend, y = mean_total, fill = backend)) +
@@ -290,7 +292,7 @@ p4 <- ggplot(cat_scores,
     title    = "Average score per question category",
     subtitle = "Grouped by question type — each backend shown separately",
     x = NULL, y = "Average score (out of 4)",
-    caption  = "Lookup = factual gene/variant queries   Analytical = aggregations   Unanswerable = hallucination tests"
+    caption  = "Lookup = factual   Analytical = aggregations   Unanswerable = hallucination tests   Expert = multi-step SQL"
   ) +
   theme_als +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))

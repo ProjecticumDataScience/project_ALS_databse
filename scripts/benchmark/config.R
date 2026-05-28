@@ -6,7 +6,7 @@
 ## Which backends to run. All run in sequence and their results
 ## are combined before grading and visualisation.
 ## Options: "querychat", "mcp", "ellmer", "dual", "mcp_dual"
-BACKENDS_TO_RUN <- c("mcp_dual", "querychat", "mcp", "ellmer", "dual")
+BACKENDS_TO_RUN <- c("mcp_dual", "mcp", "ellmer", "dual", "querychat")
 
 ## ── Models (single-model backends) ───────────────────────────
 ## Used by querychat, mcp, and ellmer backends.

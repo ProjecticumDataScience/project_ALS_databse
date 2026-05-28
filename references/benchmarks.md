@@ -239,6 +239,46 @@ Additionally, if questions are too vague or broad, the chatbot should ask for cl
 
 ---
 
+## E1 — Are moderate and high-impact mutations in TARDBP enriched in cases vs controls?
+
+**Expected approach:** Model should clarify which interpretation it uses.
+
+**Interpretation 1 — variant count:**
+SELECT
+  (SELECT COUNT(*) FROM varInfo_synthetic
+   WHERE gene_name = 'TARDBP' AND (ModerateImpact=1 OR HighImpact=1)
+   AND (ALS_1!=0 OR ALS_2!=0 OR ALS_3!=0 OR ALS_4!=0 OR ALS_5!=0)) AS n_ALS,
+  (SELECT COUNT(*) FROM varInfo_synthetic
+   WHERE gene_name = 'TARDBP' AND (ModerateImpact=1 OR HighImpact=1)
+   AND (Control_1!=0 OR Control_2!=0 OR Control_3!=0 OR Control_4!=0 OR Control_5!=0)) AS n_control
+
+**Answer:** 15 variants in both ALS and controls.
+
+**Interpretation 2 — burden:**
+SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) vs SUM(Control columns)
+WHERE gene_name = 'TARDBP' AND (ModerateImpact=1 OR HighImpact=1)
+
+**Answer:** ALS burden = 80, control burden = 85.
+
+---
+
+## E2 — In which gene does ALS_1 have the most pathogenic mutations?
+
+**Expected SQL:** CTE filtering ALS_1 != 0 AND (CADDphred > 20 OR PolyPhen = 'D' OR SIFT = 'D'),
+GROUP BY gene_name, ORDER BY SUM(ALS_1) DESC
+
+**Answer:** ABCA4 with 321 (allele count, homozygous = 2, heterozygous = 1)
+
+---
+
+## E3 — In which genes are more variants present in cases than controls, and what is the ratio?
+
+**Expected SQL:** GROUP BY gene_name, compute
+(SUM(ALS columns) + 1.0) / (SUM(Control columns) + 1.0) AS dosage_ratio,
+ORDER BY dosage_ratio DESC
+
+**Answer:** TARDBP, PEX5, ABCA4, SOD1, IL3RA have more case carriers than controls.
+
 # Advanced Tests (RVAT Required)
 
 These are more advanced benchmarking questions. Only relevant when there is time left and you succeed with the SQLite chatbot.
