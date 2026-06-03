@@ -5,7 +5,7 @@
 
 # Correct paths based on actual directory structure
 PROJECT_DIR="$HOME/project_ALS_databse"
-SCRIPT_DIR="$PROJECT_DIR/scripts/shiney_mcpv1"
+SCRIPT_DIR="$PROJECT_DIR/MVP"
 SERVER_PY="$SCRIPT_DIR/server.py"
 CONDA_BASE="$HOME/miniconda3"
 
@@ -42,16 +42,9 @@ pkill -f "mcpo"
 pkill -f "server.py"
 sleep 2
 
-# ── 1. Open WebUI ──────────────────────────────────
-source "$CONDA_BASE/bin/activate" webui
-open-webui serve &
-WEBUI_PID=$!
-echo "Open WebUI started (pid $WEBUI_PID)"
-conda deactivate 2>/dev/null || true
-
 # ── 2. mcpo + MCP server ───────────────────────────
-source "$CONDA_BASE/bin/activate" webui
-mcpo --port 8000 -- /home/luuk.engels/miniconda3/envs/webui/bin/python3 "$SERVER_PY" &
+source "$CONDA_BASE/bin/activate" mcp_env
+mcpo --port 8005 -- python3 "$SERVER_PY" &
 MCPO_PID=$!
 echo "mcpo started (pid $MCPO_PID)"
 echo "  → wrapping: $SERVER_PY"
@@ -59,7 +52,7 @@ echo "  → wrapping: $SERVER_PY"
 # ── 3. Health check ────────────────────────────────
 echo "Waiting for mcpo..."
 for i in $(seq 1 15); do
-  if curl -sf http://localhost:8000/openapi.json > /dev/null 2>&1; then
+  if curl -sf http://localhost:8005/openapi.json > /dev/null 2>&1; then
     echo "mcpo health check ✓  (ready after ${i}s)"
     break
   fi
@@ -73,7 +66,6 @@ done
 echo ""
 echo "================================================"
 echo " All services started"
-echo "  Open WebUI → http://localhost:8080"
-echo "  MCP/mcpo   → http://localhost:8000"
+echo "  MCP/mcpo   → http://localhost:8005"
 echo "  Shiny app  → open app.R in RStudio"
 echo "================================================"
