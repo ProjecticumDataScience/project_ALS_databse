@@ -295,6 +295,10 @@ def get_sex_distribution() -> list[dict]:
     """
     con = get_con()
     try:
+        ## Verify pheno table exists
+        tables = [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+        if 'pheno' not in tables:
+            return [{"error": "pheno table not found in database. Available tables: " + ", ".join(tables)}]
         cur = con.execute("""
             SELECT
               CASE sex WHEN 1 THEN 'Female' WHEN 2 THEN 'Male' ELSE 'Unknown' END AS sex,
@@ -305,6 +309,8 @@ def get_sex_distribution() -> list[dict]:
             GROUP BY sex
         """)
         return [dict(row) for row in cur.fetchall()]
+    except Exception as e:
+        return [{"error": str(e)}]
     finally:
         con.close()
 
@@ -319,6 +325,9 @@ def get_population_counts() -> list[dict]:
     """
     con = get_con()
     try:
+        tables = [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+        if 'pheno' not in tables:
+            return [{"error": "pheno table not found. Available: " + ", ".join(tables)}]
         cur = con.execute("""
             SELECT
               pop, superPop,
@@ -332,6 +341,8 @@ def get_population_counts() -> list[dict]:
             ORDER BY n_samples DESC
         """)
         return [dict(row) for row in cur.fetchall()]
+    except Exception as e:
+        return [{"error": str(e)}]
     finally:
         con.close()
 
@@ -348,55 +359,75 @@ def get_carriers_with_pheno(gene: str, impact: str = "HighImpact") -> list[dict]
 
     Parameters:
         gene: gene name to filter (e.g. 'SOD1', 'TARDBP')
-        impact: impact filter — 'HighImpact', 'ModerateImpact', or 'any'
+        impact: 'HighImpact', 'ModerateImpact', or 'any'
 
     Returns carrier IIDs with their sex, age, population, and phenotype.
     """
     con = get_con()
     try:
+        tables = [r[0] for r in con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()]
+        if 'pheno' not in tables:
+            return [{"error": "pheno table not found. Available: " + ", ".join(tables)}]
+
         ## Build impact filter
         if impact == "HighImpact":
-            impact_filter = "v.HighImpact = 1"
+            impact_filter = "HighImpact = 1"
         elif impact == "ModerateImpact":
-            impact_filter = "v.ModerateImpact = 1"
+            impact_filter = "ModerateImpact = 1"
         else:
-            impact_filter = "(v.HighImpact = 1 OR v.ModerateImpact = 1)"
+            impact_filter = "(HighImpact = 1 OR ModerateImpact = 1)"
 
-        ## For each sample column, check if they carry at least one variant
-        ## IID 'ALS1' maps to column ALS_1 etc.
+        ## Map sample IIDs to genotype column names
         sample_map = {
-            'ALS1': 'ALS_1', 'ALS2': 'ALS_2', 'ALS3': 'ALS_3',
-            'ALS4': 'ALS_4', 'ALS5': 'ALS_5',
-            'Control1': 'Control_1', 'Control2': 'Control_2',
-            'Control3': 'Control_3', 'Control4': 'Control_4',
-            'Control5': 'Control_5'
+            "ALS1": "ALS_1", "ALS2": "ALS_2", "ALS3": "ALS_3",
+            "ALS4": "ALS_4", "ALS5": "ALS_5",
+            "Control1": "Control_1", "Control2": "Control_2",
+            "Control3": "Control_3", "Control4": "Control_4",
+            "Control5": "Control_5"
         }
 
-        carriers = []
+        ## Build a single UNION query instead of looping with f-strings
+        union_parts = []
         for iid, col in sample_map.items():
-            cur = con.execute(f"""
-                SELECT COUNT(*) AS n_variants
-                FROM varInfo_synthetic v
-                WHERE v.gene_name = ? AND {impact_filter} AND v.{col} > 0
-            """, (gene,))
-            n = cur.fetchone()['n_variants']
-            if n > 0:
-                ## Get pheno info for this sample
-                cur2 = con.execute(
+            union_parts.append(
+                f"SELECT '{iid}' AS IID, SUM(CASE WHEN {col} > 0 THEN 1 ELSE 0 END) AS carries "
+                f"FROM varInfo_synthetic WHERE gene_name = ? AND {impact_filter}"
+            )
+        carrier_sql = " UNION ALL ".join(union_parts)
+        params = [gene] * len(sample_map)
+
+        carriers_raw = con.execute(carrier_sql, params).fetchall()
+
+        ## Join with pheno for carriers only
+        results = []
+        for row in carriers_raw:
+            iid = row["IID"]
+            carries = row["carries"]
+            if carries and carries > 0:
+                pheno_row = con.execute(
                     "SELECT IID, sex, pheno, pop, superPop, age FROM pheno WHERE IID = ?",
                     (iid,)
-                )
-                row = cur2.fetchone()
-                if row:
-                    d = dict(row)
-                    d['n_variants_carried'] = n
-                    d['genotype_column'] = col
-                    carriers.append(d)
+                ).fetchone()
+                if pheno_row:
+                    results.append({
+                        "IID": iid,
+                        "sex": pheno_row["sex"],
+                        "sex_label": "Female" if pheno_row["sex"] == 1 else "Male",
+                        "pheno": pheno_row["pheno"],
+                        "pheno_label": "ALS" if pheno_row["pheno"] == 1 else "Control",
+                        "pop": pheno_row["pop"],
+                        "superPop": pheno_row["superPop"],
+                        "age": pheno_row["age"],
+                        "n_variants_carried": int(carries)
+                    })
+        return results if results else [{"message": f"No carriers found for {gene} with {impact}"}]
 
-        return carriers
+    except Exception as e:
+        return [{"error": str(e)}]
     finally:
         con.close()
-
 
 if __name__ == "__main__":
     mcp.run()
