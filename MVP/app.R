@@ -160,11 +160,11 @@ summarize_result <- function(question, tool_name, result_json,
     "Start directly with the conclusion. ",
     "Always mention exact numbers when you know them. ",
     "Use the schema information above to correctly interpret the results. ",
-    "IMPORTANT: You MUST respond in English only. Never use Dutch or any other language."
+    "Answer in the language in which the question was asked "
   )
   
   preview <- if (nchar(result_json) > 3000) {
-    paste0(substr(result_json, 1, 3000), "\n... [resultaat ingekort]")
+    paste0(substr(result_json, 1, 3000), "\n... [result shortened]")
   } else result_json
   
   count_hint <- if (!is.null(row_count)) {
@@ -176,8 +176,8 @@ summarize_result <- function(question, tool_name, result_json,
     "User question: ", question,  "\n",
     "Tool used: ", tool_name, "\n",
     count_hint,
-    "Resultaat:\n",     preview,    "\n\n",
-    "Geef een korte Nederlandse samenvatting."
+    "Result:\n",     preview,    "\n\n",
+    "Give a short summary."
   )
   
   call_ollama(prompt, system_prompt = sys, model = orch_model)
@@ -287,12 +287,13 @@ run_single_pipeline <- function(question, model, progress_fn = NULL) {
 # ══════════════════════════════════════════════════════════════════════════════
 
 ui <- page_sidebar(
-  title = "Project ALS — Variant Assistent",
+  title = "Project ALS — Variant Assistant",
   theme = bs_theme(
     version    = 5,
     bootswatch = "flatly",
     primary    = "#2A9D8F",
-    secondary  = "#457B9D"
+    secondary  = "#457B9D",
+    "navbar-bg" = "#18bc9c"
   ),
   
   tags$head(

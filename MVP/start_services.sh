@@ -135,6 +135,7 @@ for i in $(seq 1 20); do
   fi
 done
 
+
 echo ""
 echo "================================================"
 echo " Services started for user: $USER"
