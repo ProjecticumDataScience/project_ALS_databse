@@ -92,25 +92,25 @@ call_ollama <- function(prompt, system_prompt = NULL,
       req_perform()
     resp_body_json(resp)$response
   }, error = function(e) {
-    paste("Ollama niet bereikbaar:", e$message)
+    paste("Ollama not reachable:", e$message)
   })
 }
 
 TOOL_DESCRIPTIONS <- paste(
-  "Beschikbare tools:\n",
-  "1. count_variants_in_gene      — aantal varianten in een gen | params: {gene}\n",
-  "2. get_high_impact_variants_in_gene — high-impact + CADD > drempel | params: {gene, cadd_min}\n",
-  "3. count_sift_deleterious_in_gene  — SIFT deleterious in gen | params: {gene}\n",
-  "4. get_high_impact_homozygous_ALS  — homozygoot in ALS | params: {}\n",
-  "5. get_top_deleterious_in_gene     — top N deleterieus | params: {gene, top_n}\n",
-  "6. get_highest_af_variant          — hoogste allelfrequentie | params: {}\n",
-  "7. get_average_af_by_impact        — gemiddelde AF per impact | params: {}\n",
-  "8. get_burden_cases_vs_controls    — totale burden cases vs controls | params: {}\n",
-  "9. summarize_variants_by_gene      — samenvatting per gen | params: {min_variants, order_by}\n",
-  "10. get_carriers_by_gene           — dragers in ALS/Control | params: {gene, group}\n",
-  "11. get_database_limitations       — wat is NIET beschikbaar | params: {}\n",
-  "12. summarize_database             — database statistieken | params: {}\n",
-  "13. run_query                      — vrije SELECT query | params: {sql}\n",
+  "Available tools:\n",
+  "1. count_variants_in_gene      — count variants in a gene | params: {gene}\n",
+  "2. get_high_impact_variants_in_gene — high-impact + CADD > threshold | params: {gene, cadd_min}\n",
+  "3. count_sift_deleterious_in_gene  — SIFT deleterious in gene | params: {gene}\n",
+  "4. get_high_impact_homozygous_ALS  — homozygous in ALS patients | params: {}\n",
+  "5. get_top_deleterious_in_gene     — top N most deleterious | params: {gene, top_n}\n",
+  "6. get_highest_af_variant          — highest allele frequency | params: {}\n",
+  "7. get_average_af_by_impact        — average AF per impact category | params: {}\n",
+  "8. get_burden_cases_vs_controls    — total burden cases vs controls | params: {}\n",
+  "9. summarize_variants_by_gene      — gene summary table | params: {min_variants, order_by}\n",
+  "10. get_carriers_by_gene           — carriers in ALS/Control group | params: {gene, group}\n",
+  "11. get_database_limitations       — what is NOT available in data | params: {}\n",
+  "12. summarize_database             — database statistics | params: {}\n",
+  "13. run_query                      — free SELECT query | params: {sql}\n",
   sep = ""
 )
 
@@ -123,12 +123,12 @@ classify_question <- function(question, orch_model = "llama3.1:8b") {
     "Output ONLY a valid JSON object with exactly two keys: 'tool' and 'params'.\n",
     "No explanation. No markdown. No extra text. No backticks.\n\n",
     TOOL_DESCRIPTIONS, "\n",
-    "REGELS:\n",
-    "- Gennamen altijd hoofdletters: NEK1, SOD1, TARDBP, FUS, ABCA4\n",
-    "- Voor onbeantwoordbare vragen (leeftijd, geslacht, ClinVar, populatie-AF): ",
-    "gebruik get_database_limitations\n",
-    "- Voor vage vragen ('belangrijkste'): gebruik get_database_limitations\n\n",
-    "Geef ALLEEN het JSON object terug voor:\n", question
+    "RULES:\n",
+    "- Gene names always uppercase: NEK1, SOD1, TARDBP, FUS, ABCA4\n",
+    "- For unanswerable questions (age, sex, ClinVar, population-AF): ",
+    "use get_database_limitations\n",
+    "- For vague questions (most important): use get_database_limitations\n\n",
+    "Return ONLY the JSON object for this question:\n", question
   )
   
   raw <- call_ollama(question, system_prompt = sys,
@@ -141,7 +141,7 @@ classify_question <- function(question, orch_model = "llama3.1:8b") {
     end   <- tail(gregexpr("\\}", clean)[[1]], 1)
     if (start > 0 && end > start) clean <- substr(clean, start, end)
     parsed <- fromJSON(clean, simplifyVector = FALSE)
-    if (is.null(parsed$tool)) stop("Geen 'tool' sleutel gevonden")
+    if (is.null(parsed$tool)) stop("No 'tool' key found in: ", clean)
     list(ok = TRUE, tool = parsed$tool,
          params = if (is.null(parsed$params)) list() else parsed$params)
   }, error = function(e) {
@@ -154,12 +154,13 @@ summarize_result <- function(question, tool_name, result_json,
                              row_count = NULL, orch_model = "llama3.1:8b") {
   sys <- paste0(
     PROMPTS$data_description, "\n\n",
-    "Je bent een ALS-bioinformatica assistent. ",
-    "Geef een korte, heldere Nederlandse samenvatting (max 3 zinnen). ",
-    "Gebruik geen SQL, JSON of technisch jargon. ",
-    "Begin direct met de conclusie. ",
-    "Als je een exact aantal weet, noem dat dan altijd. ",
-    "Gebruik de schema-informatie hierboven om de resultaten correct te interpreteren."
+    "You are an ALS bioinformatics assistant. ",
+    "Give a short, clear English summary (max 3 sentences). ",
+    "Do not use SQL, JSON or technical jargon. ",
+    "Start directly with the conclusion. ",
+    "Always mention exact numbers when you know them. ",
+    "Use the schema information above to correctly interpret the results. ",
+    "IMPORTANT: You MUST respond in English only. Never use Dutch or any other language."
   )
   
   preview <- if (nchar(result_json) > 3000) {
@@ -167,13 +168,13 @@ summarize_result <- function(question, tool_name, result_json,
   } else result_json
   
   count_hint <- if (!is.null(row_count)) {
-    paste0("\nHet exacte aantal gevonden rijen is: ", row_count,
-           ". Noem dit exacte getal.\n")
+    paste0("\nThe exact number of rows found is: ", row_count,
+           ". Always mention this exact number.\n")
   } else ""
   
   prompt <- paste0(
-    "Gebruikersvraag: ", question,  "\n",
-    "Gebruikte tool:  ", tool_name, "\n",
+    "User question: ", question,  "\n",
+    "Tool used: ", tool_name, "\n",
     count_hint,
     "Resultaat:\n",     preview,    "\n\n",
     "Geef een korte Nederlandse samenvatting."
@@ -187,11 +188,11 @@ run_dual_pipeline <- function(question, orch_model, sub_model,
                               progress_fn = NULL) {
   
   ## Step 1: orchestrator classifies
-  if (!is.null(progress_fn)) progress_fn("Orchestrator interpreteert vraag...", 1)
+  if (!is.null(progress_fn)) progress_fn("Orchestrator interpreting question...", 1)
   cl <- classify_question(question, orch_model = orch_model)
   
   if (!cl$ok) return(list(
-    ok = FALSE, text = paste("Classificatie mislukt:", cl$error),
+    ok = FALSE, text = paste("Classification failed:", cl$error),
     tool = NULL, df = NULL
   ))
   
@@ -200,16 +201,16 @@ run_dual_pipeline <- function(question, orch_model, sub_model,
   
   ## Step 2: subagent refines if SQL is needed
   if (tool == "run_query" && !is.null(params$sql)) {
-    if (!is.null(progress_fn)) progress_fn("Subagent verfijnt SQL...", 2)
+    if (!is.null(progress_fn)) progress_fn("Subagent refining SQL...", 2)
     sub_sys <- paste0(
       PROMPTS$data_description, "\n\n",
-      "Je bent een SQL-specialist. Je ontvangt een SQL-query en moet deze ",
-      "verbeteren zodat hij correct is voor SQLite op de varInfo_synthetic tabel.\n",
-      "Kritieke regels:\n",
-      "- Ontbrekende waarden in CADDphred/PolyPhen/SIFT zijn opgeslagen als '.' niet NULL\n",
-      "- Gebruik CAST(CADDphred AS REAL) voor numerieke vergelijkingen\n",
-      "- Homozygoot: kolom = 2, drager: kolom > 0\n",
-      "Geef ALLEEN de verbeterde SQL terug. Geen uitleg."
+      "You are a SQL specialist. You receive a SQL query and must improve it\n",
+      "so it is correct for SQLite on the varInfo_synthetic table.\n",
+      "Critical rules:\n",
+      "- Missing values in CADDphred/PolyPhen/SIFT are stored as '.' not NULL\n",
+      "- Use CAST(CADDphred AS REAL) for numeric comparisons\n",
+      "- Homozygous: column = 2, carrier: column > 0\n",
+      "Return ONLY the improved SQL. No explanation."
     )
     improved_sql <- call_ollama(
       paste0("Verbeter deze SQL:\n", params$sql),
@@ -224,18 +225,18 @@ run_dual_pipeline <- function(question, orch_model, sub_model,
   }
   
   ## Step 3: execute via mcpo
-  if (!is.null(progress_fn)) progress_fn("Query uitvoeren via MCP...", 3)
+  if (!is.null(progress_fn)) progress_fn("Executing query via MCP...", 3)
   raw_result <- call_mcp(tool, params)
   
   ## Step 4: orchestrator summarises
-  if (!is.null(progress_fn)) progress_fn("Orchestrator formuleert antwoord...", 4)
+  if (!is.null(progress_fn)) progress_fn("Formulating answer...", 4)
   
   df <- tryCatch({
     parsed <- fromJSON(raw_result, flatten = TRUE)
     if (is.data.frame(parsed)) parsed
     else if (is.list(parsed) && length(parsed) > 0) {
       flat <- unlist(parsed, recursive = TRUE)
-      data.frame(sleutel = names(flat), waarde = as.character(unname(flat)),
+      data.frame(key = names(flat), value = as.character(unname(flat)),
                  stringsAsFactors = FALSE)
     } else data.frame(resultaat = as.character(raw_result))
   }, error = function(e) data.frame(resultaat = raw_result))
@@ -249,28 +250,28 @@ run_dual_pipeline <- function(question, orch_model, sub_model,
 ## ── Single pipeline ────────────────────────────────────────────────────────
 run_single_pipeline <- function(question, model, progress_fn = NULL) {
   
-  if (!is.null(progress_fn)) progress_fn("LLM interpreteert en classificeert...", 1)
+  if (!is.null(progress_fn)) progress_fn("LLM interpreting and classifying...", 1)
   cl <- classify_question(question, orch_model = model)
   
   if (!cl$ok) return(list(
-    ok = FALSE, text = paste("Classificatie mislukt:", cl$error),
+    ok = FALSE, text = paste("Classification failed:", cl$error),
     tool = NULL, df = NULL
   ))
   
   tool   <- cl$tool
   params <- if (is.null(cl$params)) list() else as.list(cl$params)
   
-  if (!is.null(progress_fn)) progress_fn("Query uitvoeren via MCP...", 2)
+  if (!is.null(progress_fn)) progress_fn("Executing query via MCP...", 2)
   raw_result <- call_mcp(tool, params)
   
-  if (!is.null(progress_fn)) progress_fn("Antwoord formuleren...", 3)
+  if (!is.null(progress_fn)) progress_fn("Formulating answer...", 3)
   
   df <- tryCatch({
     parsed <- fromJSON(raw_result, flatten = TRUE)
     if (is.data.frame(parsed)) parsed
     else if (is.list(parsed) && length(parsed) > 0) {
       flat <- unlist(parsed, recursive = TRUE)
-      data.frame(sleutel = names(flat), waarde = as.character(unname(flat)),
+      data.frame(key = names(flat), value = as.character(unname(flat)),
                  stringsAsFactors = FALSE)
     } else data.frame(resultaat = as.character(raw_result))
   }, error = function(e) data.frame(resultaat = raw_result))
@@ -309,6 +310,20 @@ ui <- page_sidebar(
       .tool-badge { color: #666; font-size: 0.8em; display: block; margin-bottom: 4px; }
       .progress-step { color: #2A9D8F; font-size: 0.85em; margin: 2px 0; }
       .progress-step.done { color: #aaa; }
+      .working-bar {
+        background: linear-gradient(90deg, #2A9D8F, #457B9D, #2A9D8F);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        color: white; font-weight: 600;
+        padding: 10px 16px; border-radius: 8px;
+        margin-top: 8px; text-align: center;
+        font-size: 0.9em; letter-spacing: 0.5px;
+      }
+      @keyframes shimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .input-hidden { display: none !important; }
       #chat_scroll { height: 520px; overflow-y: auto; padding: 12px;
                      background: #f8f9fa; border: 1px solid #dee2e6;
                      border-radius: 6px; }
@@ -320,15 +335,18 @@ ui <- page_sidebar(
     ## Enter to send
     tags$script(HTML(
       "$(document).on('keypress', '#user_input', function(e) {
-         if (e.which == 13 && !e.shiftKey) { $('#send_btn').click(); }
+         if (e.which == 13 && !e.shiftKey) {
+           e.preventDefault();
+           $('#send_btn').click();
+         }
        });"
     ))
   ),
   
   sidebar = sidebar(
     width = 310,
-    h4("Variant Assistent"),
-    p("Stel vragen over ALS-varianten in de database.", style = "color:#666;"),
+    h4("Variant Assistant"),
+    p("Ask questions about ALS variants in the database.", style = "color:#666;"),
     hr(),
     
     ## ── Pipeline selector ──────────────────────────────────────────────────
@@ -342,17 +360,17 @@ ui <- page_sidebar(
     hr(),
     
     ## ── Example questions ──────────────────────────────────────────────────
-    h5("Voorbeeldvragen"),
+    h5("Example Questions"),
     tags$ul(
       style = "padding-left: 16px;",
-      tags$li(actionLink("ex1", "Hoeveel varianten in NEK1?")),
-      tags$li(actionLink("ex2", "Toon HIGH-impact varianten")),
-      tags$li(actionLink("ex3", "Welk gen heeft de meeste varianten?")),
-      tags$li(actionLink("ex4", "Varianten per chromosoom?")),
-      tags$li(actionLink("ex5", "Schadelijke varianten (SIFT)")),
-      tags$li(actionLink("ex6", "Database overzicht")),
-      tags$li(actionLink("ex7", "ALS dragers in SOD1?")),
-      tags$li(actionLink("ex8", "Wat is de gemiddelde leeftijd van ALS patiënten?"))
+      tags$li(actionLink("ex1", "How many variants in NEK1?")),
+      tags$li(actionLink("ex2", "Show HIGH-impact variants")),
+      tags$li(actionLink("ex3", "Which gene has the most variants?")),
+      tags$li(actionLink("ex4", "Variants per chromosome?")),
+      tags$li(actionLink("ex5", "Deleterious variants (SIFT)")),
+      tags$li(actionLink("ex6", "Database overview")),
+      tags$li(actionLink("ex7", "ALS carriers in SOD1?")),
+      tags$li(actionLink("ex8", "What is the average age of ALS patients?"))
     ),
     hr(),
     
@@ -361,7 +379,7 @@ ui <- page_sidebar(
     uiOutput("status_ui"),
     hr(),
     
-    actionButton("clear_btn", "Gesprek wissen",
+    actionButton("clear_btn", "Clear conversation",
                  class = "btn-outline-secondary btn-sm w-100")
   ),
   
@@ -379,12 +397,7 @@ ui <- page_sidebar(
       div(id = "chat_scroll", uiOutput("chat_ui")),
       ## Progress log
       uiOutput("progress_ui"),
-      div(
-        style = "display:flex; gap:8px; margin-top:10px;",
-        textInput("user_input", label = NULL, width = "100%",
-                  placeholder = "Stel een vraag... (Enter om te versturen)"),
-        actionButton("send_btn", "→", class = "btn-primary")
-      )
+      uiOutput("input_area_ui")
     ),
     
     ## ── Results table ───────────────────────────────────────────────────
@@ -392,7 +405,7 @@ ui <- page_sidebar(
       full_screen = TRUE,
       card_header(
         div(style = "display:flex; justify-content:space-between; align-items:center;",
-            h4("Resultaten", style = "margin:0;"),
+            h4("Results", style = "margin:0;"),
             uiOutput("row_count_ui"))
       ),
       DTOutput("result_table")
@@ -456,20 +469,20 @@ server <- function(input, output, session) {
   ## ── Status ────────────────────────────────────────────────────────────
   output$status_ui <- renderUI({
     if (is.na(rv$mcp_ok)) {
-      div(style = "color:#888;", "● Controleren...")
+      div(style = "color:#888;", "● Checking...")
     } else if (rv$mcp_ok) {
-      div(style = "color:#2A9D8F; font-weight:bold;", "● MCP verbonden")
+      div(style = "color:#2A9D8F; font-weight:bold;", "● MCP connected")
     } else {
       tagList(
-        div(style = "color:red; font-weight:bold;", "● MCP niet bereikbaar"),
-        tags$small("Start start_services.sh opnieuw")
+        div(style = "color:red; font-weight:bold;", "● MCP unreachable"),
+        tags$small("Restart start_services.sh")
       )
     }
   })
   
   output$row_count_ui <- renderUI({
     req(!is.null(rv$row_count))
-    tags$small(style = "color:#666;", paste0(rv$row_count, " rijen"))
+    tags$small(style = "color:#666;", paste0(rv$row_count, " rows"))
   })
   
   ## ── Progress log ──────────────────────────────────────────────────────
@@ -490,14 +503,14 @@ server <- function(input, output, session) {
   
   ## ── Example questions ─────────────────────────────────────────────────
   ex_map <- list(
-    ex1 = "Hoeveel varianten zitten er in NEK1?",
-    ex2 = "Toon alle HIGH-impact varianten",
-    ex3 = "Welk gen heeft de meeste varianten?",
-    ex4 = "Hoeveel varianten zijn er per chromosoom?",
-    ex5 = "Toon schadelijke varianten voorspeld door SIFT",
-    ex6 = "Geef een overzicht van de database",
-    ex7 = "Welke ALS dragers zijn er in SOD1?",
-    ex8 = "Wat is de gemiddelde leeftijd van ALS patiënten?"
+    ex1 = "How many variants are in NEK1?",
+    ex2 = "Show all HIGH-impact variants",
+    ex3 = "Which gene has the most variants?",
+    ex4 = "How many variants are there per chromosome?",
+    ex5 = "Show deleterious variants predicted by SIFT",
+    ex6 = "Give an overview of the database",
+    ex7 = "Which ALS carriers are there in SOD1?",
+    ex8 = "What is the average age of ALS patients?"
   )
   for (id in names(ex_map)) {
     local({
@@ -505,6 +518,23 @@ server <- function(input, output, session) {
       observeEvent(input[[id]], updateTextInput(session, "user_input", value = q))
     })
   }
+  
+  ## ── Input area (hides while loading) ─────────────────────────────────
+  output$input_area_ui <- renderUI({
+    if (rv$is_loading) {
+      div(
+        class = "working-bar",
+        "⟳  Working on your question..."
+      )
+    } else {
+      div(
+        style = "display:flex; gap:8px; margin-top:10px;",
+        textInput("user_input", label = NULL, width = "100%",
+                  placeholder = "Ask a question... (Enter to send)"),
+        actionButton("send_btn", "→", class = "btn-primary")
+      )
+    }
+  })
   
   ## ── Clear ────────────────────────────────────────────────────────────
   observeEvent(input$clear_btn, {
@@ -525,28 +555,36 @@ server <- function(input, output, session) {
     rv$row_count    <- NULL
     rv$progress_log <- character(0)
     
-    ## Progress updater
-    update_progress <- function(msg, step) {
-      rv$progress_log <- c(rv$progress_log, msg)
-    }
-    
     p <- isolate(current_pipeline())
+    total_steps <- if (p$mode == "dual") 4 else 3
     
-    result <- tryCatch({
-      if (p$mode == "dual") {
-        run_dual_pipeline(question,
-                          orch_model  = p$orch,
-                          sub_model   = p$sub,
-                          progress_fn = update_progress)
-      } else {
-        run_single_pipeline(question,
-                            model       = p$orch,
-                            progress_fn = update_progress)
+    result <- withProgress(
+      message = "Processing your question...",
+      value   = 0, {
+        
+        update_progress <- function(msg, step) {
+          rv$progress_log <- c(rv$progress_log, msg)
+          setProgress(value   = step / total_steps,
+                      message = msg)
+        }
+        
+        tryCatch({
+          if (p$mode == "dual") {
+            run_dual_pipeline(question,
+                              orch_model  = p$orch,
+                              sub_model   = p$sub,
+                              progress_fn = update_progress)
+          } else {
+            run_single_pipeline(question,
+                                model       = p$orch,
+                                progress_fn = update_progress)
+          }
+        }, error = function(e) {
+          list(ok = FALSE, text = paste("Unexpected error:", e$message),
+               tool = NULL, df = NULL)
+        })
       }
-    }, error = function(e) {
-      list(ok = FALSE, text = paste("Onverwachte fout:", e$message),
-           tool = NULL, df = NULL)
-    })
+    )
     
     if (result$ok) {
       rv$last_df   <- result$df
@@ -571,7 +609,7 @@ server <- function(input, output, session) {
     if (length(msgs) == 0) {
       return(p(style = "color:#999; font-style:italic; text-align:center;
                         margin-top:40px;",
-               "Stel een vraag over de ALS-variant database..."))
+               "Ask a question about the ALS variant database..."))
     }
     
     els <- lapply(msgs, function(m) {
@@ -605,9 +643,9 @@ server <- function(input, output, session) {
       options = list(
         pageLength = 15, scrollX = TRUE, dom = "frtip",
         language = list(
-          search   = "Zoeken:",
-          info     = "Rijen _START_ tot _END_ van _TOTAL_",
-          paginate = list(previous = "Vorige", `next` = "Volgende")
+          search   = "Search:",
+          info     = "Showing _START_ to _END_ of _TOTAL_ rows",
+          paginate = list(previous = "Previous", `next` = "Next")
         )
       ),
       rownames = FALSE,

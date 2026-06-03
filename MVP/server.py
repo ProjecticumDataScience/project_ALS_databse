@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ══════════════════════════════════════════════════════════════════════════════
-# rvatData MCP Server — Python/SQLite implementatie (mirror van DBI/RSQLite)
+# rvatData MCP Server — SQLite implementation for ALS variant analysis
 # ══════════════════════════════════════════════════════════════════════════════
 import os
 import sqlite3
@@ -14,18 +14,18 @@ DB_PATH = os.path.expanduser(
 mcp = FastMCP("rvatData MCP Server")
 
 
-# ─── Hulpfuncties ─────────────────────────────────────────────────────────────
+# ── Helper functions ──────────────────────────────────────────────────────────
 
 def get_con():
-    """Open een SQLite verbinding (read-only via URI)."""
+    """Open a read-only SQLite connection via URI."""
     uri = f"file:{DB_PATH}?mode=ro"
     return sqlite3.connect(uri, uri=True)
 
 
 def _query(sql: str, params: tuple = (), max_rows: int = 200) -> list[dict]:
-    """Voer een veilige read-only SELECT query uit en geef max max_rows rijen."""
+    """Execute a safe read-only SELECT query and return at most max_rows rows."""
     if not sql.strip().upper().startswith("SELECT"):
-        raise ValueError("Alleen SELECT queries zijn toegestaan.")
+        raise ValueError("Only SELECT queries are allowed.")
     con = get_con()
     try:
         con.row_factory = sqlite3.Row
@@ -37,7 +37,7 @@ def _query(sql: str, params: tuple = (), max_rows: int = 200) -> list[dict]:
 
 
 def _scalar(sql: str, params: tuple = ()) -> Any:
-    """Geef één scalaire waarde terug."""
+    """Return a single scalar value."""
     rows = _query(sql, params, max_rows=1)
     if rows:
         return list(rows[0].values())[0]
@@ -45,12 +45,12 @@ def _scalar(sql: str, params: tuple = ()) -> Any:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. SCHEMA / EXPLORATIE
+# 1. SCHEMA / EXPLORATION
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def list_tables() -> list[str]:
-    """Lijst alle tabellen in de database."""
+    """List all tables in the database."""
     con = get_con()
     try:
         cur = con.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -62,10 +62,10 @@ def list_tables() -> list[str]:
 @mcp.tool()
 def describe_table(table_name: str) -> list[dict]:
     """
-    Beschrijf de kolommen van een tabel (naam, type, notnull).
+    Describe the columns of a table (name, type, notnull).
 
     Args:
-        table_name: Naam van de tabel
+        table_name: Name of the table
     """
     con = get_con()
     try:
@@ -80,44 +80,45 @@ def describe_table(table_name: str) -> list[dict]:
 @mcp.tool()
 def get_sample_rows(table_name: str, n: int = 5) -> list[dict]:
     """
-    Geef de eerste n rijen van een tabel.
+    Return the first n rows of a table.
 
     Args:
-        table_name: Naam van de tabel
-        n: Aantal rijen (standaard 5)
+        table_name: Name of the table
+        n: Number of rows (default 5)
     """
     return _query(f"SELECT * FROM {table_name} LIMIT {int(n)}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 2. ALGEMENE QUERY TOOL
+# 2. GENERIC QUERY TOOL
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def run_query(sql: str) -> list[dict]:
     """
-    Voer een willekeurige read-only SELECT query uit (max 200 rijen).
+    Execute any read-only SELECT query (max 200 rows).
 
-    BESCHIKBARE KOLOMMEN IN varInfo_synthetic:
+    AVAILABLE COLUMNS IN varInfo_synthetic:
       VAR_id, CHROM, POS, ID, REF, ALT, QUAL, FILTER,
-      AC, AN, AF (globale allelfrequentie — GEEN populatie-specifieke AF),
+      AC, AN, AF (global allele frequency — NO population-specific AF),
       gene_name,
       HighImpact (0/1), ModerateImpact (0/1), Synonymous (0/1),
-      CADDphred (hoog = schadelijker),
+      CADDphred (higher = more deleterious),
       SIFT  : 'D' = deleterious, 'T' = tolerated,
       PolyPhen: 'D' = probably damaging, 'P' = possibly damaging, 'B' = benign,
       ALS_1 .. ALS_5, Control_1 .. Control_5
-        (genotype: 0 = hom-ref, 1 = heterozygoot, 2 = hom-alt)
+        (genotype: 0 = hom-ref, 1 = heterozygous, 2 = hom-alt)
+      Missing values for CADDphred, PolyPhen, SIFT are stored as '.' not NULL.
 
-    NIET BESCHIKBAAR:
-      - Leeftijd van patiënten of controles
-      - Pathogeniciteitsstatus (bijv. ClinVar)
-      - Populatie-specifieke allelfrequenties (EUR, SAS, AFR)
-      - Geslacht van de dragers
-      - Eerdere publicaties of rapportages over varianten
+    NOT AVAILABLE:
+      - Age of patients or controls
+      - Pathogenicity status (e.g. ClinVar)
+      - Population-specific allele frequencies (EUR, SAS, AFR)
+      - Sex of carriers
+      - Previous publications or reports about variants
 
-    ONMOGELIJKE COMBINATIES:
-      - Een variant kan NIET tegelijk Synonymous=1 EN HighImpact=1 zijn.
+    IMPOSSIBLE COMBINATIONS:
+      - A variant CANNOT be both Synonymous=1 AND HighImpact=1.
 
     Args:
         sql: SELECT statement
@@ -132,10 +133,10 @@ def run_query(sql: str) -> list[dict]:
 @mcp.tool()
 def count_variants_in_gene(gene: str) -> list[dict]:
     """
-    Tel het aantal varianten in een gen.
+    Count the number of variants in a gene.
 
     Args:
-        gene: Gennaam, bijv. 'NEK1'
+        gene: Gene name, e.g. 'NEK1'
     """
     return _query(
         "SELECT COUNT(VAR_id) AS number_of_variants "
@@ -148,11 +149,11 @@ def count_variants_in_gene(gene: str) -> list[dict]:
 @mcp.tool()
 def get_high_impact_variants_in_gene(gene: str, cadd_min: float = 20.0) -> list[dict]:
     """
-    Selecteer varianten in een gen met HighImpact en CADDphred boven een drempel.
+    Select variants in a gene with HighImpact and CADDphred above a threshold.
 
     Args:
-        gene: Gennaam
-        cadd_min: Minimale CADDphred score (standaard 20)
+        gene: Gene name
+        cadd_min: Minimum CADDphred score (default 20)
     """
     return _query(
         "SELECT VAR_id, gene_name, HighImpact, CADDphred "
@@ -165,10 +166,10 @@ def get_high_impact_variants_in_gene(gene: str, cadd_min: float = 20.0) -> list[
 @mcp.tool()
 def count_sift_deleterious_in_gene(gene: str) -> list[dict]:
     """
-    Tel varianten in een gen die door SIFT als deleterieus worden voorspeld.
+    Count variants in a gene predicted deleterious by SIFT.
 
     Args:
-        gene: Gennaam
+        gene: Gene name
     """
     return _query(
         "SELECT COUNT(*) AS number_of_variants_with_SIFT_D "
@@ -181,7 +182,7 @@ def count_sift_deleterious_in_gene(gene: str) -> list[dict]:
 @mcp.tool()
 def get_high_impact_homozygous_ALS() -> list[dict]:
     """
-    Geef high-impact varianten waarbij minstens één ALS-patiënt homozygoot is
+    Return high-impact variants where at least one ALS patient is homozygous
     (genotype = 2).
     """
     return _query(
@@ -196,12 +197,12 @@ def get_high_impact_homozygous_ALS() -> list[dict]:
 @mcp.tool()
 def get_top_deleterious_in_gene(gene: str, top_n: int = 10) -> list[dict]:
     """
-    Geef de meest deleterieuze varianten in een gen (CADD + SIFT + PolyPhen).
-    Definitie: CADDphred > 20 EN SIFT = 'D' EN PolyPhen = 'D'.
+    Return the most deleterious variants in a gene (CADD + SIFT + PolyPhen).
+    Definition: CADDphred > 20 AND SIFT = 'D' AND PolyPhen = 'D'.
 
     Args:
-        gene: Gennaam
-        top_n: Aantal te tonen varianten (standaard 10)
+        gene: Gene name
+        top_n: Number of variants to return (default 10)
     """
     return _query(
         "SELECT VAR_id, gene_name, CADDphred, SIFT, PolyPhen "
@@ -214,12 +215,12 @@ def get_top_deleterious_in_gene(gene: str, top_n: int = 10) -> list[dict]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4. ANALYTISCHE QUERIES
+# 4. ANALYTICAL QUERIES
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def get_highest_af_variant() -> list[dict]:
-    """Geef de variant met de hoogste allelfrequentie."""
+    """Return the variant with the highest allele frequency."""
     return _query(
         "SELECT VAR_id, MAX(AF) AS highest_allele_frequency "
         "FROM varInfo_synthetic"
@@ -228,7 +229,7 @@ def get_highest_af_variant() -> list[dict]:
 
 @mcp.tool()
 def get_average_af_by_impact() -> list[dict]:
-    """Gemiddelde allelfrequentie per impactcategorie (Synonymous, ModerateImpact, HighImpact)."""
+    """Average allele frequency per impact category (Synonymous, ModerateImpact, HighImpact)."""
     return _query(
         "SELECT "
         "  AVG(CASE WHEN Synonymous     = 1 THEN AF END) AS average_AF_synonymous, "
@@ -241,15 +242,15 @@ def get_average_af_by_impact() -> list[dict]:
 @mcp.tool()
 def get_high_impact_burden_per_sample(sample_id: str) -> list[dict]:
     """
-    Hoeveel high-impact varianten draagt een opgegeven sample?
-    Geeft het aantal heterozygote (genotype=1) en homozygote (genotype=2) varianten.
+    How many high-impact variants does a given sample carry?
+    Returns the number of heterozygous (genotype=1) and homozygous (genotype=2) variants.
 
     Args:
-        sample_id: Sample-naam, bijv. 'ALS_1' of 'Control_3'
+        sample_id: Sample name, e.g. 'ALS_1' or 'Control_3'
     """
     allowed = [f"ALS_{i}" for i in range(1, 6)] + [f"Control_{i}" for i in range(1, 6)]
     if sample_id not in allowed:
-        raise ValueError(f"Onbekende sample '{sample_id}'. Kies uit: {', '.join(allowed)}")
+        raise ValueError(f"Unknown sample '{sample_id}'. Choose from: {', '.join(allowed)}")
     return _query(
         f"SELECT "
         f"  SUM(CASE WHEN {sample_id} = 1 THEN 1 ELSE 0 END) AS heterozygous, "
@@ -262,8 +263,8 @@ def get_high_impact_burden_per_sample(sample_id: str) -> list[dict]:
 @mcp.tool()
 def get_total_burden_cases_vs_controls() -> list[dict]:
     """
-    Totale allelbelasting (effect allelen) voor cases vs. controls.
-    Elke drager levert genotype-waarde (0/1/2) bij aan de totale som.
+    Total allele burden (effect alleles) for cases vs. controls.
+    Each carrier contributes their genotype value (0/1/2) to the total sum.
     """
     return _query(
         "SELECT "
@@ -276,10 +277,10 @@ def get_total_burden_cases_vs_controls() -> list[dict]:
 @mcp.tool()
 def get_top_case_enriched_variants(top_n: int = 10) -> list[dict]:
     """
-    Top varianten met de hoogste case/control ratio (allel-count).
+    Top variants with the highest case/control ratio (allele count).
 
     Args:
-        top_n: Aantal te tonen varianten (standaard 10)
+        top_n: Number of variants to return (default 10)
     """
     return _query(
         "SELECT "
@@ -298,13 +299,13 @@ def get_top_case_enriched_variants(top_n: int = 10) -> list[dict]:
 @mcp.tool()
 def summarize_variants_by_gene(min_variants: int = 10, order_by: str = "total_variants") -> list[dict]:
     """
-    Samenvatting per gen: variant-aantallen, impact-verdeling, gemiddelde AF
-    en genomische positie. Alleen genen met meer dan min_variants varianten.
+    Summary per gene: variant counts, impact breakdown, mean AF and genomic position.
+    Only genes with more than min_variants variants are included.
 
     Args:
-        min_variants: Minimaal aantal varianten (standaard 10)
-        order_by: Kolomnaam om op te sorteren: total_variants, high_impact_count,
-                  moderate_impact_count, mean_AF, of length (standaard total_variants)
+        min_variants: Minimum number of variants (default 10)
+        order_by: Column to sort by: total_variants, high_impact_count,
+                  moderate_impact_count, mean_AF, or length (default total_variants)
     """
     allowed_order = {"total_variants", "high_impact_count", "moderate_impact_count", "mean_AF", "length"}
     if order_by not in allowed_order:
@@ -328,17 +329,17 @@ def summarize_variants_by_gene(min_variants: int = 10, order_by: str = "total_va
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 5. CARRIER ANALYSE
+# 5. CARRIER ANALYSIS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def get_carriers_by_gene(gene: str, group: str = "ALS") -> list[dict]:
     """
-    Geef varianten in een gen waarbij minstens één persoon uit de groep drager is.
+    Return variants in a gene where at least one person in the group is a carrier.
 
     Args:
-        gene: Gennaam
-        group: 'ALS' of 'Control'
+        gene: Gene name
+        group: 'ALS' or 'Control'
     """
     group_upper = group.strip().upper()
     if group_upper == "ALS":
@@ -346,7 +347,7 @@ def get_carriers_by_gene(gene: str, group: str = "ALS") -> list[dict]:
     elif group_upper == "CONTROL":
         cols = [f"Control_{i}" for i in range(1, 6)]
     else:
-        raise ValueError("group moet 'ALS' of 'Control' zijn.")
+        raise ValueError("group must be 'ALS' or 'Control'.")
     carrier_filter = " OR ".join(f"{c} > 0" for c in cols)
     return _query(
         f"SELECT VAR_id, CHROM, POS, REF, ALT, gene_name, "
@@ -362,17 +363,17 @@ def get_carriers_by_gene(gene: str, group: str = "ALS") -> list[dict]:
 @mcp.tool()
 def get_variants_by_gene_and_impact(gene: str, impact: str, limit: int = 200) -> list[dict]:
     """
-    Geef varianten per gen op impact-niveau gefilterd.
+    Return variants for a gene filtered by impact level.
 
     Args:
-        gene: Gennaam
-        impact: 'HIGH', 'MODERATE', of 'SYNONYMOUS'
-        limit: Maximaal aantal rijen (standaard 200)
+        gene: Gene name
+        impact: 'HIGH', 'MODERATE', or 'SYNONYMOUS'
+        limit: Maximum number of rows (default 200)
     """
     impact_map = {"HIGH": "HighImpact", "MODERATE": "ModerateImpact", "SYNONYMOUS": "Synonymous"}
     col = impact_map.get(impact.strip().upper())
     if not col:
-        raise ValueError("impact moet 'HIGH', 'MODERATE' of 'SYNONYMOUS' zijn.")
+        raise ValueError("impact must be 'HIGH', 'MODERATE' or 'SYNONYMOUS'.")
     return _query(
         f"SELECT VAR_id, CHROM, POS, REF, ALT, gene_name, "
         f"       HighImpact, ModerateImpact, Synonymous, "
@@ -386,30 +387,30 @@ def get_variants_by_gene_and_impact(gene: str, impact: str, limit: int = 200) ->
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 6. DATABASE SAMENVATTING
+# 6. DATABASE SUMMARY
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def summarize_database() -> dict:
-    """Globale statistieken van de varInfo_synthetic tabel."""
+    """Global statistics of the varInfo_synthetic table."""
     con = get_con()
     try:
         def s(sql):
             return con.execute(sql).fetchone()[0]
         return {
-            "totaal_varianten":     s("SELECT COUNT(*)                   FROM varInfo_synthetic"),
-            "unieke_genen":         s("SELECT COUNT(DISTINCT gene_name)  FROM varInfo_synthetic"),
+            "total_variants":       s("SELECT COUNT(*)                  FROM varInfo_synthetic"),
+            "unique_genes":         s("SELECT COUNT(DISTINCT gene_name) FROM varInfo_synthetic"),
             "high_impact":          s("SELECT COUNT(*) FROM varInfo_synthetic WHERE HighImpact = 1"),
             "moderate_impact":      s("SELECT COUNT(*) FROM varInfo_synthetic WHERE ModerateImpact = 1"),
             "synonymous":           s("SELECT COUNT(*) FROM varInfo_synthetic WHERE Synonymous = 1"),
             "sift_deleterious":     s("SELECT COUNT(*) FROM varInfo_synthetic WHERE SIFT = 'D'"),
             "polyphen_damaging":    s("SELECT COUNT(*) FROM varInfo_synthetic WHERE PolyPhen = 'D'"),
-            "gemiddelde_allelfreq": s("SELECT ROUND(AVG(AF), 6) FROM varInfo_synthetic"),
-            "database_pad":         DB_PATH,
+            "mean_allele_freq":     s("SELECT ROUND(AVG(AF), 6) FROM varInfo_synthetic"),
+            "database_path":        DB_PATH,
             "genome_build":         "GRCh38",
-            "niet_beschikbaar":     (
-                "Leeftijd, geslacht van dragers, populatie-specifieke AF, "
-                "pathogeniciteitsstatus (ClinVar), eerdere publicaties."
+            "not_available":        (
+                "Age, sex of carriers, population-specific AF, "
+                "pathogenicity status (ClinVar), previous publications."
             ),
         }
     finally:
@@ -417,88 +418,88 @@ def summarize_database() -> dict:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. DATA-BEPERKINGEN TOOL
+# 7. DATABASE LIMITATIONS
 # ══════════════════════════════════════════════════════════════════════════════
 
 @mcp.tool()
 def get_database_limitations() -> dict:
     """
-    Beschrijft expliciet wat NIET beschikbaar is in de database.
-    Roep dit aan vóór je een vraag beantwoordt die mogelijk buiten de data valt.
+    Explicitly describes what is NOT available in the database.
+    Call this before answering a question that may be outside the available data.
     """
     return {
-        "ontbrekende_velden": {
-            "leeftijd": {
-                "beschikbaar": False,
-                "uitleg": (
-                    "Er is geen leeftijdsinformatie beschikbaar voor cases of controls. "
-                    "Vragen als 'wat is de gemiddelde leeftijd van ALS-patiënten' "
-                    "kunnen NIET worden beantwoord."
+        "missing_fields": {
+            "age": {
+                "available": False,
+                "explanation": (
+                    "No age information is available for cases or controls. "
+                    "Questions like 'what is the average age of ALS patients' "
+                    "CANNOT be answered."
                 ),
             },
-            "geslacht_dragers": {
-                "beschikbaar": False,
-                "uitleg": (
-                    "varInfo_synthetic heeft geen sex-kolom. De tabel SM heeft wel "
-                    "een sex-kolom (IID, sex), maar deze is niet gekoppeld aan de "
-                    "genotype-kolommen ALS_1..ALS_5 / Control_1..Control_5. "
-                    "Vragen als 'hoeveel vrouwelijke dragers zijn er' kunnen NIET "
-                    "worden beantwoord via SQLite alleen."
+            "sex_of_carriers": {
+                "available": False,
+                "explanation": (
+                    "varInfo_synthetic has no sex column. The SM table has a "
+                    "sex column (IID, sex), but it is not linked to the genotype "
+                    "columns ALS_1..ALS_5 / Control_1..Control_5. "
+                    "Questions like 'how many female carriers are there' CANNOT "
+                    "be answered via SQLite alone."
                 ),
             },
-            "populatie_specifieke_AF": {
-                "beschikbaar": False,
-                "uitleg": (
-                    "De AF-kolom is een globale allelfrequentie. Er zijn geen "
-                    "populatie-specifieke frequenties (EUR, SAS, AFR enz.). "
-                    "Vragen als 'wat is de AF in Europeanen' kunnen NIET worden beantwoord."
+            "population_specific_AF": {
+                "available": False,
+                "explanation": (
+                    "The AF column is a global allele frequency. There are no "
+                    "population-specific frequencies (EUR, SAS, AFR etc.). "
+                    "Questions like 'what is the AF in Europeans' CANNOT be answered."
                 ),
             },
-            "pathogeniciteit": {
-                "beschikbaar": False,
-                "uitleg": (
-                    "Er is geen pathogeniciteitsinformatie (bijv. ClinVar-classificatie). "
-                    "Vragen als 'is variant X pathogeen' kunnen NIET worden beantwoord."
+            "pathogenicity": {
+                "available": False,
+                "explanation": (
+                    "No pathogenicity information (e.g. ClinVar classification) is available. "
+                    "Questions like 'is variant X pathogenic' CANNOT be answered."
                 ),
             },
-            "eerdere_rapportages": {
-                "beschikbaar": False,
-                "uitleg": (
-                    "Er is geen informatie over eerder gepubliceerde varianten. "
-                    "Vragen als 'is VAR_id 100 eerder gerapporteerd' kunnen NIET worden beantwoord."
-                ),
-            },
-        },
-        "onmogelijke_combinaties": {
-            "synonymous_en_high_impact": {
-                "mogelijk": False,
-                "uitleg": (
-                    "Een variant kan biologisch gezien NIET tegelijk synonymous "
-                    "(geen aminozuurverandering) EN high-impact zijn."
+            "previous_reports": {
+                "available": False,
+                "explanation": (
+                    "No information about previously published variants is available. "
+                    "Questions like 'has VAR_id 100 been reported before' CANNOT be answered."
                 ),
             },
         },
-        "vaag_of_subjectief": {
-            "belangrijkste_varianten": {
-                "actie": "Vraag om verduidelijking",
-                "uitleg": (
-                    "'Belangrijkste' is subjectief. Verduidelijk: bedoelt de gebruiker "
-                    "hoogste CADD-score, high-impact, sterkste case-enrichment, of iets anders?"
-                ),
-            },
-            "meest_deleterieus": {
-                "actie": "Definieer en vermeld de definitie",
-                "uitleg": (
-                    "'Meest deleterieus' is ambigu. Gebruik bij voorkeur een combinatie "
-                    "van CADDphred, SIFT='D' en PolyPhen='D', en vermeld altijd welke definitie je hebt gebruikt."
+        "impossible_combinations": {
+            "synonymous_and_high_impact": {
+                "possible": False,
+                "explanation": (
+                    "A variant CANNOT be both synonymous (no amino acid change) "
+                    "AND high-impact at the same time."
                 ),
             },
         },
-        "geavanceerd_rvat": {
-            "beschikbaar_via_sql": False,
-            "uitleg": (
-                "Populatie-gestratificeerde analyses, MAF-berekeningen per cohort en "
-                "burden-tests vereisen het R-pakket `rvat` en kunnen niet puur via SQLite worden gedaan."
+        "vague_or_subjective": {
+            "most_important_variants": {
+                "action": "Ask for clarification",
+                "explanation": (
+                    "'Most important' is subjective. Clarify: does the user mean "
+                    "highest CADD score, high-impact, strongest case-enrichment, or something else?"
+                ),
+            },
+            "most_deleterious": {
+                "action": "Define and state the definition",
+                "explanation": (
+                    "'Most deleterious' is ambiguous. Preferably use a combination "
+                    "of CADDphred, SIFT=D and PolyPhen=D, and always state which definition was used."
+                ),
+            },
+        },
+        "advanced_rvat": {
+            "available_via_sql": False,
+            "explanation": (
+                "Population-stratified analyses, MAF calculations per cohort and "
+                "burden tests require the R package rvat and cannot be done via SQLite alone."
             ),
         },
     }
