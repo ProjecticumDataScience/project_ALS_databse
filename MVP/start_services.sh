@@ -24,7 +24,7 @@ find_conda() {
 
 find_mcpo_env() {
   local base="$1"
-  for env in webui mcp_env mcp als_env base; do
+  for env in mcp_env mcp als_env webui base; do
     [ -f "$base/envs/$env/bin/mcpo" ] && echo "$env" && return 0
   done
   [ -f "$base/bin/mcpo" ] && echo "base" && return 0
