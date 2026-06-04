@@ -7,8 +7,14 @@ import sqlite3
 from typing import Any
 from mcp.server.fastmcp import FastMCP
 
+## Database path: set by start_services.sh via RVAT_GDB_PATH,
+## or falls back to rvatData.gdb in the same folder as this script.
+import pathlib
+_script_dir = pathlib.Path(__file__).parent.resolve()
+_local_db   = str(_script_dir / "rvatData.gdb")
+
 DB_PATH = os.path.expanduser(
-    os.environ.get("RVAT_GDB_PATH", "~/project_ALS_databse/references/rvatData.gdb")
+    os.environ.get("RVAT_GDB_PATH", _local_db)
 )
 
 mcp = FastMCP("rvatData MCP Server")

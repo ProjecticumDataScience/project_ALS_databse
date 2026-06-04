@@ -6,142 +6,165 @@ A local AI-powered assistant for querying the ALS variant database.
 Ask plain English questions and get answers backed by real database queries —
 no SQL knowledge required.
 
-Built with: R Shiny · Ollama (local LLM) · MCP server (Python/FastAPI) · DuckDB-NSQL
-
+Built with: R Shiny · Ollama (local LLM) · MCP server (Python/FastMCP)
 
 ─────────────────────────────────────────────────────────────────────────────
-PROJECT STRUCTURE
+FOLDER CONTENTS
 ─────────────────────────────────────────────────────────────────────────────
 
   app.R               Main Shiny application
   server.py           MCP tool server (exposes database query endpoints)
-  start_services.sh   Startup script (launches Ollama + MCP server)
+  start_services.sh   Startup script (launches the MCP server)
   prompts.txt         Domain knowledge loaded at runtime by the LLM
   environment.yml     Conda environment definition
+  rvatData.gdb        ALS variant database (SQLite)
   README.txt          This file
 
+─────────────────────────────────────────────────────────────────────────────
+REQUIREMENTS
+─────────────────────────────────────────────────────────────────────────────
+
+  - Ollama         (https://ollama.com)
+  - Conda          (miniconda or anaconda — https://docs.anaconda.com/miniconda)
+  - R + RStudio    (https://posit.co/download/rstudio-desktop)
 
 ─────────────────────────────────────────────────────────────────────────────
 FIRST-TIME SETUP  (do this once)
 ─────────────────────────────────────────────────────────────────────────────
 
+0. Place the MVP folder in your home directory
+
+   Move or copy the MVP folder so it lives at ~/MVP:
+
+     Linux/macOS:  mv ~/Downloads/MVP ~/MVP
+     Windows:      move it to C:\Users\YourName\MVP
+
+   Then open a terminal and navigate to it:
+
+     cd ~/MVP
+
+   All subsequent commands assume you are in this folder.
+
 1. Pull the required Ollama models
 
-   Open a terminal and run:
+   Make sure Ollama is installed and running, then in a terminal:
 
      ollama pull llama3.1:8b
-     ollama pull mistral
      ollama pull duckdb-nsql
+     ollama pull mistral
 
-   These are the models available in the pipeline switcher.
-   llama3.1:8b and duckdb-nsql are required for the recommended
-   Two LLM pipeline; others are optional.
+   llama3.1:8b and duckdb-nsql are required for the recommended pipeline.
+   mistral is optional.
 
 2. Create the conda environment
 
+   From inside ~/MVP, run:
+
      conda env create -f environment.yml
 
-   This installs Python dependencies for the MCP server (server.py).
+   This installs the Python dependencies for the MCP server (mcpo, fastmcp).
+   Only needs to be done once.
 
-3. Verify your project folder name
- 
-   The startup script expects your project to live at:
- 
-     ~/project_ALS_databse/
- 
-   If your folder is named differently, open start_services.sh and
-   update line 10:
- 
-     PROJECT_DIR="$HOME/your_actual_folder_name"
- 
-   If the folder name matches, no changes are needed.
+3. Install R packages
 
+   In R or RStudio, run:
+
+     install.packages(c("shiny", "bslib", "DT", "httr2", "jsonlite", "shinyjs"))
 
 ─────────────────────────────────────────────────────────────────────────────
 STARTUP  (do this every session)
 ─────────────────────────────────────────────────────────────────────────────
 
-1. In a terminal, run:
+1. Open a terminal, navigate to the MVP folder and start the MCP server:
 
+     cd ~/MVP
      bash start_services.sh
 
-   This starts the Ollama model server and the MCP query server in the
-   background. Wait a few seconds for both to initialise.
+   Wait for the "health check ✓" message before continuing.
+   The server runs in the background — keep this terminal open.
 
-2. Open app.R in RStudio and click Run App, or run:
+   Note: on Windows, use Git Bash or WSL to run this command.
+   It will not work in Command Prompt or PowerShell.
 
-     Rscript app.R
+2. Open app.R in RStudio and click Run App.
 
    A browser tab will open with the Variant Assistant interface.
 
-3. In the sidebar, check that Status shows "MCP connected" in green.
+3. Check that Status shows "● MCP connected" in green in the sidebar.
    If it shows "MCP unreachable", wait 10 seconds and run
    start_services.sh again.
-
 
 ─────────────────────────────────────────────────────────────────────────────
 CHOOSING A PIPELINE
 ─────────────────────────────────────────────────────────────────────────────
 
-The app supports four LLM pipeline configurations, selectable from the
-sidebar under Pipeline. The recommended default is:
+Select a pipeline from the sidebar dropdown. Recommended default:
 
-  ★ Two LLM — llama3.1 + llama3.1
-    The orchestrator classifies the question and selects the right database
-    tool; a second model pass refines any free-form SQL before execution.
-    Best balance of speed and answer accuracy.
+  ★ Two LLM — llama3.1 → duckdb-nsql
+    The orchestrator (llama3.1:8b) interprets the question and selects
+    the right database tool. The SQL specialist (duckdb-nsql) refines
+    any free-form queries before execution.
+    Best balance of accuracy and reliability.
 
 Other options:
 
-  Two LLM — llama3.1 + duckdb-nsql
-    Highest SQL accuracy. Slower. Best for complex or ambiguous queries.
+  Two LLM — llama3.1 → llama3.1
+    Both steps use the same model. Slightly faster, less SQL precision.
 
   Single — llama3.1:8b
-    Faster. Good tool selection, weaker on free-form SQL queries.
+    One model handles everything. Good for simple lookup questions.
 
   Single — mistral
-    Fastest responses. Lower reliability on tool selection.
-
-Each answer shows which tool was called and a confidence indicator:
-  ✔ named tool    — low risk, predefined query
-  ⚠ free SQL      — higher risk, verify the result
-  ✘ unanswerable  — the database does not contain this information
-
+    Fastest. Lower reliability on complex queries.
 
 ─────────────────────────────────────────────────────────────────────────────
-EXPORTING RESULTS
+USING THE APP
 ─────────────────────────────────────────────────────────────────────────────
 
-Click "Export session" at the bottom of the sidebar to download the current
-session. Choose from:
+  - Type a question in the input box and press Enter or click →
+  - Click any Example Question in the sidebar to pre-fill the input
+  - The chat panel shows the answer; the Results panel shows the raw data
+  - Each answer shows which database tool was used (🔧 tool name)
+  - Click "Clear conversation" to start fresh
 
-  Format:   Plain text (.txt) · CSV (.csv) · HTML report (.html)
-  Content:  Chat log · Results table · or both
+Example questions to try (with known correct answers):
 
-The filename is timestamped automatically (e.g. als_session_20250604_143201.txt).
-
+  How many variants are in ABCA4?              → 589
+  How many variants in SOD1 are high impact?   → 4
+  How many genes are in the database?          → 12
+  How many total variants are in the database? → 1802
+  What is the average age of ALS patients?     → unanswerable (by design)
 
 ─────────────────────────────────────────────────────────────────────────────
 TROUBLESHOOTING
 ─────────────────────────────────────────────────────────────────────────────
 
-  MCP unreachable       Run start_services.sh again and wait 10 seconds.
-  Ollama not reachable  Check that Ollama is running: ollama list (in terminal)
-  Wrong answers         Switch to the Two LLM + duckdb-nsql pipeline.
-  Free SQL warning      Verify the result manually; the query was AI-generated.
-  Slow responses        Expected for Two LLM pipelines; Single is faster.
+  MCP unreachable     Run start_services.sh again and wait 10 seconds.
+                      Check that rvatData.gdb is in the ~/MVP folder.
 
+  Ollama not found    Make sure Ollama is running: ollama list (in terminal)
+
+  conda not found     Make sure miniconda/anaconda is installed and that
+                      your terminal session has conda initialised.
+                      Try opening a new terminal after installation.
+
+  Wrong answers       Switch to Two LLM + duckdb-nsql pipeline.
+
+  Response in Dutch   Known LLM behaviour — re-submit the question.
+
+  Slow responses      Expected for Two LLM pipelines. Single LLM is faster.
 
 ─────────────────────────────────────────────────────────────────────────────
 NOTES
 ─────────────────────────────────────────────────────────────────────────────
 
-- All processing is local. No data leaves your machine.
-- The database contains synthetic ALS variant data for MVP testing.
-- prompts.txt controls what domain knowledge the LLM has access to.
-  Edit it to adjust how the assistant interprets questions, if deemed necessary.
-- The assistant cannot answer questions about patient age, sex, ClinVar
-  annotations, or population allele frequencies — these are not in the
-  current database schema.
+  - All processing is fully local. No data leaves the machine.
+  - The database (rvatData.gdb) must stay in the ~/MVP folder alongside
+    server.py and start_services.sh. The app will not start without it.
+  - prompts.txt controls the domain knowledge available to the LLM.
+    Edit it to adjust how the assistant interprets questions.
+  - The assistant correctly refuses questions about patient age, sex,
+    ClinVar pathogenicity, and population allele frequencies — these
+    are not present in the current database schema.
 
 ─────────────────────────────────────────────────────────────────────────────
