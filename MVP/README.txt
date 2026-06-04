@@ -12,13 +12,14 @@ Built with: R Shiny · Ollama (local LLM) · MCP server (Python/FastMCP)
 FOLDER CONTENTS
 ─────────────────────────────────────────────────────────────────────────────
 
-  app.R               Main Shiny application
-  server.py           MCP tool server (exposes database query endpoints)
-  start_services.sh   Startup script (launches the MCP server)
-  prompts.txt         Domain knowledge loaded at runtime by the LLM
-  environment.yml     Conda environment definition
-  rvatData.gdb        ALS variant database (SQLite)
-  README.txt          This file
+  app.R                      Main Shiny application
+  server.py                  MCP tool server (exposes database query endpoints)
+  start_services.sh          Startup script (launches the MCP server)
+  prompts.txt                Domain knowledge loaded at runtime by the LLM
+  environment.yml            Conda environment definition
+  rvatData.gdb               ALS variant database (SQLite)
+  mvp_pipeline_diagram.png   Diagram that showcases MVP pipeline
+  README.txt                 This file
 
 ─────────────────────────────────────────────────────────────────────────────
 REQUIREMENTS
