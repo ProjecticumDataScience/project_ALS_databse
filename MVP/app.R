@@ -427,6 +427,10 @@ ui <- page_sidebar(
         background: white;
       }
       .export-option:hover { border-color: #2A9D8F; background: #f0f9f8; }
+      @keyframes mine-bounce {
+        0%, 100% { transform: scale(1);   opacity: 1; }
+        50%       { transform: scale(0.4); opacity: 0.4; }
+      }
       .export-section-label {
         font-size: 0.78em; font-weight: 700; color: #888;
         text-transform: uppercase; letter-spacing: 0.04em;
