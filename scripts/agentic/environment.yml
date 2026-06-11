@@ -1,0 +1,16 @@
+name: mcp_env
+channels:
+  - defaults
+dependencies:
+  - ollama
+  - r-base
+  - r-shiny
+  - r-bslib
+  - r-dt
+  - r-httr2
+  - r-jsonlite
+  - python=3.11
+  - pip
+  - pip:
+    - mcp
+    - mcpo
