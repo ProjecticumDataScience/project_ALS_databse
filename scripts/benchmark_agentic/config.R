@@ -3,16 +3,22 @@
 ## ============================================================
 
 ## ── Backends ─────────────────────────────────────────────────
-## Options: "agentic_single", "agentic_dual"
-BACKENDS_TO_RUN <- c("agentic_single", "agentic_dual")
+## Options: "agentic_single", "agentic_dual", "agentic_adaptive"
+BACKENDS_TO_RUN <- c("agentic_single", "agentic_dual", "agentic_adaptive")
 
 ## ── Models ───────────────────────────────────────────────────
 MODELS_TO_TEST <- c("llama3.1:8b")
 
 ## ── Dual backend model grid ───────────────────────────────────
-## Only llama3.1:8b -> llama3.1:8b for this run
 ORCH_MODELS_TO_TEST <- c("llama3.1:8b")
-SUB_MODELS_TO_TEST  <- c("llama3.1:8b")
+SUB_MODELS_TO_TEST  <- c("llama3.1:8b")    ## used for agentic_dual
+
+## ── Adaptive backend ─────────────────────────────────────────
+## LLM1 picks LLM2 dynamically:
+##   run_variant_query → SUB_SQL_MODEL  (SQL specialist)
+##   named tools/agentic → SUB_REASON_MODEL (reasoning)
+SUB_SQL_MODEL    <- "duckdb-nsql"
+SUB_REASON_MODEL <- "llama3.1:8b"
 
 ## ── Judge model ───────────────────────────────────────────────
 JUDGE_MODEL <- "gemma3"

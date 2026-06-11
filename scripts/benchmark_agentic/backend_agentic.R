@@ -37,12 +37,16 @@ cat("Agentic pipeline loaded from:", agentic_script, "\n")
 ## ── Session setup ────────────────────────────────────────────
 
 agentic_setup <- function(model_name) {
-  ## model_name is either:
-  ##   "llama3.1:8b"            (single mode)
-  ##   "llama3.1:8b -> duckdb-nsql"  (dual mode)
+  ## model_name formats:
+  ##   "llama3.1:8b"                    (single)
+  ##   "llama3.1:8b -> duckdb-nsql"     (dual)
+  ##   "llama3.1:8b [adaptive]"         (adaptive)
   
-  ## Parse model_name for dual mode
-  if (grepl("->", model_name)) {
+  if (grepl("\\[adaptive\\]", model_name)) {
+    orch_model <- trimws(gsub("\\s*\\[adaptive\\]", "", model_name))
+    sub_model  <- NULL
+    mode       <- "dual_adaptive"
+  } else if (grepl("->", model_name)) {
     parts      <- strsplit(model_name, "\\s*->\\s*")[[1]]
     orch_model <- trimws(parts[1])
     sub_model  <- trimws(parts[2])
@@ -81,10 +85,16 @@ agentic_setup <- function(model_name) {
     return(NULL)
   }
   
+  ## For adaptive mode, load SUB_SQL_MODEL and SUB_REASON_MODEL from config
+  sub_sql    <- if (mode == "dual_adaptive" && exists("SUB_SQL_MODEL"))    SUB_SQL_MODEL    else NULL
+  sub_reason <- if (mode == "dual_adaptive" && exists("SUB_REASON_MODEL")) SUB_REASON_MODEL else NULL
+  
   list(
     mode       = mode,
     orch       = orch_model,
     sub        = sub_model,
+    sub_sql    = sub_sql,
+    sub_reason = sub_reason,
     mcp_base   = MCP_BASE,
     ollama_url = OLLAMA_URL
   )

@@ -116,7 +116,7 @@ All should call get_database_limitations. Model must NOT hallucinate.
 
 | ID | Question | Why unanswerable |
 |----|----------|-----------------|
-| U01 | VAR_id 100 pathogenic? | No ClinVar data. CADD alone ≠ pathogenic. |
+| U01 | VAR_id 100 pathogenic? | VAR_id 100 = ABCA4 rs760098992. ClinVar record: **not in ClinVar**. Correct answer: unknown/no ClinVar record. |
 | U02 | AF of VAR_id 30 in Europeans? | Global AF only. No population-specific AF. |
 | U03 | Synonymous AND high-impact? | Mutually exclusive — 0 exist. Correct answer is "0, impossible" not a refusal. |
 | U04 | Protein domain of VAR_id 42? | No protein domain annotation. |
@@ -146,3 +146,110 @@ All should call get_database_limitations. Model must NOT hallucinate.
 | phenotype (P) | "complex" (sex/population keywords) | agentic loop |
 | annotation_trap (T) | "simple" | single/dual shot |
 | unanswerable (U) | "simple" | single/dual shot |
+
+---
+
+# RVAT Statistical Tests (R01–R05)
+
+These questions require the rvat_analysis MCP server (plumber on port 8009).
+They test real statistical burden testing, MAF computation, LD, and single
+variant association — capabilities beyond what SQL alone can provide.
+
+**Important:** grade_answer=TRUE if the model calls the correct rvat tool
+and interprets the result correctly. Exact numeric answers may vary slightly
+due to floating point but should be in the right order of magnitude.
+
+---
+
+## R01 — Run a burden test for SOD1 in ALS cases versus controls
+
+**Expected tool:** rvat_analysis/run_burden_test
+**Params:** {gene: "SOD1", test: "firth", impact_filter: "high_moderate"}
+
+**Answer:**
+- P-value ≈ 0 (highly significant)
+- OR ≈ 5.9 (strong case enrichment)
+- 42 variants tested, 80 case carriers vs 53 control carriers
+- Interpretation: SOD1 shows highly significant rare variant burden in ALS
+
+**Grading:** grade_answer=TRUE if response states significant association
+(P<0.05) with OR>1 for SOD1. grade_tool=TRUE if run_burden_test called.
+
+---
+
+## R02 — Get the MAF for moderate impact variants in TARDBP
+
+**Expected tool:** rvat_analysis/get_maf_by_impact
+**Params:** {gene: "TARDBP", impact_filter: "moderate"}
+
+**Answer:**
+- Mean MAF ≈ 0.0001 (0.01%) across ~14 moderate impact variants
+- All variants are rare (MAF < 0.001)
+- SUMMARY row contains mean MAF for the gene
+
+**Grading:** grade_answer=TRUE if response states MAF ~0.0001 or describes
+variants as rare. grade_tool=TRUE if get_maf_by_impact called with moderate.
+grade_answer=FALSE if model uses get_average_af_by_impact (global averages).
+
+---
+
+## R03 — How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?
+
+**Expected tool:** phenotype_data/get_carriers_with_phenotype
+**Params:** {gene: "SOD1", impact: "high_moderate", sex: 1, population: "SAS"}
+
+**Answer:** The benchmark reference answer is **9 female SAS carriers** using
+high+moderate impact variants as proxy for "pathogenic" (standard genomics approach).
+"Pathogenic mutation" = high+moderate impact variants, NOT ClinVar-confirmed only.
+
+**Grading:** grade_answer=TRUE if response states ~9 carriers or uses
+get_carriers_with_phenotype with high_moderate impact filter.
+grade_answer=FALSE if model calls ClinVar tools or reports impossible numbers
+(>10 total samples in dataset).
+
+---
+
+## R04 — What is the linkage disequilibrium between high-impact variants in FUS?
+
+**Expected tool:** rvat_analysis/get_ld_matrix
+**Params:** {gene: "FUS", impact_filter: "high"}
+
+**Answer:** FUS has only 1 high-impact variant (VAR_id 1175). LD cannot be
+computed with fewer than 2 variants. The tool returns an informative message:
+"Fewer than 2 variants — LD cannot be computed".
+
+**Grading:** grade_answer=TRUE if model calls get_ld_matrix AND correctly
+reports that LD cannot be computed (only 1 high-impact variant in FUS).
+grade_answer=FALSE if model refuses entirely or hallucinates LD values.
+grade_tool=TRUE if get_ld_matrix was called.
+
+---
+
+## R05 — What are the most significant single variants in NEK1 associated with ALS?
+
+**Expected tool:** rvat_analysis/run_single_variant_test
+**Params:** {gene: "NEK1", test: "scoreSPA", impact_filter: "any"}
+
+**Answer:** Per-variant p-values for all NEK1 variants. Top variants by CADD
+include VAR_id 1331 and 1449 (both CADD=41). P-values will vary — the key is
+that the model runs single variant tests and reports the top results.
+
+**Note:** With only 5 cases and 5 controls in the synthetic genotype data,
+individual variant p-values may not be very significant. Accept any reasonable
+ranking by p-value or CADD score.
+
+**Grading:** grade_answer=TRUE if run_single_variant_test called and model
+reports top variants with p-values or effect sizes.
+grade_tool=TRUE if run_single_variant_test was called.
+
+---
+
+# Updated Grading Summary (with rvat)
+
+| ID | Category | Expected tool | Expected answer |
+|----|----------|--------------|-----------------|
+| R01 | rvat | rvat_analysis/run_burden_test | P≈0, OR≈5.9 for SOD1 |
+| R02 | rvat | rvat_analysis/get_maf_by_impact | Mean MAF≈0.0001 |
+| R03 | rvat | phenotype_data/get_carriers_with_phenotype | ~9 female SAS carriers |
+| R04 | rvat | rvat_analysis/get_ld_matrix | Cannot compute (1 variant) |
+| R05 | rvat | rvat_analysis/run_single_variant_test | Top NEK1 variants by p-value |

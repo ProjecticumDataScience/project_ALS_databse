@@ -1,0 +1,151 @@
+"model","backend","id","category","grade_answer","grade_minimal_response","grade_hallucination","grade_tool","grade_total","elapsed_sec"
+"llama3.1:8b","agentic_single","A01","analytical",1,1,0,1,3,68.7
+"llama3.1:8b","agentic_single","A02","analytical",1,1,1,0,3,70.6
+"llama3.1:8b","agentic_single","A03","analytical",1,1,1,1,4,207.7
+"llama3.1:8b","agentic_single","A04","analytical",1,0,1,0,2,66.8
+"llama3.1:8b","agentic_single","A05","analytical",1,1,0,1,3,75
+"llama3.1:8b","agentic_single","A06","analytical",1,1,0,1,3,70.9
+"llama3.1:8b","agentic_single","A07","analytical",1,1,0,1,3,66.4
+"llama3.1:8b","agentic_single","A08","analytical",1,1,0,1,3,91.7
+"llama3.1:8b","agentic_single","A09","analytical",1,1,0,1,3,78.4
+"llama3.1:8b","agentic_single","A10","analytical",1,1,0,1,3,77.4
+"llama3.1:8b","agentic_single","A11","analytical",0,0,1,0,1,71.1
+"llama3.1:8b","agentic_single","A12","analytical",1,1,0,1,3,68
+"llama3.1:8b","agentic_single","A13","analytical",1,1,0,1,3,73
+"llama3.1:8b","agentic_single","A14","analytical",1,1,0,1,3,73.8
+"llama3.1:8b","agentic_single","A15","analytical",1,1,0,1,3,70.6
+"llama3.1:8b","agentic_single","A16","analytical",1,1,0,1,3,79.2
+"llama3.1:8b","agentic_single","A17","analytical",1,1,0,1,3,75.7
+"llama3.1:8b","agentic_single","C01","complex",1,0,1,0,2,77
+"llama3.1:8b","agentic_single","C02","complex",1,1,0,1,3,77.1
+"llama3.1:8b","agentic_single","C03","complex",1,1,1,1,4,75.4
+"llama3.1:8b","agentic_single","C04","complex",1,1,0,1,3,71.2
+"llama3.1:8b","agentic_single","C05","complex",1,0,1,0,2,90
+"llama3.1:8b","agentic_single","C06","complex",1,1,1,1,4,114.2
+"llama3.1:8b","agentic_single","C07","complex",1,1,0,1,3,75.8
+"llama3.1:8b","agentic_single","C08","complex",0,0,1,0,1,69.8
+"llama3.1:8b","agentic_single","C09","complex",1,1,1,0,3,83.5
+"llama3.1:8b","agentic_single","C10","complex",1,1,0,1,3,104.8
+"llama3.1:8b","agentic_single","C11","complex",0,0,1,0,1,66.6
+"llama3.1:8b","agentic_single","C12","complex",0,0,1,0,1,121.6
+"llama3.1:8b","agentic_single","C13","complex",1,1,1,1,4,105.3
+"llama3.1:8b","agentic_single","C14","complex",1,1,1,1,4,71.9
+"llama3.1:8b","agentic_single","C15","complex",1,1,1,1,4,70.7
+"llama3.1:8b","agentic_single","C16","complex",1,1,0,1,3,68
+"llama3.1:8b","agentic_single","C17","complex",1,1,0,1,3,66.4
+"llama3.1:8b","agentic_single","C18","complex",1,1,1,1,4,151.8
+"llama3.1:8b","agentic_single","P01","phenotype",1,1,0,1,3,94.8
+"llama3.1:8b","agentic_single","P02","phenotype",1,1,0,1,3,93.8
+"llama3.1:8b","agentic_single","P03","phenotype",1,1,0,1,3,91.3
+"llama3.1:8b","agentic_single","P04","phenotype",1,1,1,1,4,87.6
+"llama3.1:8b","agentic_single","P05","phenotype",1,1,0,1,3,94.4
+"llama3.1:8b","agentic_single","P06","phenotype",1,1,1,0,3,68.4
+"llama3.1:8b","agentic_single","S01","simple",1,1,0,1,3,76.1
+"llama3.1:8b","agentic_single","S02","simple",1,1,0,1,3,70.5
+"llama3.1:8b","agentic_single","S03","simple",1,0,1,0,2,70
+"llama3.1:8b","agentic_single","S04","simple",1,1,0,1,3,65.6
+"llama3.1:8b","agentic_single","S05","simple",1,1,0,1,3,64.1
+"llama3.1:8b","agentic_single","S06","simple",1,1,0,1,3,66.6
+"llama3.1:8b","agentic_single","S07","simple",1,1,0,1,3,68
+"llama3.1:8b","agentic_single","S08","simple",1,1,0,1,3,67.4
+"llama3.1:8b","agentic_single","S09","simple",1,1,0,1,3,65.2
+"llama3.1:8b","agentic_single","S10","simple",1,1,0,1,3,62.7
+"llama3.1:8b","agentic_single","S11","simple",1,1,1,1,4,72.6
+"llama3.1:8b","agentic_single","S12","simple",1,1,0,1,3,65.2
+"llama3.1:8b","agentic_single","S13","simple",1,0,1,0,2,73
+"llama3.1:8b","agentic_single","S14","simple",1,1,0,1,3,65.7
+"llama3.1:8b","agentic_single","S15","simple",1,0,1,0,2,65.8
+"llama3.1:8b","agentic_single","S16","simple",1,1,0,1,3,67
+"llama3.1:8b","agentic_single","T01","annotation_trap",1,0,1,0,2,66
+"llama3.1:8b","agentic_single","T02","annotation_trap",1,1,0,1,3,61.6
+"llama3.1:8b","agentic_single","T03","annotation_trap",1,1,0,1,3,67.2
+"llama3.1:8b","agentic_single","U01","unanswerable",1,1,0,1,3,15.2
+"llama3.1:8b","agentic_single","U02","unanswerable",1,1,0,1,3,13
+"llama3.1:8b","agentic_single","U03","unanswerable",1,1,1,1,4,66.6
+"llama3.1:8b","agentic_single","U04","unanswerable",1,1,1,1,4,14.4
+"llama3.1:8b","agentic_single","U05","unanswerable",1,1,1,1,4,11.3
+"llama3.1:8b","agentic_single","U06","unanswerable",1,1,1,1,4,10.6
+"llama3.1:8b","agentic_single","U07","unanswerable",1,1,1,1,4,10.6
+"llama3.1:8b","agentic_single","U08","unanswerable",1,1,0,1,3,12.5
+"llama3.1:8b","agentic_single","U09","unanswerable",1,1,0,1,3,10.9
+"llama3.1:8b","agentic_single","U10","unanswerable",1,1,1,1,4,10.4
+"llama3.1:8b","agentic_single","U11","unanswerable",1,1,1,1,4,14.9
+"llama3.1:8b","agentic_single","U12","unanswerable",1,1,0,1,3,10
+"llama3.1:8b","agentic_single","U13","unanswerable",0,1,0,1,2,14.5
+"llama3.1:8b","agentic_single","U14","unanswerable",0,1,0,1,2,11
+"llama3.1:8b","agentic_single","U15","unanswerable",1,1,1,1,4,14.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A01","analytical",1,1,0,1,3,69
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A02","analytical",1,0,1,0,2,70.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A03","analytical",1,1,0,1,3,204.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A04","analytical",1,0,1,0,2,65.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A05","analytical",1,1,0,1,3,74.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A06","analytical",1,1,0,1,3,72.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A07","analytical",1,1,0,1,3,66.4
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A08","analytical",1,1,0,1,3,89.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A09","analytical",1,1,0,1,3,79.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A10","analytical",1,0,1,0,2,76.4
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A11","analytical",1,1,0,1,3,70.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A12","analytical",1,1,0,1,3,67.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A13","analytical",1,1,0,0,2,74.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A14","analytical",1,1,0,1,3,75.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A15","analytical",1,1,0,1,3,71.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A16","analytical",1,1,0,1,3,78.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","A17","analytical",1,1,0,1,3,77.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C01","complex",1,0,1,0,2,76.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C02","complex",1,1,0,1,3,76.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C03","complex",1,1,0,1,3,75.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C04","complex",1,1,0,1,3,72.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C05","complex",0,0,1,0,1,89.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C06","complex",1,0,1,0,2,113.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C07","complex",1,1,0,1,3,76.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C08","complex",0,0,1,0,1,69.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C09","complex",1,1,1,1,4,84.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C10","complex",1,1,0,1,3,104.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C11","complex",0,0,1,0,1,66.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C12","complex",0,0,1,0,1,124.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C13","complex",1,1,0,1,3,107.3
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C14","complex",1,1,0,1,3,73.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C15","complex",1,1,1,1,4,71.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C16","complex",1,1,0,1,3,68.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C17","complex",1,1,0,1,3,67.3
+"llama3.1:8b -> llama3.1:8b","agentic_dual","C18","complex",1,1,1,1,4,69.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P01","phenotype",1,1,0,1,3,96
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P02","phenotype",1,1,0,1,3,96.4
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P03","phenotype",1,1,0,1,3,96.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P04","phenotype",1,1,0,1,3,88.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P05","phenotype",1,1,0,1,3,94.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","P06","phenotype",1,1,0,1,3,66.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S01","simple",1,0,0,1,2,67.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S02","simple",1,1,0,1,3,68.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S03","simple",1,1,0,1,3,68.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S04","simple",1,1,0,1,3,65.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S05","simple",1,1,0,1,3,62.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S06","simple",1,0,1,0,2,66.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S07","simple",1,0,1,0,2,67
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S08","simple",1,1,0,1,3,65.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S09","simple",1,1,0,1,3,66.4
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S10","simple",1,1,0,1,3,63.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S11","simple",1,1,1,1,4,72.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S12","simple",1,0,1,1,3,64.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S13","simple",1,1,0,1,3,71.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S14","simple",1,1,0,1,3,63.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S15","simple",1,1,0,1,3,65.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","S16","simple",1,1,0,1,3,64.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","T01","annotation_trap",1,1,0,1,3,65.8
+"llama3.1:8b -> llama3.1:8b","agentic_dual","T02","annotation_trap",1,1,1,0,3,65.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","T03","annotation_trap",1,1,0,1,3,68.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U01","unanswerable",1,1,0,1,3,15.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U02","unanswerable",1,1,0,1,3,12.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U03","unanswerable",1,1,1,1,4,65
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U04","unanswerable",1,1,0,1,3,14
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U05","unanswerable",1,1,1,1,4,11.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U06","unanswerable",1,1,0,1,3,11.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U07","unanswerable",1,1,1,1,4,10.9
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U08","unanswerable",1,1,0,1,3,12.1
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U09","unanswerable",1,1,0,1,3,10.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U10","unanswerable",1,1,1,1,4,10.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U11","unanswerable",1,1,1,1,4,11.7
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U12","unanswerable",1,1,1,1,4,11.6
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U13","unanswerable",0,1,0,1,2,11.5
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U14","unanswerable",0,1,0,1,2,12.2
+"llama3.1:8b -> llama3.1:8b","agentic_dual","U15","unanswerable",1,1,0,1,3,11.9

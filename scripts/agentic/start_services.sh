@@ -51,7 +51,64 @@ else
   MCPO_BIN="$CONDA_BASE/envs/$CONDA_ENV/bin/mcpo"
 fi
 
-MCP_PORT="${MCP_PORT:-8007}"
+MCP_PORT="${MCP_PORT:-8008}"
+
+## ── Auto-detect Python path ──────────────────────────────────────────────────
+CONDA_ENV="${CONDA_ENV:-mcp_env}"
+
+## Try conda env first, then fall back to system python3
+if command -v conda &>/dev/null; then
+  MCP_PYTHON="$(conda run -n "$CONDA_ENV" which python3 2>/dev/null)"
+fi
+if [ -z "$MCP_PYTHON" ] || [ ! -f "$MCP_PYTHON" ]; then
+  ## Fallback: search common conda paths
+  for candidate in     "$HOME/miniconda3/envs/$CONDA_ENV/bin/python3"     "$HOME/anaconda3/envs/$CONDA_ENV/bin/python3"     "/opt/conda/envs/$CONDA_ENV/bin/python3"; do
+    if [ -f "$candidate" ]; then
+      MCP_PYTHON="$candidate"
+      break
+    fi
+  done
+fi
+if [ -z "$MCP_PYTHON" ]; then
+  echo "ERROR: Could not find Python in conda env '$CONDA_ENV'"
+  echo "Set CONDA_ENV to your environment name, or set MCP_PYTHON directly"
+  exit 1
+fi
+echo "Using Python: $MCP_PYTHON"
+
+## ── Generate servers.json dynamically ────────────────────────────────────────
+## This makes the config portable — no hardcoded user paths
+cat > "$SCRIPT_DIR/servers.json" << SERVERS_EOF
+{
+  "mcpServers": {
+    "db_exploration": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/DB_exploration.py"]
+    },
+    "variant_analysis": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/variant_analysis.py"]
+    },
+    "genotype_analysis": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/genotype_analysis.py"]
+    },
+    "phenotype_data": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/phenotype_data.py"]
+    },
+    "clinvar_annotation": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/clinvar_annotation.py"]
+    },
+    "rvat_analysis": {
+      "command": "$MCP_PYTHON",
+      "args": ["$SCRIPT_DIR/mcp_servers/rvat_bridge.py"]
+    }
+  }
+}
+SERVERS_EOF
+echo "servers.json generated for user: $(whoami)"
 
 echo "================================================"
 echo " Project ALS — Agentic Pipeline"
@@ -67,6 +124,34 @@ if [ ! -f "$SERVERS_JSON" ]; then
   echo "ERROR: servers.json not found at $SERVERS_JSON"; exit 1
 fi
 
+## ── Start rvat plumber server ────────────────────────────────────────────────
+RVAT_PORT="${RVAT_PORT:-8009}"
+RVAT_LOG="$SCRIPT_DIR/rvat_server.log"
+
+## Stop existing rvat server if running
+pkill -u "$USER" -f "rvat_server.R" 2>/dev/null && sleep 1 || true
+
+## Check if rvat_server.R exists
+if [ -f "$SCRIPT_DIR/mcp_servers/rvat_server.R" ]; then
+  echo "Starting rvat plumber server on port $RVAT_PORT..."
+  RVAT_GDB_PATH="$RVAT_GDB_PATH" RVAT_PORT="$RVAT_PORT" \
+    Rscript -e "plumber::plumb('$SCRIPT_DIR/mcp_servers/rvat_server.R')\$run(port=$RVAT_PORT, host='0.0.0.0')" \
+    > "$RVAT_LOG" 2>&1 &
+  RVAT_PID=$!
+  echo "rvat server started (pid $RVAT_PID), log: $RVAT_LOG"
+  ## Wait for rvat server to be ready
+  for i in $(seq 1 30); do
+    if curl -sf "http://localhost:$RVAT_PORT/status" >/dev/null 2>&1; then
+      echo "rvat server ready ✓  (after ${i}s)"
+      break
+    fi
+    sleep 1
+  done
+else
+  echo "rvat_server.R not found — skipping rvat server"
+fi
+
+## ── Stop existing mcpo process ───────────────────────────────────────────────
 ## Stop existing process on port
 pkill -u "$USER" -f "mcpo.*$MCP_PORT" 2>/dev/null && sleep 1 || true
 

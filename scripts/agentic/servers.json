@@ -1,20 +1,28 @@
 {
   "mcpServers": {
     "db_exploration": {
-      "command": "/home/robin.jansen/miniconda3/envs/mcp_env/bin/python3",
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
       "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/DB_exploration.py"]
     },
     "variant_analysis": {
-      "command": "/home/robin.jansen/miniconda3/envs/mcp_env/bin/python3",
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
       "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/variant_analysis.py"]
     },
     "genotype_analysis": {
-      "command": "/home/robin.jansen/miniconda3/envs/mcp_env/bin/python3",
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
       "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/genotype_analysis.py"]
     },
     "phenotype_data": {
-      "command": "/home/robin.jansen/miniconda3/envs/mcp_env/bin/python3",
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
       "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/phenotype_data.py"]
+    },
+    "clinvar_annotation": {
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
+      "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/clinvar_annotation.py"]
+    },
+    "rvat_analysis": {
+      "command": "/home/robin.jansen/.cache/R/reticulate/uv/cache/archive-v0/rBBDis3vrjvwdYmR/bin/python3",
+      "args": ["/home/robin.jansen/project_ALS_databse/scripts/agentic/mcp_servers/rvat_bridge.py"]
     }
   }
 }

@@ -147,6 +147,18 @@ benchmark_questions <- list(
   list(id="T03", category="annotation_trap",
        question="Are there any variants where HighImpact equals 1 AND Synonymous equals 1 at the same time?"),
   
+  # ── RVAT (5) ─────────────────────────────────────────────────────────
+  list(id="R01", category="rvat",
+       question="Run a burden test for SOD1 in ALS cases versus controls."),
+  list(id="R02", category="rvat",
+       question="Get the MAF for moderate impact variants in TARDBP."),
+  list(id="R03", category="rvat",
+       question="How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?"),
+  list(id="R04", category="rvat",
+       question="What is the linkage disequilibrium between high-impact variants in FUS?"),
+  list(id="R05", category="rvat",
+       question="What are the most significant single variants in NEK1 associated with ALS?"),
+  
   # ── UNANSWERABLE (15) ────────────────────────────────────────
   list(id="U01", category="unanswerable",
        question="Is VAR_id 100 previously reported as pathogenic?"),
@@ -180,7 +192,7 @@ benchmark_questions <- list(
        question="Is the variant at position 1378764 on chrX likely to be causative for ALS?")
 )
 
-cat("Total questions:", length(benchmark_questions), "\n")
+cat("Total questions:", length(benchmark_questions), "\n")  ## should be 80
 
 ## ── Setup / ask wrappers ─────────────────────────────────────
 setup_session  <- function(model_name) agentic_setup(model_name)
@@ -197,11 +209,21 @@ run_benchmark <- function(model_name, questions) {
   for (i in seq_along(questions)) {
     q <- questions[[i]]
     cat(sprintf("  [%d/%d] %s\n", i, length(questions), q$id))
-    out <- ask_question(session, q$question)
+    t_start     <- proc.time()[["elapsed"]]
+    out         <- ask_question(session, q$question)
+    elapsed_sec <- round(proc.time()[["elapsed"]] - t_start, 1)
+    elapsed_fmt <- if (elapsed_sec >= 60) {
+      sprintf("%d:%02d min", as.integer(elapsed_sec) %/% 60L,
+              as.integer(elapsed_sec) %% 60L)
+    } else {
+      sprintf("%.1f sec", elapsed_sec)
+    }
+    cat(sprintf("         \u21b3 %.1f sec\n", elapsed_sec))
     results[[q$id]] <- list(
       id=q$id, category=q$category, question=q$question,
       full=out$full, response=out$response,
-      model=model_name, backend=BACKEND
+      model=model_name, backend=BACKEND,
+      elapsed_sec=elapsed_sec, elapsed_fmt=elapsed_fmt
     )
     Sys.sleep(2)
   }
@@ -220,13 +242,18 @@ cat("Output folder:", output_dir, "\n")
 all_results <- data.frame(
   id=character(), category=character(), question=character(),
   full=character(), response=character(),
-  model=character(), backend=character(), stringsAsFactors=FALSE
+  model=character(), backend=character(),
+  elapsed_sec=numeric(), elapsed_fmt=character(),
+  stringsAsFactors=FALSE
 )
 
 models_for_this_backend <- if (BACKEND == "agentic_dual") {
   pairs <- expand.grid(orch=ORCH_MODELS_TO_TEST, sub=SUB_MODELS_TO_TEST,
                        stringsAsFactors=FALSE)
   paste0(pairs$orch, " -> ", pairs$sub)
+} else if (BACKEND == "agentic_adaptive") {
+  ## Adaptive: LLM1 picks between sub_sql and sub_reason automatically
+  paste0(ORCH_MODELS_TO_TEST, " [adaptive]")
 } else { MODELS_TO_TEST }
 
 for (model_name in models_for_this_backend) {
@@ -241,6 +268,7 @@ for (model_name in models_for_this_backend) {
     output <- c(output,
                 paste("ID:      ", r$id), paste("Category:", r$category),
                 paste("Question:", r$question),
+                paste("Time:    ", r$elapsed_fmt),
                 "--- Full output ---", r$full,
                 "--- Final response ---", r$response,
                 "------------------------------------------------", "")
@@ -250,7 +278,9 @@ for (model_name in models_for_this_backend) {
     all_results <- rbind(all_results, data.frame(
       id=r$id, category=r$category, question=r$question,
       full=r$full, response=r$response,
-      model=model_name, backend=BACKEND, stringsAsFactors=FALSE
+      model=model_name, backend=BACKEND,
+      elapsed_sec=r$elapsed_sec, elapsed_fmt=r$elapsed_fmt,
+      stringsAsFactors=FALSE
     ))
   }
 }

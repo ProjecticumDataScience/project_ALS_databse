@@ -1,0 +1,376 @@
+"id","category","question","full","response","model","backend","elapsed_sec","elapsed_fmt"
+"S01","simple","How many variants in SOD1 have a PolyPhen score of D (damaging)?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",2.6,"2.6 sec"
+"S02","simple","List all unique chromosomes present in the varInfo_synthetic table.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"S03","simple","How many variants have a CADD score above 30 and are in the gene ABCA4?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"S04","simple","How many synonymous variants are there in the entire dataset?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S05","simple","How many variants are present in the gene OPTN?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S06","simple","How many high-impact variants are located on chromosome X?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S07","simple","How many variants are predicted deleterious by both SIFT and PolyPhen simultaneously?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"S08","simple","How many variants is ALS_2 homozygous for?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S09","simple","How many distinct genes are present in the varInfo_synthetic table?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S10","simple","How many variants are in the dataset in total?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.7,"0.7 sec"
+"S11","simple","How many variants does each gene have? Order by most variants.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S12","simple","How many variants have a missing CADD score?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.7,"0.7 sec"
+"S13","simple","How many variants have all three annotations available: CADD, PolyPhen, and SIFT?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"S14","simple","How many high-impact variants are in ABCA4?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S15","simple","How many variants have an allele frequency of exactly zero?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"S16","simple","How many variants does SIFT predict as deleterious in OPTN?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"A01","analytical","Which variant in NEK1 has the lowest non-zero allele frequency?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A02","analytical","What proportion of all variants in the dataset are classified as high impact?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A03","analytical","For each gene, what is the ratio of high-impact to synonymous variants? Only show genes with at least 5 of each.","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.2,"0.2 sec"
+"A04","analytical","Which control sample carries the highest total burden of high-impact variants?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A05","analytical","What is the average CADD score for variants predicted deleterious by both SIFT and PolyPhen, compared to variants predicted benign by both?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.3,"1.3 sec"
+"A06","analytical","What is the average allele frequency per chromosome? Which chromosome has the highest?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"A07","analytical","What is the total allele burden in SOD1 for ALS cases versus controls?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A08","analytical","What percentage of all variants in the dataset is carried by at least one ALS patient?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"A09","analytical","What is the average CADD score for high-impact versus moderate-impact variants in NEK1?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"A10","analytical","How many variants are carried exclusively by controls and not by any ALS patient?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A11","analytical","What is the impact distribution (high, moderate, synonymous) in SOD1?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A12","analytical","Which chromosome has the most variants in the dataset?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"A13","analytical","What percentage of variants are missing ALL three functional annotations: CADD, PolyPhen, and SIFT?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.1,"1.1 sec"
+"A14","analytical","For ALS_4, how many high-impact variants are heterozygous versus homozygous?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"A15","analytical","What is the average CADD score of moderate-impact variants in PEX5?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"A16","analytical","What is the allele burden for ALS_5 versus Control_5 among high-impact variants only?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"A17","analytical","Give a full summary of the gene UBQLN2: total variants, impact distribution, and mean allele frequency.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.1,"1.1 sec"
+"C01","complex","How many variants are carried exclusively by ALS cases and not by any control?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"C02","complex","Which gene shows the greatest difference in total allele burden between ALS cases and controls?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"C03","complex","For each of the five ALS patients, how many high-impact variants do they carry in TARDBP, SOD1, or NEK1?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.3,"1.3 sec"
+"C04","complex","Which gene has the most homozygous variant-calls across all ALS patients combined?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"C05","complex","How many variants are shared between all five ALS patients AND all five controls?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"C06","complex","For moderate- and high-impact variants in TARDBP, compare the allele burden per individual across all 5 cases and all 5 controls.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.3,"1.3 sec"
+"C07","complex","Which variants are present in all ten individuals (all 5 ALS and all 5 controls)? List gene and VAR_id.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.1,"1.1 sec"
+"C08","complex","Among SIFT-deleterious variants, which three genes have the highest total case burden, and how does it compare to controls?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.2,"1.2 sec"
+"C09","complex","How many variants fall into each impact category: high, moderate, synonymous, and other?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"C10","complex","In which genes does ALS_3 carry at least one high-impact variant?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"C11","complex","Give a full summary of the gene FUS: total variants, impact distribution, and mean allele frequency.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.4,"1.4 sec"
+"C12","complex","Group all variants by CADD score bins: below 10, 10 to 20, 20 to 30, and 30 and above. For each bin show the total ALS case burden and number of variants.","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.9,"1.9 sec"
+"C13","complex","Among high-impact variants, what is the distribution of PolyPhen predictions?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.9,"0.9 sec"
+"C14","complex","What are the three variants with the highest CADD score in the entire dataset, and which genes are they in?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.1,"1.1 sec"
+"C15","complex","What are the three variants with the lowest non-zero allele frequency, and which genes are they in?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"C16","complex","What is the only high-impact variant in FUS, and what are its functional annotations?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"C17","complex","On which chromosome is IL3RA located, and how does the variant count on that chromosome compare to the total dataset?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1.1,"1.1 sec"
+"C18","complex","For RIN3 high-impact variants specifically, is the allele burden higher in cases or controls?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"P01","phenotype","How many female carriers are there in ABCA4?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"P02","phenotype","How many female carriers are there in SOD1?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"P03","phenotype","How many SAS carriers are there in NEK1?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"P04","phenotype","What is the sex distribution of samples in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"P05","phenotype","What is the average age of ALS cases in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: ]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"P06","phenotype","How many ALS cases and controls are in the database?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"T01","annotation_trap","How many variants have a PolyPhen score of possibly damaging?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"T02","annotation_trap","How many variants are tolerated by SIFT?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.7,"0.7 sec"
+"T03","annotation_trap","Are there any variants where HighImpact equals 1 AND Synonymous equals 1 at the same time?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",1,"1.0 sec"
+"U01","unanswerable","Is VAR_id 100 previously reported as pathogenic?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"U02","unanswerable","What is the allele frequency of VAR_id 30 in Europeans?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U03","unanswerable","Which variants are both synonymous and high impact?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.8,"0.8 sec"
+"U04","unanswerable","What is the protein domain affected by VAR_id 42?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.1,"0.1 sec"
+"U05","unanswerable","Has the variant at position 12345 been validated in a wet-lab experiment?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U06","unanswerable","Which ALS patient has the earliest age of onset?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U07","unanswerable","What is the linkage disequilibrium between VAR_id 10 and VAR_id 11?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U08","unanswerable","Which variants are clinically significant?","[mode: single]
+[complexity: simple]
+[tools called: unknown]
+--- Final response ---
+Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","Classification failed: Classification failed: Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0.7,"0.7 sec"
+"U09","unanswerable","What is the rs-number of VAR_id 200?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U10","unanswerable","Which variants are de novo mutations?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U11","unanswerable","What is the allele frequency of VAR_id 50 in the African population?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U12","unanswerable","How long has ALS_3 been diagnosed with ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U13","unanswerable","Which variants have the strongest effect on disease risk?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U14","unanswerable","Which of the ALS patients has the most severe disease progression?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
+"U15","unanswerable","Is the variant at position 1378764 on chrX likely to be causative for ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+Ollama not reachable: HTTP 400 Bad Request.","Ollama not reachable: HTTP 400 Bad Request.","llama3.1:8b [adaptive]","agentic_adaptive",0,"0.0 sec"
