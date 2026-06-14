@@ -1,0 +1,123 @@
+1
+Onbeantwoordbaar
+What is the ClinVar pathogenicity classification of VAR_id 42?
+
+Er is geen ClinVar-kolom of externe annotatie aanwezig. SIFT/PolyPhen/CADD zijn computationele voorspellingen, geen klinische classificaties.
+
+✓ Correct antwoord: "Deze informatie is niet beschikbaar in de database."
+
+2
+Onbeantwoordbaar
+What is the gnomAD allele frequency of the variant at position 1378764 on chrX in the European population?
+
+Geen gnomAD-data aanwezig. De AF-kolom is globaal en synthetisch — geen populatiespecifieke of externe databronnen.
+
+✓ Correct antwoord: "Geen gnomAD of populatiespecifieke AF beschikbaar."
+
+3
+Onbeantwoordbaar
+Which exon does the high-impact variant in FUS (VAR_id 1175) affect?
+
+Geen exon-annotatie aanwezig in varInfo_synthetic. Alleen chromosoom en positie zijn bekend.
+
+✓ Correct antwoord: "Exon-informatie is niet aanwezig in de database."
+
+4
+Onbeantwoordbaar
+What is the protein domain affected by the most deleterious variant in SOD1?
+
+Geen eiwit-domein annotatie. De database bevat alleen genomische positie, geen eiwitstructuurinformatie.
+
+✓ Correct antwoord: "Proteïnedomein-data is niet beschikbaar."
+
+5
+Onbeantwoordbaar
+Does VAR_id 200 affect splicing?
+
+Geen splicing-annotatie (bijv. SpliceAI) aanwezig. HighImpact kan splicing-varianten omvatten maar geeft geen specifieke splicing-score.
+
+✓ Correct antwoord: "Splicing-voorspellingen zijn niet aanwezig in de database."
+
+Categorie 2 — Biologisch of logisch onmogelijk
+
+6
+Logisch onmogelijk
+Which variants are both synonymous and high impact?
+
+Biologisch onmogelijk: een synonyme variant verandert het aminozuur niet en kan per definitie geen high-impact zijn. In de dataset is COUNT(*) WHERE HighImpact=1 AND Synonymous=1 = 0.
+
+✓ Correct antwoord: "Dit is biologisch onmogelijk — de categorieën sluiten elkaar uit. Er zijn 0 zulke varianten in de dataset."
+
+7
+Logisch onmogelijk
+Which variants have a genotype of 3 (i.e. three copies of the alternate allele) in ALS_1?
+
+Genotype-codering is 0/1/2 (diploid). Genotype 3 bestaat niet in een diploïd organisme. Er zijn 0 rijen met ALS_1=3.
+
+✓ Correct antwoord: "Genotype 3 bestaat niet — codering is 0=hom-ref, 1=het, 2=hom-alt."
+
+8
+Logisch onmogelijk
+What is the allele frequency of a variant that no one in the world carries?
+
+Als niemand een variant draagt, is de allelfrequentie per definitie 0 — de vraag beantwoordt zichzelf. Bovendien zijn varianten met AF=0 al aanwezig (n=36), maar deze zijn in de dataset opgenomen ondanks AF=0.
+
+✓ Correct antwoord: "AF = 0 per definitie. De vraag is circulair."
+
+9
+Logisch onmogelijk
+How many variants have a CADD score of exactly 0 and are also high impact?
+
+Een CADD-score van 0 impliceert geen deleterieus effect — dit is per definitie onverenigbaar met high-impact classificatie. In de data zijn er geen high-impact varianten met CADD=0.
+
+✓ Correct antwoord: "CADD=0 en HighImpact=1 combinatie bestaat niet in deze dataset en is biologisch tegenstrijdig."
+
+10
+Logisch onmogelijk
+Which ALS patient is also listed as a control?
+
+In varInfo_synthetic zijn ALS_1–5 en Control_1–5 aparte kolommen voor verschillende individuen. Dezelfde persoon kan niet in beide groepen zitten. In de pheno-tabel heeft elk IID precies één phenotype (0 of 1).
+
+✓ Correct antwoord: "Cases en controls zijn gescheiden individuen — overlap is niet mogelijk in dit design."
+
+Categorie 3 — Te vaag om te beantwoorden
+
+11
+Te vaag
+Which variants are important?
+
+"Belangrijk" is subjectief en afhankelijk van context: klinisch, statistisch, functioneel, zeldzaam? Zonder definitie is de vraag niet beantwoordbaar.
+
+✓ Correct antwoord: Vraag om verduidelijking — bedoelt de gebruiker hoge CADD-score? Significante burden? Zeldzame varianten? Klinische relevantie?
+
+12
+Te vaag
+Is NEK1 an ALS gene?
+
+Dit is een biologische/literatuurvraag, geen database-vraag. De database bevat geen publicatiestatus, associatiescores of externe literatuurverwijzingen. Burden-test resultaten zouden een aanwijzing geven, maar zijn geen bewijs van causaliteit.
+
+✓ Correct antwoord: "De database bevat geen informatie over genstatus in de literatuur. Een burden-test via de rvat-server kan associatie berekenen, maar geen causaliteit bewijzen."
+
+13
+Te vaag
+What is the most interesting variant in the dataset?
+
+"Interessant" is volledig subjectief. De chatbot mag hier geen variant kiezen zonder te vragen wat de gebruiker bedoelt.
+
+✓ Correct antwoord: Vraag om verduidelijking — zeldzaamste? Hoogste CADD? Meest case-specifiek? Meest tegenstrijdige annotaties?
+
+14
+Te vaag
+Which variants should we follow up on in the wet lab?
+
+Wetlab-prioritering vereist klinische expertise, literatuurkennis en experimentele overwegingen die niet in de database zitten. De chatbot kan criteria voorstellen (hoge CADD, zeldzaam, case-specifiek) maar mag geen beslissing nemen.
+
+✓ Correct antwoord: "Dit vereist klinische beoordeling buiten de database. Ik kan varianten filteren op criteria die u opgeeft, maar niet zelf wetlab-prioriteit bepalen."
+
+15
+Te vaag
+Is this dataset good enough to find the cause of ALS?
+
+Dit is een wetenschappelijke en statistische oordeel-vraag die de chatbot niet kan beantwoorden op basis van de data alleen. Het vereist kennis van studiedesign, power, confounders en de huidige wetenschappelijke literatuur.
+
+✓ Correct antwoord: "Dit is een methodologische vraag buiten het bereik van de database. Ik kan statistieken rapporteren (n=5 cases, 5 controls in de synthetische dataset) maar kan geen uitspraak doen over causaliteit of voldoende power."
