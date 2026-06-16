@@ -1,8 +1,0 @@
-"question","llm_answer","error","pass","notes"
-"How many variants are there?","The total number of variants in the database is **1802**.",FALSE,NA,NA
-"How many deleterious SIFT variants?","There are **570** deleterious SIFT variants in the database.",FALSE,NA,NA
-"What is the mean allele frequency?","It seems that the `AVG(afs)` function is trying to calculate the average value of a non-existent column named 'afs'. The correct column name for allele frequency in this database schema appears to be `AF`.
-
-Here's an updated query:
-
-{""name"": ""querychat_query"", ""parameters"": {""_intent"":[""Calculate the mean allele frequency of variants in the dataset.""],""query"":[""SELECT AVG(AF) AS mean_af FROM varInfo_synthetic""]}}",FALSE,NA,NA
