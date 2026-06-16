@@ -50,7 +50,7 @@ benchmark_questions <- list(
        question="How many variants have an allele frequency of exactly zero?"),
   list(id="S16", category="simple",
        question="How many variants does SIFT predict as deleterious in OPTN?"),
-  
+
   # ── ANALYTICAL (17) ──────────────────────────────────────────
   list(id="A01", category="analytical",
        question="Which variant in NEK1 has the lowest non-zero allele frequency?"),
@@ -86,7 +86,7 @@ benchmark_questions <- list(
        question="What is the allele burden for ALS_5 versus Control_5 among high-impact variants only?"),
   list(id="A17", category="analytical",
        question="Give a full summary of the gene UBQLN2: total variants, impact distribution, and mean allele frequency."),
-  
+
   # ── COMPLEX (18) ─────────────────────────────────────────────
   list(id="C01", category="complex",
        question="How many variants are carried exclusively by ALS cases and not by any control?"),
@@ -124,7 +124,7 @@ benchmark_questions <- list(
        question="On which chromosome is IL3RA located, and how does the variant count on that chromosome compare to the total dataset?"),
   list(id="C18", category="complex",
        question="For RIN3 high-impact variants specifically, is the allele burden higher in cases or controls?"),
-  
+
   # ── PHENOTYPE (6) ────────────────────────────────────────────
   list(id="P01", category="phenotype",
        question="How many female carriers are there in ABCA4?"),
@@ -138,7 +138,7 @@ benchmark_questions <- list(
        question="What is the average age of ALS cases in the database?"),
   list(id="P06", category="phenotype",
        question="How many ALS cases and controls are in the database?"),
-  
+
   # ── ANNOTATION TRAPS (3) ─────────────────────────────────────
   list(id="T01", category="annotation_trap",
        question="How many variants have a PolyPhen score of possibly damaging?"),
@@ -146,7 +146,7 @@ benchmark_questions <- list(
        question="How many variants are tolerated by SIFT?"),
   list(id="T03", category="annotation_trap",
        question="Are there any variants where HighImpact equals 1 AND Synonymous equals 1 at the same time?"),
-  
+
   # ── UNANSWERABLE (15) ────────────────────────────────────────
   list(id="U01", category="unanswerable",
        question="Is VAR_id 100 previously reported as pathogenic?"),
@@ -178,7 +178,7 @@ benchmark_questions <- list(
        question="Which of the ALS patients has the most severe disease progression?"),
   list(id="U15", category="unanswerable",
        question="Is the variant at position 1378764 on chrX likely to be causative for ALS?"),
-  
+
   # ── RVAT (5) ─────────────────────────────────────────────────
   list(id="R01", category="rvat",
        question="Run a burden test for SOD1 in ALS cases versus controls."),
@@ -190,7 +190,7 @@ benchmark_questions <- list(
        question="What is the linkage disequilibrium between high-impact variants in FUS?"),
   list(id="R05", category="rvat",
        question="What are the most significant single variants in NEK1 associated with ALS?"),
-  
+
   # ── NONSENSE (15) ────────────────────────────────────────────
   ## Category 1: Missing annotation (N01-N05)
   list(id="N01", category="nonsense",
@@ -225,7 +225,7 @@ benchmark_questions <- list(
        question="Which variants should we follow up on in the wet lab?"),
   list(id="N15", category="nonsense",
        question="Is this dataset good enough to find the cause of ALS?"),
-  
+
   # ── TOOLFREE (15) ────────────────────────────────────────────
   ## Variant-level SQL (F01-F10)
   list(id="F01", category="toolfree",

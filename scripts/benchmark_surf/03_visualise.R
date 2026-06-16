@@ -30,6 +30,10 @@ if (exists("GRADED_FINAL_CSV") && !is.null(GRADED_FINAL_CSV)) {
 combined <- do.call(rbind, lapply(GRADED_FILES, function(f) {
   df <- read.csv(f)
   if (!"backend" %in% colnames(df)) df$backend <- "querychat"
+  df$grade_total <- suppressWarnings(as.numeric(as.character(df$grade_total)))
+  df$grade_answer <- ifelse(toupper(as.character(df$grade_answer))=="TRUE",1L,
+                     ifelse(toupper(as.character(df$grade_answer))=="FALSE",0L,
+                     suppressWarnings(as.integer(df$grade_answer))))
   df
 }))
 
@@ -125,7 +129,7 @@ criterion_colors <- c(
 )
 
 ## ── Shared theme ──────────────────────────────────────────────
-theme_als <- theme_minimal(base_size = 12) +
+theme_als <- function() theme_minimal(base_size = 12) +
   theme(
     plot.title        = element_text(face = "bold", size = 14,
                                      margin = margin(b = 6)),
@@ -171,7 +175,7 @@ p1 <- ggplot(model_scores,
     x = NULL, y = "Average score (out of 4)",
     caption  = "Criteria: answer correctness · conciseness · hallucination · tool correctness"
   ) +
-  theme_als +
+  theme_als() +
   theme(axis.text.x = element_text(angle = 0))
 
 ggsave(file.path(output_dir, "plot_overall_scores.png"), p1,
@@ -205,7 +209,7 @@ if (multi_backend) {
       x = NULL, y = "Average score (out of 4)",
       caption  = "Higher = better across all 4 grading criteria"
     ) +
-    theme_als +
+    theme_als() +
     theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8))
   
   ggsave(file.path(output_dir, "plot_backend_comparison.png"), p2,
@@ -272,7 +276,7 @@ p3 <- ggplot(averaged_h, aes(x = label, y = id, fill = grade_total)) +
                       length(unique(averaged_h$id)), " questions"),
     x = NULL, y = NULL
   ) +
-  theme_als +
+  theme_als() +
   theme(
     axis.text.x      = element_text(angle = 30, hjust = 0, size = 8),
     axis.text.y      = element_text(size = 8, face = "bold"),
@@ -327,7 +331,7 @@ p4 <- ggplot(cat_scores,
       "Nonsense = refusal/clarification  ·  Toolfree = pure SQL"
     )
   ) +
-  theme_als +
+  theme_als() +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 ## ncol=3 means up to 3 rows for 9 categories — adjust height accordingly
@@ -370,7 +374,7 @@ p5 <- ggplot(crit_scores,
     x = NULL, y = "Proportion correct",
     caption  = "Answer correct · Concise response · Hallucination free · Tool correct"
   ) +
-  theme_als +
+  theme_als() +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 ggsave(file.path(output_dir, "plot_criteria_scores.png"), p5,
@@ -420,7 +424,7 @@ if ("elapsed_sec" %in% colnames(averaged)) {
       x = NULL, y = "Mean elapsed time",
       caption  = "Includes all agentic loop steps · excludes the 2-sec inter-question sleep"
     ) +
-    theme_als +
+    theme_als() +
     theme(axis.text.x = element_text(angle = 30, hjust = 1))
   
   ggsave(file.path(output_dir, "plot_timing.png"), p6,
@@ -471,7 +475,7 @@ p7 <- ggplot(correct_counts,
     caption  = paste0("Out of ", max(correct_counts$n_total), " questions total  ·  ",
                       "A high score here with a low overall score indicates verbose/hallucinating responses")
   ) +
-  theme_als +
+  theme_als() +
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(color = "#e8e8e8")
@@ -534,7 +538,7 @@ if (any(new_cats %in% unique(averaged$category))) {
         "Toolfree: complex SQL questions answerable without MCP tools"
       )
     ) +
-    theme_als +
+    theme_als() +
     theme(axis.text.x = element_text(angle = 30, hjust = 1))
   
   ggsave(file.path(output_dir, "plot_new_categories.png"), p8,

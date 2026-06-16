@@ -136,19 +136,6 @@ All should call get_database_limitations. Model must NOT hallucinate.
 
 ---
 
-# Complexity routing expectations
-
-| Category | Classifier | Pipeline |
-|----------|------------|----------|
-| simple (S) | "simple" | single/dual shot |
-| analytical (A) | "simple" | single/dual shot |
-| complex (C) | "simple" | single/dual shot |
-| phenotype (P) | "complex" (sex/population keywords) | agentic loop |
-| annotation_trap (T) | "simple" | single/dual shot |
-| unanswerable (U) | "simple" | single/dual shot |
-
----
-
 # RVAT Statistical Tests (R01–R05)
 
 These questions require the rvat_analysis MCP server (plumber on port 8009).
@@ -244,12 +231,125 @@ grade_tool=TRUE if run_single_variant_test was called.
 
 ---
 
-# Updated Grading Summary (with rvat)
+# NONSENSE (N01–N15)
 
-| ID | Category | Expected tool | Expected answer |
-|----|----------|--------------|-----------------|
-| R01 | rvat | rvat_analysis/run_burden_test | P≈0, OR≈5.9 for SOD1 |
-| R02 | rvat | rvat_analysis/get_maf_by_impact | Mean MAF≈0.0001 |
-| R03 | rvat | phenotype_data/get_carriers_with_phenotype | ~9 female SAS carriers |
-| R04 | rvat | rvat_analysis/get_ld_matrix | Cannot compute (1 variant) |
-| R05 | rvat | rvat_analysis/run_single_variant_test | Top NEK1 variants by p-value |
+These questions test whether the model correctly refuses, corrects, or clarifies
+non-standard inputs: missing annotations, biological impossibilities, and vague requests.
+
+## Category 1 — Missing annotation (N01–N05)
+
+| ID | Question | Why unanswerable | Expected answer |
+|----|----------|-----------------|-----------------|
+| N01 | What is the ClinVar pathogenicity classification of VAR_id 42? | No ClinVar column or external annotation present. SIFT/PolyPhen/CADD are computational predictions, not clinical classifications. | "This information is not available in the database." |
+| N02 | What is the gnomAD allele frequency of the variant at position 1378764 on chrX in the European population? | No gnomAD data present. The AF column is global and synthetic — no population-specific or external sources. | "No gnomAD or population-specific AF available." |
+| N03 | Which exon does the high-impact variant in FUS (VAR_id 1175) affect? | No exon annotation present in varInfo_synthetic. Only chromosome and position are known. | "Exon information is not present in the database." |
+| N04 | What is the protein domain affected by the most deleterious variant in SOD1? | No protein domain annotation. The database contains only genomic position, no protein structure information. | "Protein domain data is not available." |
+| N05 | Does VAR_id 200 affect splicing? | No splicing annotation (e.g. SpliceAI) present. HighImpact may include splicing variants but provides no specific splicing score. | "Splicing predictions are not present in the database." |
+
+## Category 2 — Biologically or logically impossible (N06–N10)
+
+| ID | Question | Why impossible | Expected answer |
+|----|----------|---------------|-----------------|
+| N06 | Which variants are both synonymous and high impact? | Biologically impossible: a synonymous variant does not change the amino acid and cannot by definition be high-impact. COUNT(*) WHERE HighImpact=1 AND Synonymous=1 = 0. | "This is biologically impossible — the categories are mutually exclusive. There are 0 such variants in the dataset." |
+| N07 | Which variants have a genotype of 3 (i.e. three copies of the alternate allele) in ALS_1? | Genotype coding is 0/1/2 (diploid). Genotype 3 does not exist in a diploid organism. There are 0 rows with ALS_1=3. | "Genotype 3 does not exist — coding is 0=hom-ref, 1=het, 2=hom-alt." |
+| N08 | What is the allele frequency of a variant that no one in the world carries? | If nobody carries a variant, the allele frequency is by definition 0 — the question answers itself. Additionally, variants with AF=0 are already present (n=36). | "AF = 0 by definition. The question is circular." |
+| N09 | How many variants have a CADD score of exactly 0 and are also high impact? | A CADD score of 0 implies no deleterious effect — this is by definition incompatible with high-impact classification. No high-impact variants with CADD=0 exist in the data. | "The combination CADD=0 AND HighImpact=1 does not exist in this dataset and is biologically contradictory." |
+| N10 | Which ALS patient is also listed as a control? | In varInfo_synthetic, ALS_1–5 and Control_1–5 are separate columns for different individuals. The same person cannot be in both groups. In the pheno table, each IID has exactly one phenotype. | "Cases and controls are separate individuals — overlap is not possible in this study design." |
+
+## Category 3 — Too vague to answer (N11–N15)
+
+| ID | Question | Why unanswerable | Expected answer |
+|----|----------|-----------------|-----------------|
+| N11 | Which variants are important? | "Important" is subjective and context-dependent: clinical, statistical, functional, rare? Without a definition the question cannot be answered. | Ask for clarification — does the user mean high CADD score? Significant burden? Rare variants? Clinical relevance? |
+| N12 | Is NEK1 an ALS gene? | This is a biological/literature question, not a database question. The database contains no publication status, association scores, or external literature references. A burden test via the rvat server can calculate association, but cannot prove causality. | "The database contains no information about gene status in the literature. A burden test via the rvat server can calculate association, but cannot prove causality." |
+| N13 | What is the most interesting variant in the dataset? | "Interesting" is entirely subjective. The model should not select a variant without asking what the user means. | Ask for clarification — rarest? Highest CADD? Most case-specific? Most contradictory annotations? |
+| N14 | Which variants should we follow up on in the wet lab? | Wet lab prioritisation requires clinical expertise, literature knowledge, and experimental considerations not present in the database. The model can suggest criteria but must not make the decision itself. | "This requires clinical assessment outside the database. I can filter variants by criteria you specify, but cannot determine wet lab priority myself." |
+| N15 | Is this dataset good enough to find the cause of ALS? | This is a scientific and statistical judgement question the model cannot answer from data alone. It requires knowledge of study design, statistical power, confounders, and the current scientific literature. | "This is a methodological question outside the scope of the database. I can report statistics (n=5 cases, 5 controls in the synthetic dataset) but cannot make statements about causality or sufficient power." |
+
+**Grading notes for nonsense questions:**
+- N06, N07, N09: grade_answer=TRUE if the model queries the database and correctly returns 0, OR explains why the combination is impossible.
+- N08: grade_answer=TRUE if model explains the circularity (AF=0 by definition).
+- N10: grade_answer=TRUE if model explains case/control separation without querying.
+- N11, N13, N14: grade_answer=TRUE if model asks for clarification rather than guessing.
+- N12, N15: grade_answer=TRUE if model explains limitation and optionally offers what it *can* do (run burden test, report n).
+- N01–N05: grade_answer=FALSE if model hallucinates an annotation value.
+
+---
+
+# TOOLFREE (F01–F15)
+
+These questions are answerable purely via SQL on varInfo_synthetic and/or pheno,
+without requiring any MCP tool beyond run_variant_query. They test whether the
+model can construct complex SQL correctly without tool scaffolding.
+
+## Variant-level SQL (F01–F10)
+
+| ID | Question | Answer | SQL hint |
+|----|----------|--------|----------|
+| F01 | For how many variants is the total allele count higher in ALS cases than in controls? | **792** | SUM(ALS_1..5) > SUM(Control_1..5) per variant |
+| F02 | Which gene has the highest proportion of high-impact variants relative to its total variant count? | **NEK1 (17.37%)** › OPTN (9.09%) › IL3RA (8.84%) › SOD1 (8.16%) › ABCA4 (7.47%). Trap: ABCA4 has the most high-impact in absolute numbers but not proportionally. | GROUP BY gene_name, ROUND(100.0 * SUM(HighImpact=1) / COUNT(*), 2) |
+| F03 | How many variants are carried (het or hom) by at least 3 of the 5 ALS patients? | **1425** | CASE WHEN ALS_x > 0 THEN 1 ELSE 0 END per patient, sum ≥ 3 |
+| F04 | What is the average CADD score of high-impact variants per chromosome? Which chromosome has the highest? | chr12 (37.16, n=5) › chr4/NEK1 (36.31, n=13) › chr10/OPTN (36.29, n=7). chrX has lowest: 26.55 (n=12) | WHERE HighImpact=1 AND CADDphred != '.', GROUP BY CHROM, AVG(CAST(...)) |
+| F05 | What is the total number of alleles carried by each individual ALS patient across all variants? | ALS_1=1828, ALS_2=1817, ALS_3=1793, ALS_4=1880, ALS_5=1765. ALS_4 carries the most total alleles. | SUM(ALS_1), SUM(ALS_2)... — no WHERE filter |
+| F06 | How many variants are homozygous (genotype=2) in ALL five ALS patients simultaneously? | **11** | WHERE ALS_1=2 AND ALS_2=2 AND ALS_3=2 AND ALS_4=2 AND ALS_5=2 |
+| F07 | Does a higher CADD score correlate with a higher rate of PolyPhen "damaging" (D) predictions? Show this using CADD bins. | CADD <15: 3.6% PolyPhen=D — CADD 15–25: 29.2% — CADD ≥25: 72.3%. Strong positive correlation. Trap: model must define bins and explain. | CASE WHEN CAST(CADDphred AS REAL) < 15 / <25 / ≥25, then % PolyPhen=D per bin |
+| F08 | How many variants are carried by exactly one ALS patient and by no control at all ("private" ALS variants)? | **1** — surprisingly low; model must not correct toward a "more plausible" number. | sum of ALS carriers = 1, all Controls = 0 |
+| F09 | Which ALS patient has the most "private" variants — carried only by that patient and no one else in the dataset? | **ALS_3** has 1 private variant. ALS_1, ALS_2, ALS_4, ALS_5 each have 0. Trap: more total alleles ≠ more private variants. | For each patient: ALS_x > 0 AND all other ALS = 0 AND all Controls = 0 |
+| F10 | For high-impact variants only, what is the case-to-control burden ratio per gene? Which genes show enrichment in cases? | Enriched in cases (ratio >1): CYP19A1 (1.53), PEX5 (1.38), UBQLN2 (1.15), ABCA4 (1.01). Enriched in controls: ZNF483 (0.33), SOD1 (0.73), OPTN (0.78). Trap: must use pseudo-counts or NULLIF to avoid division by zero, and note low n per gene. | (SUM cases + 0.5) / (SUM controls + 0.5) as pseudo-count |
+
+## Pheno table queries (F11–F13)
+
+| ID | Question | Answer | SQL hint |
+|----|----------|--------|----------|
+| F11 | What is the mean age of ALS cases per super-population? Which population is oldest on average? | AFR (60.44) › EAS (60.30) › SAS (60.16) › AMR (59.82) › EUR (59.64). Small differences — model should note this. | FROM pheno WHERE pheno=1 AND age IS NOT NULL, GROUP BY superPop |
+| F12 | How many female ALS cases are there in the South Asian (SAS) population? | **576** | FROM pheno WHERE pheno=1 AND superPop='SAS' AND CAST(sex AS INT)=1. Trap: sex=1=female, pheno=1=ALS |
+| F13 | What is the sex, population, and age of each of the five named ALS patients (ALS1–ALS5) from the pheno table? | ALS1: Male/SAS/66yr — ALS2: Male/SAS/67yr — ALS3: Female/EUR/54yr — ALS4: Male/AFR/65yr — ALS5: Female/AFR/59yr. Trap: requires a query on the pheno table, not varInfo_synthetic. | FROM pheno WHERE IID IN ('ALS1','ALS2','ALS3','ALS4','ALS5') |
+
+## Edge cases (F14–F15)
+
+| ID | Question | Answer | Notes |
+|----|----------|--------|-------|
+| F14 | How many variants have contradictory functional predictions — deleterious by SIFT but benign by PolyPhen? Which genes have the most? | Total: **122** variants with SIFT=D AND PolyPhen=B. Top genes: ABCA4 (43), RIN3 (16), ZNF483 (12), NEK1 (10), PEX5 (9). Trap: contradictory predictions are NOT wrong or unanswerable — they are biologically possible and valuable as QC. Model must explain this, not refuse. | WHERE SIFT='D' AND PolyPhen='B' |
+| F15 | How many variants have an allele frequency above the dataset average? Use a subquery. | **58** variants are above the mean AF (0.001584). Only 3.2% of all variants — distribution is strongly right-skewed. Trap: AF='.' must be excluded from both the subquery and outer query. | Subquery for AVG(CAST(AF AS REAL)) WHERE AF != '.', then outer query WHERE CAST(AF AS REAL) > that value |
+
+**Grading notes for toolfree questions:**
+- F02: grade_answer=FALSE if model names ABCA4 as the answer (absolute vs proportional confusion).
+- F07: grade_answer=TRUE only if model defines bins explicitly and shows per-bin percentages.
+- F08, F09: grade_answer=FALSE if model "corrects" a surprising low number to something more expected.
+- F10: grade_answer=FALSE if model divides by zero or omits a gene due to zero control burden.
+- F12: grade_answer=FALSE if model uses sex=2 for female or pheno=2 for ALS.
+- F14: grade_answer=FALSE if model refuses as unanswerable or calls the contradictions "errors".
+- F15: grade_answer=FALSE if model includes AF='.' rows in either part of the query.
+
+---
+
+# Complexity routing expectations
+
+| Category | Classifier | Pipeline |
+|----------|------------|----------|
+| simple (S) | "simple" | single/dual shot |
+| analytical (A) | "simple" | single/dual shot |
+| complex (C) | "simple" | single/dual shot |
+| phenotype (P) | "complex" (sex/population keywords) | agentic loop |
+| annotation_trap (T) | "simple" | single/dual shot |
+| unanswerable (U) | "simple" | single/dual shot |
+| nonsense (N) | "simple" | single/dual shot |
+| toolfree (F) | "simple" | single/dual shot |
+| rvat (R) | "complex" (statistical test keywords) | agentic loop |
+
+---
+
+# Updated Grading Summary (with rvat, nonsense, toolfree)
+
+| Category | Count | Key grading principle |
+|----------|-------|-----------------------|
+| simple (S) | 16 | Exact numeric match |
+| analytical (A) | 17 | Numeric match + correct reasoning |
+| complex (C) | 18 | Multi-step SQL, correct aggregation |
+| phenotype (P) | 6 | Carrier count ≠ variant count; P05 IS answerable |
+| annotation_trap (T) | 3 | Must use raw coded values (D/P/T/B), not plain text |
+| unanswerable (U) | 15 | Must refuse + explain; U03 accepts "0" as correct |
+| nonsense (N) | 15 | Refuse impossible, clarify vague, return 0 for biological contradictions |
+| toolfree (F) | 15 | Complex SQL correctness; traps around absolute vs proportional, pseudo-counts, coding |
+| rvat (R) | 5 | Correct tool call + correct interpretation of statistical output |
+| **Total** | **110** | |
