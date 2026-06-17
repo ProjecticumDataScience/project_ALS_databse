@@ -1,16 +1,17 @@
-name: mcp_env
+name: als_mcp
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - ollama
-  - r-base
+  - python=3.11
+  - r-base=4.4
   - r-shiny
   - r-bslib
   - r-dt
   - r-httr2
   - r-jsonlite
-  - python=3.11
+  - r-shinyjs
   - pip
   - pip:
-    - mcp
-    - mcpo
+      - mcp>=1.0.0
+      - mcpo>=0.0.20
