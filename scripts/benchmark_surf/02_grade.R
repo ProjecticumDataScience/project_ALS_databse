@@ -13,15 +13,43 @@ library(rollama)
 ## When sourced from run_pipeline.R, BENCHMARK_CSV is already set
 ## by 01_benchmark.R. When run standalone, set it manually below.
 if (!exists("BENCHMARK_CSV")) {
-  BENCHMARK_CSV <- "~/project_ALS_databse/analysis/benchmark_testing/benchmark_20260511_093437/all_models_combined.csv"
+  BENCHMARK_CSV <- NULL  ## set automatically by run_pipeline.R — override here if running standalone
 }
 
 ## ── Resolve paths from config ─────────────────────────────────
 if (!exists("BENCHMARKS_MD")) {
-  source(file.path(dirname(sys.frame(1)$ofile), "config.R"))
+  cfg <- tryCatch(
+    file.path(dirname(sys.frame(1)$ofile), "config.R"),
+    error = function(e) file.path(getwd(), "config.R")
+  )
+  source(cfg)
 }
 
 benchmark_content <- paste(readLines(path.expand(BENCHMARKS_MD)), collapse = "\n")
+
+## ── Parse benchmark markdown into a per-ID answer lookup ─────
+## Extracts rows from pipe tables: | ID | Question | Answer | ...
+parse_benchmark_answers <- function(md_text) {
+  lines  <- strsplit(md_text, "\n")[[1]]
+  lookup <- list()
+  for (ln in lines) {
+    ln <- trimws(ln)
+    if (!startsWith(ln, "|")) next
+    cols <- strsplit(ln, "|", fixed = TRUE)[[1]]
+    cols <- trimws(cols[nchar(trimws(cols)) > 0])
+    if (length(cols) < 3) next
+    id  <- cols[1]
+    ans <- cols[3]
+    ## Skip header/separator rows
+    if (grepl("^[-:]+$", ans) || ans == "Answer" || ans == "Expected answer") next
+    if (grepl("^[A-Z][0-9]{2}$", id)) {
+      lookup[[id]] <- ans
+    }
+  }
+  lookup
+}
+ANSWER_LOOKUP <- parse_benchmark_answers(benchmark_content)
+cat("Parsed", length(ANSWER_LOOKUP), "expected answers from benchmark markdown\n")
 
 ## ── Timestamped grading subdirectory ─────────────────────────
 grading_run_timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
@@ -54,56 +82,45 @@ auto_grade_ollama <- function(csv_path, outfile_name, judge_model = JUDGE_MODEL)
   file$grade_total            <- NA
   file$grade_reasoning        <- NA
   
+  ## Short static rubric — no benchmark content embedded
   rubric <- paste0(
-    "You are grading a genomics chatbot's responses to questions about an ALS variant database.
-Genotype values (0,1,2) indicate zygosity only, NOT disease association.
-Missing values are stored as '.' not NULL.
-PolyPhen and SIFT are computational predictions only, NOT evidence of pathogenicity.
-A variant cannot be both Synonymous and HighImpact simultaneously.
-
-Below is the full benchmark document containing the expected SQL queries and correct answers
-for each question. Use this as your ground truth when grading:
-
-================================================================
-", benchmark_content, "
-================================================================
-
-Grade the response on 4 criteria, each true or false:
-
-1. grade_answer: Is the final answer correct or appropriate?
-   - Compare against the expected answer in the benchmark document above
-   - For unanswerable questions: did it correctly refuse and explain why?
-   - For phenotype questions (P01-P06): multi-table joins required. Accept any
-     correct answer. A correct refusal explaining the limitation is also acceptable.
-   - For analytical questions (A01-A17): all answerable from varInfo_synthetic.
-     grade_answer=FALSE if model incorrectly refuses.
-   - For complex questions (C01-C18): multi-step queries on varInfo_synthetic.
-     Accept approximate answers for aggregations; exact numbers preferred.
-   - For annotation_trap questions (T01-T03): model must use correct codes.
-     T01: PolyPhen='P' = 182. T02: SIFT='T' = 565. T03: 0 variants (mutually exclusive).
-     grade_answer=FALSE if model searches for 'possibly damaging' as text or uses wrong code.
-
-2. grade_minimal_response: Is the response concise (1-3 sentences)?
-   - true if brief and to the point
-   - false if overly verbose, lists individual rows, or rambles
-
-3. grade_hallucination: Is the response free of hallucinations?
-   - true if no invented data, column names, or biological misinterpretations
-   - false if it invents values, misinterprets genotypes as disease association,
-     or claims pathogenicity from PolyPhen/SIFT alone
-
-4. grade_tool: Was the correct tool selected with correct parameters?
-   - Compare against the expected SQL in the benchmark document above
-   - true if the SQL logic is sound and would return the right data
-   - false if wrong columns, wrong logic, or no SQL when one was needed
-   - true if question is unanswerable and no SQL was correctly not generated
-
-You MUST respond with ONLY a JSON object. No preamble. No explanation. No markdown.
-Start your response with { and end with }.
-Example of the exact format required:
-{grade_answer: true, grade_minimal_response: true, grade_hallucination: true, grade_tool: true, reasoning: the answer is correct}
-
-The keys must be exactly: grade_answer, grade_minimal_response, grade_hallucination, grade_tool, reasoning"
+    "You are grading a genomics chatbot that queries an ALS variant database.\n",
+    "Database facts:\n",
+    "- Genotype values 0/1/2 = ref/het/hom, NOT disease association\n",
+    "- Missing values stored as '.' not NULL\n",
+    "- PolyPhen/SIFT are computational predictions, NOT clinical pathogenicity\n",
+    "- A variant cannot be both Synonymous and HighImpact simultaneously\n\n",
+    "Grade on exactly 4 criteria (true/false each):\n",
+    "1. grade_answer: Does the answer match the expected answer provided?\n",
+    "   - Unanswerable Qs: TRUE if model correctly refuses and explains why\n",
+    "   - Nonsense Qs (N): TRUE if model refuses/explains impossibility or returns 0\n",
+    "   - Toolfree Qs (F): TRUE if the number/result matches expected\n",
+    "   - Accept approximate numbers for aggregations (within 5%)\n",
+    "2. grade_minimal_response: Is the response 1-3 sentences, no fluff?\n",
+    "   - FALSE if it mentions rows, query details, or analysis process\n",
+    "   - FALSE if it adds unnecessary biological speculation\n",
+    "3. grade_hallucination: Did the response avoid inventing data not present in the tool result?\n",
+    "   - TRUE in almost all cases where the answer is correct or correctly refused\n",
+    "   - TRUE if the response says this information is not available\n",
+    "   - TRUE if numbers match or are close to the expected answer\n",
+    "   - TRUE even if the answer is wrong due to wrong tool — that is grade_tool=FALSE, not hallucination\n",
+    "   - FALSE ONLY if the response states a SPECIFIC number or fact that directly CONTRADICTS the tool result\n",
+    "   - FALSE ONLY examples: says 5 carriers when tool returned 2, says chr1 when tool returned chrX\n",
+    "   - Do NOT mark FALSE just because response is brief, used a tool, or you disagree with phrasing\n",
+    "   - IMPORTANT: A correct refusal ('not available') is NEVER a hallucination — mark TRUE\n",
+    "   - IMPORTANT: Saying 0 when the answer is biologically impossible is NOT a hallucination — mark TRUE\n",
+    "4. grade_tool: Was the right tool called with correct logic?\n",
+    "   - TRUE if SQL/tool logic would return the correct data\n",
+    "   - TRUE if unanswerable and no tool correctly skipped\n\n",
+    "Respond with ONLY a JSON object. No markdown. No preamble. Start with {\n",
+    "Required keys: grade_answer, grade_minimal_response, grade_hallucination, grade_tool, reasoning\n",
+    "Example: {\"grade_answer\": true, \"grade_minimal_response\": true, \"grade_hallucination\": true, \"grade_tool\": true, \"reasoning\": \"correct\"}\n",
+    "SPECIAL CASES:\n",
+    "- P01 (female carriers ABCA4): accept BOTH 2 (named ALS patients only) AND 5 (all female carriers in full dataset)\n",
+    "- P02 (female carriers SOD1): accept BOTH 2 AND 5\n",
+    "- P03 (SAS carriers NEK1): accept BOTH 2 AND 4\n",
+    "- C02 (greatest burden difference): ABCA4 (diff=83) is correct — if model says PEX5 or TARDBP, grade_answer=FALSE\n",
+    "- C13 (PolyPhen distribution high-impact): missing ('.') = 106 is a valid category — penalise if omitted\n"
   )
   
   for (row in 1:nrow(file)) {
@@ -116,32 +133,41 @@ The keys must be exactly: grade_answer, grade_minimal_response, grade_hallucinat
       "Final response:\n", file$response[row]
     )
     
+    ## ── Build per-question prompt with only the relevant answer ──
+    expected_ans <- ANSWER_LOOKUP[[file$id[row]]]
+    expected_str <- if (!is.null(expected_ans)) {
+      paste0("Expected answer: ", expected_ans)
+    } else {
+      paste0("Category: ", file$category[row],
+             " — use your knowledge of the database to assess correctness.")
+    }
+    
+    prompt_full <- paste0(
+      "Question ID: ", file$id[row], "\n",
+      "Category: ", file$category[row], "\n",
+      "Question: ", file$question[row], "\n",
+      expected_str, "\n\n",
+      "Chatbot full output (includes tool calls):\n", file$full[row], "\n\n",
+      "Chatbot final response:\n", file$response[row]
+    )
+    
     result <- tryCatch({
       resp <- ollamar::chat(
         model    = judge_model,
         messages = list(
           list(role = "system", content = rubric),
-          list(role = "user",   content = prompt)
+          list(role = "user",   content = prompt_full)
         ),
         format      = "json",
         output      = "text",
-        num_predict = 400,
+        num_predict = 300,
         temperature = 0
       )
-      
-      ## ── Robust JSON extraction ───────────────────────────
-      ## Find the first { and last } to extract the JSON block,
-      ## ignoring any preamble gemma3 adds before the JSON.
+      resp <- trimws(gsub("```json|```", "", resp))
       start <- regexpr("\\{", resp)[[1]]
       end   <- tail(gregexpr("\\}", resp)[[1]], 1)
-      
-      if (start == -1 || end == -1 || end < start) {
-        stop("No JSON object found in response")
-      }
-      
-      json_str <- substr(resp, start, end)
-      jsonlite::fromJSON(json_str)
-      
+      if (start == -1L || end == -1L || end < start) stop("No JSON found")
+      jsonlite::fromJSON(substr(resp, start, end))
     }, error = function(e) {
       cat("  PARSE ERROR on row", row, ":", conditionMessage(e), "\n")
       NULL

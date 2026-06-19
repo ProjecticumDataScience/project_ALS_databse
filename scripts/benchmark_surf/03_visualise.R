@@ -129,7 +129,8 @@ criterion_colors <- c(
 )
 
 ## ── Shared theme ──────────────────────────────────────────────
-theme_als <- function() theme_minimal(base_size = 12) +
+theme_als <- function() {
+  theme_minimal(base_size = 12) %+replace%
   theme(
     plot.title        = element_text(face = "bold", size = 14,
                                      margin = margin(b = 6)),
@@ -150,6 +151,7 @@ theme_als <- function() theme_minimal(base_size = 12) +
                                      margin = margin(b = 6)),
     strip.background  = element_rect(fill = "grey95", color = NA)
   )
+}
 
 ## ══════════════════════════════════════════════════════════════
 ## PLOT 1: Overall score — one bar per backend, facet by backend

@@ -1,0 +1,331 @@
+"model","backend","id","category","grade_answer","grade_minimal_response","grade_hallucination","grade_tool","grade_total","elapsed_sec"
+"llama3.1:70b","agentic_single","A01","analytical",0,1,0,0,1,59.2
+"llama3.1:70b","agentic_single","A02","analytical",1,1,0,1,3,53.9
+"llama3.1:70b","agentic_single","A03","analytical",0,0,1,0,1,265.8
+"llama3.1:70b","agentic_single","A04","analytical",0,0,1,0,1,45.1
+"llama3.1:70b","agentic_single","A05","analytical",0,0,1,0,1,128.1
+"llama3.1:70b","agentic_single","A06","analytical",1,1,0,1,3,79.6
+"llama3.1:70b","agentic_single","A07","analytical",1,1,0,1,3,53.7
+"llama3.1:70b","agentic_single","A08","analytical",1,1,0,1,3,55.3
+"llama3.1:70b","agentic_single","A09","analytical",1,1,0,1,3,80.4
+"llama3.1:70b","agentic_single","A10","analytical",1,1,0,1,3,71.6
+"llama3.1:70b","agentic_single","A11","analytical",1,1,0,1,3,75.6
+"llama3.1:70b","agentic_single","A12","analytical",1,1,0,1,3,45.2
+"llama3.1:70b","agentic_single","A13","analytical",1,1,0,1,3,67.7
+"llama3.1:70b","agentic_single","A14","analytical",1,1,0,1,3,73.4
+"llama3.1:70b","agentic_single","A15","analytical",1,1,0,1,3,58.5
+"llama3.1:70b","agentic_single","A16","analytical",0,0,1,0,1,36.2
+"llama3.1:70b","agentic_single","A17","analytical",1,1,0,1,3,60.5
+"llama3.1:70b","agentic_single","C01","complex",1,1,0,1,3,72.4
+"llama3.1:70b","agentic_single","C02","complex",0,1,0,0,1,69.3
+"llama3.1:70b","agentic_single","C03","complex",0,0,1,0,1,70.4
+"llama3.1:70b","agentic_single","C04","complex",1,1,0,1,3,72.7
+"llama3.1:70b","agentic_single","C05","complex",1,1,0,1,3,74.4
+"llama3.1:70b","agentic_single","C06","complex",0,0,1,0,1,71.9
+"llama3.1:70b","agentic_single","C07","complex",1,0,0,1,2,121.2
+"llama3.1:70b","agentic_single","C08","complex",0,1,0,0,1,71.2
+"llama3.1:70b","agentic_single","C09","complex",1,1,0,1,3,100.9
+"llama3.1:70b","agentic_single","C10","complex",0,1,0,0,1,75.9
+"llama3.1:70b","agentic_single","C11","complex",1,1,0,1,3,59.1
+"llama3.1:70b","agentic_single","C12","complex",1,1,0,1,3,166.7
+"llama3.1:70b","agentic_single","C13","complex",0,1,0,0,1,81.6
+"llama3.1:70b","agentic_single","C14","complex",0,1,0,0,1,64.5
+"llama3.1:70b","agentic_single","C15","complex",0,1,0,0,1,62.5
+"llama3.1:70b","agentic_single","C16","complex",0,0,1,0,1,24.7
+"llama3.1:70b","agentic_single","C17","complex",0,1,0,0,1,59.7
+"llama3.1:70b","agentic_single","C18","complex",0,1,0,0,1,75.3
+"llama3.1:70b","agentic_single","F01","toolfree",0,0,0,0,0,47.4
+"llama3.1:70b","agentic_single","F02","toolfree",1,0,0,0,1,71.5
+"llama3.1:70b","agentic_single","F03","toolfree",1,1,0,1,3,105.9
+"llama3.1:70b","agentic_single","F04","toolfree",1,1,0,1,3,88.1
+"llama3.1:70b","agentic_single","F05","toolfree",0,0,1,0,1,53.1
+"llama3.1:70b","agentic_single","F06","toolfree",1,1,0,1,3,60
+"llama3.1:70b","agentic_single","F07","toolfree",0,1,0,0,1,146.6
+"llama3.1:70b","agentic_single","F08","toolfree",0,0,0,0,0,141.1
+"llama3.1:70b","agentic_single","F09","toolfree",0,0,1,0,1,22.8
+"llama3.1:70b","agentic_single","F10","toolfree",0,0,1,0,1,116.8
+"llama3.1:70b","agentic_single","F11","toolfree",1,1,0,1,3,90.9
+"llama3.1:70b","agentic_single","F12","toolfree",0,1,0,0,1,158.2
+"llama3.1:70b","agentic_single","F13","toolfree",0,1,0,0,1,57.3
+"llama3.1:70b","agentic_single","F14","toolfree",1,1,0,1,3,70.5
+"llama3.1:70b","agentic_single","F15","toolfree",1,1,0,1,3,53
+"llama3.1:70b","agentic_single","N01","nonsense",1,1,0,1,3,41.7
+"llama3.1:70b","agentic_single","N02","nonsense",1,1,0,1,3,30.3
+"llama3.1:70b","agentic_single","N03","nonsense",1,0,0,0,1,32.5
+"llama3.1:70b","agentic_single","N04","nonsense",1,1,0,1,3,23.1
+"llama3.1:70b","agentic_single","N05","nonsense",1,1,0,0,2,0
+"llama3.1:70b","agentic_single","N06","nonsense",1,1,0,1,3,46.3
+"llama3.1:70b","agentic_single","N07","nonsense",1,1,0,1,3,45.6
+"llama3.1:70b","agentic_single","N08","nonsense",1,0,0,0,1,51.5
+"llama3.1:70b","agentic_single","N09","nonsense",0,0,0,0,0,54.7
+"llama3.1:70b","agentic_single","N10","nonsense",1,1,0,0,2,29.4
+"llama3.1:70b","agentic_single","N11","nonsense",1,1,0,0,2,38.1
+"llama3.1:70b","agentic_single","N12","nonsense",1,1,0,1,3,41.7
+"llama3.1:70b","agentic_single","N13","nonsense",1,1,0,0,2,22.2
+"llama3.1:70b","agentic_single","N14","nonsense",1,1,0,1,3,21
+"llama3.1:70b","agentic_single","N15","nonsense",1,1,0,0,2,21.1
+"llama3.1:70b","agentic_single","P01","phenotype",0,1,0,0,1,78.1
+"llama3.1:70b","agentic_single","P02","phenotype",0,1,0,0,1,67.1
+"llama3.1:70b","agentic_single","P03","phenotype",0,1,0,0,1,64.4
+"llama3.1:70b","agentic_single","P04","phenotype",1,1,0,1,3,64.2
+"llama3.1:70b","agentic_single","P05","phenotype",1,1,0,1,3,69.1
+"llama3.1:70b","agentic_single","P06","phenotype",1,1,0,1,3,43.3
+"llama3.1:70b","agentic_single","R01","rvat",1,1,0,1,3,71
+"llama3.1:70b","agentic_single","R02","rvat",1,1,0,1,3,99.3
+"llama3.1:70b","agentic_single","R03","rvat",1,1,0,1,3,77.1
+"llama3.1:70b","agentic_single","R04","rvat",1,1,0,1,3,46.8
+"llama3.1:70b","agentic_single","R05","rvat",1,1,0,1,3,104.7
+"llama3.1:70b","agentic_single","S01","simple",1,1,0,1,3,267.4
+"llama3.1:70b","agentic_single","S02","simple",1,1,0,1,3,42.6
+"llama3.1:70b","agentic_single","S03","simple",1,1,0,1,3,54.3
+"llama3.1:70b","agentic_single","S04","simple",1,1,0,1,3,39.6
+"llama3.1:70b","agentic_single","S05","simple",1,1,0,1,3,35.8
+"llama3.1:70b","agentic_single","S06","simple",1,1,0,1,3,43.5
+"llama3.1:70b","agentic_single","S07","simple",1,1,0,1,3,47
+"llama3.1:70b","agentic_single","S08","simple",1,1,0,1,3,41.6
+"llama3.1:70b","agentic_single","S09","simple",1,1,0,1,3,42.3
+"llama3.1:70b","agentic_single","S10","simple",1,1,0,1,3,35.3
+"llama3.1:70b","agentic_single","S11","simple",1,1,0,1,3,97.3
+"llama3.1:70b","agentic_single","S12","simple",1,1,0,1,3,40.8
+"llama3.1:70b","agentic_single","S13","simple",1,1,0,1,3,54.6
+"llama3.1:70b","agentic_single","S14","simple",1,1,0,1,3,46.1
+"llama3.1:70b","agentic_single","S15","simple",1,1,0,1,3,40.6
+"llama3.1:70b","agentic_single","S16","simple",1,1,0,1,3,41.2
+"llama3.1:70b","agentic_single","T01","annotation_trap",1,1,0,1,3,42.4
+"llama3.1:70b","agentic_single","T02","annotation_trap",1,1,0,1,3,36.6
+"llama3.1:70b","agentic_single","T03","annotation_trap",1,1,0,1,3,51.6
+"llama3.1:70b","agentic_single","U01","unanswerable",1,1,0,1,3,39.3
+"llama3.1:70b","agentic_single","U02","unanswerable",1,1,0,0,2,28.3
+"llama3.1:70b","agentic_single","U03","unanswerable",1,1,0,1,3,47.3
+"llama3.1:70b","agentic_single","U04","unanswerable",1,1,0,1,3,38.5
+"llama3.1:70b","agentic_single","U05","unanswerable",1,1,0,1,3,21
+"llama3.1:70b","agentic_single","U06","unanswerable",1,1,0,1,3,22.1
+"llama3.1:70b","agentic_single","U07","unanswerable",1,1,0,1,3,21.1
+"llama3.1:70b","agentic_single","U08","unanswerable",1,1,0,1,3,39.6
+"llama3.1:70b","agentic_single","U09","unanswerable",1,1,1,1,4,23.2
+"llama3.1:70b","agentic_single","U10","unanswerable",1,1,0,1,3,22.4
+"llama3.1:70b","agentic_single","U11","unanswerable",1,1,0,0,2,25.9
+"llama3.1:70b","agentic_single","U12","unanswerable",1,1,0,1,3,21.7
+"llama3.1:70b","agentic_single","U13","unanswerable",1,1,1,1,4,22.1
+"llama3.1:70b","agentic_single","U14","unanswerable",1,1,1,1,4,21
+"llama3.1:70b","agentic_single","U15","unanswerable",1,1,0,1,3,22.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A01","analytical",0,0,1,0,1,59.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A02","analytical",1,1,0,1,3,53.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A03","analytical",1,1,0,1,3,153.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A04","analytical",0,0,1,0,1,44.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A05","analytical",1,1,0,1,3,104.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A06","analytical",1,1,0,1,3,76.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A07","analytical",1,1,0,1,3,52.6
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A08","analytical",1,1,0,1,3,53.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A09","analytical",1,1,0,1,3,81.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A10","analytical",1,1,0,1,3,69.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A11","analytical",1,1,0,1,3,73.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A12","analytical",1,1,0,1,3,45.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A13","analytical",1,1,0,1,3,66.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A14","analytical",1,1,0,1,3,70.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A15","analytical",1,1,0,1,3,57.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A16","analytical",0,0,1,0,1,37.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","A17","analytical",1,1,0,1,3,61.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C01","complex",1,1,0,1,3,70.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C02","complex",0,1,0,0,1,66.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C03","complex",0,0,0,0,0,65
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C04","complex",1,1,0,1,3,72.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C05","complex",1,1,0,1,3,71.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C06","complex",0,0,1,0,1,72.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C07","complex",1,1,0,1,3,113.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C08","complex",0,1,0,0,1,70.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C09","complex",1,1,0,1,3,98.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C10","complex",0,1,0,0,1,75.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C11","complex",1,1,0,1,3,58.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C12","complex",1,1,0,1,3,170.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C13","complex",0,1,0,0,1,82.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C14","complex",0,1,0,0,1,63.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C15","complex",0,1,0,0,1,60.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C16","complex",0,0,1,0,1,24.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C17","complex",0,1,0,0,1,60
+"llama3.1:70b -> llama3.1:70b","agentic_dual","C18","complex",0,1,0,0,1,67.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F01","toolfree",0,0,0,0,0,46.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F02","toolfree",1,0,0,0,1,70.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F03","toolfree",1,1,0,1,3,107.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F04","toolfree",1,1,0,0,2,86.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F05","toolfree",0,0,1,0,1,44.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F06","toolfree",1,1,0,1,3,61.6
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F07","toolfree",0,0,0,0,0,173.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F08","toolfree",0,1,0,0,1,138.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F09","toolfree",0,0,1,0,1,20.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F10","toolfree",0,0,1,0,1,115.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F11","toolfree",1,1,0,1,3,98.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F12","toolfree",0,1,0,0,1,155.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F13","toolfree",0,1,0,0,1,58.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F14","toolfree",1,1,0,1,3,72.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","F15","toolfree",1,1,0,1,3,50.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N01","nonsense",1,1,0,1,3,39.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N02","nonsense",1,1,0,1,3,31.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N03","nonsense",1,0,0,0,1,32.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N04","nonsense",1,1,0,1,3,23
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N05","nonsense",1,1,0,0,2,0
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N06","nonsense",1,1,0,1,3,45.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N07","nonsense",1,1,0,1,3,42.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N08","nonsense",1,0,0,0,1,51
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N09","nonsense",0,0,0,0,0,51.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N10","nonsense",1,1,0,0,2,29.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N11","nonsense",1,1,0,0,2,38.6
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N12","nonsense",1,1,0,1,3,41
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N13","nonsense",1,1,0,0,2,21
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N14","nonsense",1,1,0,1,3,22.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","N15","nonsense",1,1,0,0,2,21.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P01","phenotype",0,1,0,0,1,78.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P02","phenotype",0,1,0,0,1,66.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P03","phenotype",0,0,0,0,0,64.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P04","phenotype",1,1,0,1,3,63.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P05","phenotype",1,1,0,1,3,68.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","P06","phenotype",1,1,0,1,3,42.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","R01","rvat",1,0,0,1,2,73.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","R02","rvat",1,1,0,1,3,97.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","R03","rvat",1,1,0,1,3,79.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","R04","rvat",1,1,0,1,3,43.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","R05","rvat",1,1,0,1,3,134.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S01","simple",1,1,0,1,3,52
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S02","simple",1,1,0,1,3,42
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S03","simple",1,1,0,1,3,55.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S04","simple",1,1,0,1,3,37.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S05","simple",1,1,0,1,3,34.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S06","simple",1,1,0,1,3,44.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S07","simple",1,1,0,1,3,49
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S08","simple",1,1,0,1,3,39
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S09","simple",1,1,0,1,3,41.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S10","simple",1,1,0,1,3,36.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S11","simple",1,1,0,1,3,92.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S12","simple",1,1,0,1,3,40.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S13","simple",1,1,0,1,3,53.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S14","simple",1,1,0,1,3,44.7
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S15","simple",1,1,0,1,3,39.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","S16","simple",1,1,0,1,3,40.6
+"llama3.1:70b -> llama3.1:70b","agentic_dual","T01","annotation_trap",1,1,0,1,3,42.1
+"llama3.1:70b -> llama3.1:70b","agentic_dual","T02","annotation_trap",1,1,0,1,3,36.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","T03","annotation_trap",1,1,0,1,3,51.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U01","unanswerable",1,1,0,1,3,39.8
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U02","unanswerable",1,1,0,0,2,28.3
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U03","unanswerable",1,1,0,1,3,47
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U04","unanswerable",1,1,0,1,3,31.6
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U05","unanswerable",1,1,0,1,3,21
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U06","unanswerable",1,1,0,1,3,21.2
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U07","unanswerable",1,1,0,1,3,21.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U08","unanswerable",1,1,0,1,3,38.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U09","unanswerable",1,1,1,1,4,23.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U10","unanswerable",1,1,0,1,3,20.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U11","unanswerable",1,1,1,1,4,22.4
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U12","unanswerable",1,1,0,1,3,20.9
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U13","unanswerable",1,1,1,1,4,21.5
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U14","unanswerable",1,1,1,1,4,21
+"llama3.1:70b -> llama3.1:70b","agentic_dual","U15","unanswerable",1,1,0,1,3,21.4
+"llama3.1:70b [adaptive]","agentic_adaptive","A01","analytical",0,1,0,0,1,58
+"llama3.1:70b [adaptive]","agentic_adaptive","A02","analytical",1,1,0,1,3,54.9
+"llama3.1:70b [adaptive]","agentic_adaptive","A03","analytical",1,1,0,1,3,164.8
+"llama3.1:70b [adaptive]","agentic_adaptive","A04","analytical",0,0,1,0,1,46.5
+"llama3.1:70b [adaptive]","agentic_adaptive","A05","analytical",1,1,0,1,3,104.5
+"llama3.1:70b [adaptive]","agentic_adaptive","A06","analytical",1,1,0,1,3,74.7
+"llama3.1:70b [adaptive]","agentic_adaptive","A07","analytical",1,1,0,1,3,52
+"llama3.1:70b [adaptive]","agentic_adaptive","A08","analytical",1,1,0,1,3,53.5
+"llama3.1:70b [adaptive]","agentic_adaptive","A09","analytical",1,1,0,1,3,78.6
+"llama3.1:70b [adaptive]","agentic_adaptive","A10","analytical",1,1,0,1,3,70.1
+"llama3.1:70b [adaptive]","agentic_adaptive","A11","analytical",1,1,0,1,3,76.3
+"llama3.1:70b [adaptive]","agentic_adaptive","A12","analytical",1,1,0,1,3,42.1
+"llama3.1:70b [adaptive]","agentic_adaptive","A13","analytical",1,1,0,1,3,68.2
+"llama3.1:70b [adaptive]","agentic_adaptive","A14","analytical",1,1,0,1,3,69.9
+"llama3.1:70b [adaptive]","agentic_adaptive","A15","analytical",1,1,0,1,3,58
+"llama3.1:70b [adaptive]","agentic_adaptive","A16","analytical",0,0,1,0,1,35.3
+"llama3.1:70b [adaptive]","agentic_adaptive","A17","analytical",1,1,0,1,3,60.4
+"llama3.1:70b [adaptive]","agentic_adaptive","C01","complex",1,1,0,1,3,69.9
+"llama3.1:70b [adaptive]","agentic_adaptive","C02","complex",0,1,0,0,1,69.2
+"llama3.1:70b [adaptive]","agentic_adaptive","C03","complex",0,0,0,0,0,68.2
+"llama3.1:70b [adaptive]","agentic_adaptive","C04","complex",1,1,0,1,3,74.3
+"llama3.1:70b [adaptive]","agentic_adaptive","C05","complex",1,1,0,1,3,71.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C06","complex",0,0,1,0,1,72.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C07","complex",0,1,0,0,1,120.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C08","complex",0,1,0,0,1,70.5
+"llama3.1:70b [adaptive]","agentic_adaptive","C09","complex",1,1,0,1,3,98.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C10","complex",0,1,0,0,1,74.8
+"llama3.1:70b [adaptive]","agentic_adaptive","C11","complex",1,0,0,1,2,61.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C12","complex",1,1,0,1,3,161.3
+"llama3.1:70b [adaptive]","agentic_adaptive","C13","complex",0,1,0,0,1,80.1
+"llama3.1:70b [adaptive]","agentic_adaptive","C14","complex",0,1,0,0,1,63.2
+"llama3.1:70b [adaptive]","agentic_adaptive","C15","complex",0,1,0,0,1,58.7
+"llama3.1:70b [adaptive]","agentic_adaptive","C16","complex",0,0,1,0,1,24.9
+"llama3.1:70b [adaptive]","agentic_adaptive","C17","complex",0,1,0,0,1,60
+"llama3.1:70b [adaptive]","agentic_adaptive","C18","complex",0,1,0,0,1,68.2
+"llama3.1:70b [adaptive]","agentic_adaptive","F01","toolfree",0,0,0,0,0,45.2
+"llama3.1:70b [adaptive]","agentic_adaptive","F02","toolfree",1,0,0,0,1,69.8
+"llama3.1:70b [adaptive]","agentic_adaptive","F03","toolfree",1,1,0,1,3,105.5
+"llama3.1:70b [adaptive]","agentic_adaptive","F04","toolfree",1,1,0,0,2,86.4
+"llama3.1:70b [adaptive]","agentic_adaptive","F05","toolfree",0,0,1,0,1,49.6
+"llama3.1:70b [adaptive]","agentic_adaptive","F06","toolfree",1,1,0,1,3,60.9
+"llama3.1:70b [adaptive]","agentic_adaptive","F07","toolfree",0,1,0,0,1,145.1
+"llama3.1:70b [adaptive]","agentic_adaptive","F08","toolfree",0,1,0,0,1,138
+"llama3.1:70b [adaptive]","agentic_adaptive","F09","toolfree",0,0,1,0,1,23.4
+"llama3.1:70b [adaptive]","agentic_adaptive","F10","toolfree",0,0,1,0,1,116.6
+"llama3.1:70b [adaptive]","agentic_adaptive","F11","toolfree",1,1,0,1,3,96.8
+"llama3.1:70b [adaptive]","agentic_adaptive","F12","toolfree",0,1,0,0,1,156.5
+"llama3.1:70b [adaptive]","agentic_adaptive","F13","toolfree",0,1,0,0,1,56.1
+"llama3.1:70b [adaptive]","agentic_adaptive","F14","toolfree",1,1,0,1,3,70.7
+"llama3.1:70b [adaptive]","agentic_adaptive","F15","toolfree",1,1,0,1,3,52.4
+"llama3.1:70b [adaptive]","agentic_adaptive","N01","nonsense",1,1,0,1,3,39
+"llama3.1:70b [adaptive]","agentic_adaptive","N02","nonsense",1,1,0,1,3,30.9
+"llama3.1:70b [adaptive]","agentic_adaptive","N03","nonsense",1,0,0,0,1,31.8
+"llama3.1:70b [adaptive]","agentic_adaptive","N04","nonsense",1,1,0,1,3,23.5
+"llama3.1:70b [adaptive]","agentic_adaptive","N05","nonsense",1,1,0,0,2,0
+"llama3.1:70b [adaptive]","agentic_adaptive","N06","nonsense",1,1,0,1,3,46
+"llama3.1:70b [adaptive]","agentic_adaptive","N07","nonsense",1,1,0,1,3,43.6
+"llama3.1:70b [adaptive]","agentic_adaptive","N08","nonsense",1,0,0,0,1,52.3
+"llama3.1:70b [adaptive]","agentic_adaptive","N09","nonsense",0,0,0,0,0,53.7
+"llama3.1:70b [adaptive]","agentic_adaptive","N10","nonsense",1,1,0,0,2,29.3
+"llama3.1:70b [adaptive]","agentic_adaptive","N11","nonsense",1,1,0,0,2,37.8
+"llama3.1:70b [adaptive]","agentic_adaptive","N12","nonsense",1,1,0,1,3,42.3
+"llama3.1:70b [adaptive]","agentic_adaptive","N13","nonsense",1,1,0,0,2,23.7
+"llama3.1:70b [adaptive]","agentic_adaptive","N14","nonsense",1,1,0,1,3,22.6
+"llama3.1:70b [adaptive]","agentic_adaptive","N15","nonsense",1,1,0,0,2,22.9
+"llama3.1:70b [adaptive]","agentic_adaptive","P01","phenotype",0,1,0,0,1,74.7
+"llama3.1:70b [adaptive]","agentic_adaptive","P02","phenotype",0,1,0,0,1,66.6
+"llama3.1:70b [adaptive]","agentic_adaptive","P03","phenotype",0,1,0,0,1,64.4
+"llama3.1:70b [adaptive]","agentic_adaptive","P04","phenotype",1,1,0,1,3,62.8
+"llama3.1:70b [adaptive]","agentic_adaptive","P05","phenotype",1,1,0,1,3,68.5
+"llama3.1:70b [adaptive]","agentic_adaptive","P06","phenotype",1,1,0,1,3,43.5
+"llama3.1:70b [adaptive]","agentic_adaptive","R01","rvat",1,0,0,1,2,69.8
+"llama3.1:70b [adaptive]","agentic_adaptive","R02","rvat",1,1,0,1,3,101.1
+"llama3.1:70b [adaptive]","agentic_adaptive","R03","rvat",1,1,0,1,3,76.3
+"llama3.1:70b [adaptive]","agentic_adaptive","R04","rvat",1,1,0,1,3,46.6
+"llama3.1:70b [adaptive]","agentic_adaptive","R05","rvat",1,1,0,1,3,109.2
+"llama3.1:70b [adaptive]","agentic_adaptive","S01","simple",1,1,0,1,3,49.1
+"llama3.1:70b [adaptive]","agentic_adaptive","S02","simple",1,1,0,1,3,42.4
+"llama3.1:70b [adaptive]","agentic_adaptive","S03","simple",1,1,0,1,3,55.6
+"llama3.1:70b [adaptive]","agentic_adaptive","S04","simple",1,1,0,1,3,39.4
+"llama3.1:70b [adaptive]","agentic_adaptive","S05","simple",1,1,0,1,3,32.3
+"llama3.1:70b [adaptive]","agentic_adaptive","S06","simple",1,1,0,1,3,44.8
+"llama3.1:70b [adaptive]","agentic_adaptive","S07","simple",1,1,0,1,3,48.4
+"llama3.1:70b [adaptive]","agentic_adaptive","S08","simple",1,1,0,1,3,40.6
+"llama3.1:70b [adaptive]","agentic_adaptive","S09","simple",1,1,0,1,3,39.2
+"llama3.1:70b [adaptive]","agentic_adaptive","S10","simple",1,1,0,1,3,37
+"llama3.1:70b [adaptive]","agentic_adaptive","S11","simple",1,1,0,1,3,92.1
+"llama3.1:70b [adaptive]","agentic_adaptive","S12","simple",1,1,0,1,3,39.1
+"llama3.1:70b [adaptive]","agentic_adaptive","S13","simple",1,1,0,1,3,53.7
+"llama3.1:70b [adaptive]","agentic_adaptive","S14","simple",1,1,0,1,3,45.7
+"llama3.1:70b [adaptive]","agentic_adaptive","S15","simple",1,1,0,1,3,42.4
+"llama3.1:70b [adaptive]","agentic_adaptive","S16","simple",1,1,0,1,3,38.1
+"llama3.1:70b [adaptive]","agentic_adaptive","T01","annotation_trap",1,1,0,1,3,40.5
+"llama3.1:70b [adaptive]","agentic_adaptive","T02","annotation_trap",1,1,0,1,3,36.7
+"llama3.1:70b [adaptive]","agentic_adaptive","T03","annotation_trap",1,1,0,1,3,49.8
+"llama3.1:70b [adaptive]","agentic_adaptive","U01","unanswerable",1,1,0,1,3,37.6
+"llama3.1:70b [adaptive]","agentic_adaptive","U02","unanswerable",1,1,0,0,2,29.5
+"llama3.1:70b [adaptive]","agentic_adaptive","U03","unanswerable",1,1,0,1,3,44.2
+"llama3.1:70b [adaptive]","agentic_adaptive","U04","unanswerable",1,1,0,1,3,31.9
+"llama3.1:70b [adaptive]","agentic_adaptive","U05","unanswerable",1,1,0,1,3,21.2
+"llama3.1:70b [adaptive]","agentic_adaptive","U06","unanswerable",1,1,0,1,3,22.1
+"llama3.1:70b [adaptive]","agentic_adaptive","U07","unanswerable",1,1,0,1,3,21.1
+"llama3.1:70b [adaptive]","agentic_adaptive","U08","unanswerable",1,1,0,1,3,39
+"llama3.1:70b [adaptive]","agentic_adaptive","U09","unanswerable",1,1,1,1,4,23
+"llama3.1:70b [adaptive]","agentic_adaptive","U10","unanswerable",1,1,0,1,3,21.9
+"llama3.1:70b [adaptive]","agentic_adaptive","U11","unanswerable",1,1,1,1,4,21.2
+"llama3.1:70b [adaptive]","agentic_adaptive","U12","unanswerable",1,1,0,1,3,21
+"llama3.1:70b [adaptive]","agentic_adaptive","U13","unanswerable",1,1,1,1,4,22.1
+"llama3.1:70b [adaptive]","agentic_adaptive","U14","unanswerable",1,1,1,1,4,21
+"llama3.1:70b [adaptive]","agentic_adaptive","U15","unanswerable",1,1,0,1,3,22.8

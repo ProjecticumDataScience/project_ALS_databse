@@ -1,0 +1,551 @@
+"id","category","question","full","response","model","backend","elapsed_sec","elapsed_fmt","grade_answer","grade_minimal_response","grade_hallucination","grade_tool","grade_total","grade_reasoning"
+"S01","simple","How many variants in SOD1 have a PolyPhen score of D (damaging)?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","llama3.1:70b [adaptive]","agentic_adaptive",208.2,"3:28 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer (23). The response is concise and does not include extraneous information or biological speculation. The chatbot correctly used the tool to query the database for variants in SOD1 with a PolyPhen score of D. No hallucination occurred."
+"S02","simple","List all unique chromosomes present in the varInfo_synthetic table.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 10 unique chromosomes present in the varInfo_synthetic table.","There are 10 unique chromosomes present in the varInfo_synthetic table.","llama3.1:70b [adaptive]","agentic_adaptive",42.9,"42.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the 10 unique chromosomes (chr1, chr4, chr9, chr10, chr12, chr14, chr15, chr16, chr21, chrX) as requested. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the query."
+"S03","simple","How many variants have a CADD score above 30 and are in the gene ABCA4?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 34 variants in ABCA4 with a CADD score above 30.","There are 34 variants in ABCA4 with a CADD score above 30.","llama3.1:70b [adaptive]","agentic_adaptive",58,"58.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (34) matches the expected answer. The response is concise and does not include unnecessary details or biological speculation. The chatbot correctly used the tool to query the database for variants in ABCA4 with a CADD score above 30."
+"S04","simple","How many synonymous variants are there in the entire dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 533 synonymous variants in the entire dataset.","There are 533 synonymous variants in the entire dataset.","llama3.1:70b [adaptive]","agentic_adaptive",40.7,"40.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (533) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this query. No hallucination occurred."
+"S05","simple","How many variants are present in the gene OPTN?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_in_gene]
+--- Final response ---
+There are 121 variants present in the gene OPTN.","There are 121 variants present in the gene OPTN.","llama3.1:70b [adaptive]","agentic_adaptive",32.1,"32.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (121) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The tool called was appropriate for the question. No hallucination occurred."
+"S06","simple","How many high-impact variants are located on chromosome X?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 14 high-impact variants located on chromosome X.","There are 14 high-impact variants located on chromosome X.","llama3.1:70b [adaptive]","agentic_adaptive",45.3,"45.3 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (14) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the query. No hallucination occurred as the number directly corresponds to the tool output."
+"S07","simple","How many variants are predicted deleterious by both SIFT and PolyPhen simultaneously?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 343 variants predicted deleterious by both SIFT and PolyPhen simultaneously.","There are 343 variants predicted deleterious by both SIFT and PolyPhen simultaneously.","llama3.1:70b [adaptive]","agentic_adaptive",49.1,"49.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (343) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly used the tool to retrieve the number of variants predicted deleterious by both SIFT and PolyPhen simultaneously."
+"S08","simple","How many variants is ALS_2 homozygous for?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_carriers_by_gene]
+--- Final response ---
+ALS_2 is homozygous for 0 variants.","ALS_2 is homozygous for 0 variants.","llama3.1:70b [adaptive]","agentic_adaptive",33.9,"33.9 sec",FALSE,TRUE,TRUE,FALSE,2,"The tool returned 0, but the expected answer is 606. The chatbot's response directly contradicts the database fact that ALS_2 is homozygous for 606 variants. This constitutes a hallucination."
+"S09","simple","How many distinct genes are present in the varInfo_synthetic table?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 12 distinct genes present in the varInfo_synthetic table.","There are 12 distinct genes present in the varInfo_synthetic table.","llama3.1:70b [adaptive]","agentic_adaptive",39,"39.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of distinct genes (12) as requested. The response is concise and does not include extraneous information or speculation. The tool call was appropriate for this simple query."
+"S10","simple","How many variants are in the dataset in total?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 1802 variants in the dataset in total.","There are 1802 variants in the dataset in total.","llama3.1:70b [adaptive]","agentic_adaptive",37.5,"37.5 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (1802) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly used the tool to retrieve the total number of variants from the dataset."
+"S11","simple","How many variants does each gene have? Order by most variants.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ABCA4 has 589 variants, followed by RIN3 with 222 variants, NEK1 with 190 variants, IL3RA with 147 variants, PEX5 with 124 variants, OPTN with 121 variants, ZNF483 with 113 variants, FUS with 95 variants, CYP19A1 with 89 variants, SOD1 with 49 variants, UBQLN2 with 36 variants, and TARDBP with 27 variants.","ABCA4 has 589 variants, followed by RIN3 with 222 variants, NEK1 with 190 variants, IL3RA with 147 variants, PEX5 with 124 variants, OPTN with 121 variants, ZNF483 with 113 variants, FUS with 95 variants, CYP19A1 with 89 variants, SOD1 with 49 variants, UBQLN2 with 36 variants, and TARDBP with 27 variants.","llama3.1:70b [adaptive]","agentic_adaptive",99.1,"1:39 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer exactly. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly called the tool to retrieve the variant counts for each gene and ordered them as requested. No hallucinated data was present."
+"S12","simple","How many variants have a missing CADD score?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 607 variants with a missing CADD score.","There are 607 variants with a missing CADD score.","llama3.1:70b [adaptive]","agentic_adaptive",38.8,"38.8 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (607) matches the expected answer. The response is concise and does not include unnecessary details or biological speculation. The chatbot correctly used the tool to retrieve the number of variants with a missing CADD score."
+"S13","simple","How many variants have all three annotations available: CADD, PolyPhen, and SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 1131 variants that have all three annotations available: CADD, PolyPhen, and SIFT.","There are 1131 variants that have all three annotations available: CADD, PolyPhen, and SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",54.8,"54.8 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of variants with all three annotations (1131), which matches the expected answer. The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query."
+"S14","simple","How many high-impact variants are in ABCA4?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/get_high_impact_variants_in_gene]
+--- Final response ---
+There are 30 high-impact variants in ABCA4.","There are 30 high-impact variants in ABCA4.","llama3.1:70b [adaptive]","agentic_adaptive",111.3,"1:51 min",FALSE,TRUE,TRUE,FALSE,2,"The expected answer is 44, but the chatbot returned 30. This is a direct contradiction of the tool result. The response is concise (1 sentence), but the incorrect number constitutes a hallucination."
+"S15","simple","How many variants have an allele frequency of exactly zero?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 36 variants with an allele frequency of exactly zero.","There are 36 variants with an allele frequency of exactly zero.","llama3.1:70b [adaptive]","agentic_adaptive",43.1,"43.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of variants with an allele frequency of zero (36). The response is concise and does not include extraneous information or speculation. The tool call was appropriate for this query."
+"S16","simple","How many variants does SIFT predict as deleterious in OPTN?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_sift_deleterious_in_gene]
+--- Final response ---
+There are 28 variants in OPTN that SIFT predicts as deleterious.","There are 28 variants in OPTN that SIFT predicts as deleterious.","llama3.1:70b [adaptive]","agentic_adaptive",38,"38.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of deleterious SIFT predictions (28). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this question. No contradictory statements were made."
+"A01","analytical","Which variant in NEK1 has the lowest non-zero allele frequency?","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/get_maf_by_impact]
+--- Final response ---
+The variant in NEK1 with the lowest non-zero allele frequency is VAR_id 1474 with an AF of 0.0002.","The variant in NEK1 with the lowest non-zero allele frequency is VAR_id 1474 with an AF of 0.0002.","llama3.1:70b [adaptive]","agentic_adaptive",115.2,"1:55 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot incorrectly identified VAR_id 1474 as having the lowest AF. The expected answer was VAR_id 1325, 1327, 1333, 1348, and 1402 with an AF of 2e-05. The chatbot provided a different variant (1474) and a different AF (0.0002), indicating hallucination. Also, the tool call was incorrect; it should have retrieved the MAF by impact for NEK1 variants."
+"A02","analytical","What proportion of all variants in the dataset are classified as high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The proportion of all variants in the dataset classified as high impact is 0.0677 (6.77%).","The proportion of all variants in the dataset classified as high impact is 0.0677 (6.77%).","llama3.1:70b [adaptive]","agentic_adaptive",51.7,"51.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (6.77%) matches the expected answer (6.77%). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the query. No hallucination occurred."
+"A03","analytical","For each gene, what is the ratio of high-impact to synonymous variants? Only show genes with at least 5 of each.","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 5 genes (ABCA4, IL3RA, NEK1, OPTN, and PEX5) with at least 5 high-impact and synonymous variants each, showing ratios of high-impact to synonymous variants ranging from 0.1778 to 0.6471.","There are 5 genes (ABCA4, IL3RA, NEK1, OPTN, and PEX5) with at least 5 high-impact and synonymous variants each, showing ratios of high-impact to synonymous variants ranging from 0.1778 to 0.6471.","llama3.1:70b [adaptive]","agentic_adaptive",172,"2:52 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer exactly (NEK1=0.647, IL3RA=0.371, ABCA4=0.270, OPTN=0.262, PEX5=0.178). The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for the query. No hallucination occurred."
+"A04","analytical","Which control sample carries the highest total burden of high-impact variants?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The control sample with IID 12345 carries a total burden of high-impact variants of 8974.","The control sample with IID 12345 carries a total burden of high-impact variants of 8974.","llama3.1:70b [adaptive]","agentic_adaptive",46.4,"46.4 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot returned a value of 8974 which does not match the expected answer of 134. The tool call was incorrect and produced an entirely fabricated number. The response is concise but contains hallucinated data."
+"A05","analytical","What is the average CADD score for variants predicted deleterious by both SIFT and PolyPhen, compared to variants predicted benign by both?","[mode: agentic]
+[complexity: complex]
+[tools called: rvat_analysis/run_single_variant_test → rvat_analysis/get_maf_by_impact]
+--- Final response ---
+The average CADD score for variants predicted deleterious by both SIFT and PolyPhen is 24.41, compared to 12.19 for variants predicted benign by both.","The average CADD score for variants predicted deleterious by both SIFT and PolyPhen is 24.41, compared to 12.19 for variants predicted benign by both.","llama3.1:70b [adaptive]","agentic_adaptive",164.2,"2:44 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot's calculated averages (24.41 and 12.19) do not match the expected values (26.04 and 12.02). The tool call was made but the result was incorrect. The response is concise, but includes an incorrect numerical value."
+"A06","analytical","What is the average allele frequency per chromosome? Which chromosome has the highest?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average allele frequency per chromosome is 0.0026493006867768596 on chromosome chr10.","The average allele frequency per chromosome is 0.0026493006867768596 on chromosome chr10.","llama3.1:70b [adaptive]","agentic_adaptive",57.5,"57.5 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer in terms of numerical value (0.002649) and chromosome (chr10). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for answering the question."
+"A07","analytical","What is the total allele burden in SOD1 for ALS cases versus controls?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The total allele burden in SOD1 is 248 for ALS cases and 247 for controls, with a difference of 1.","The total allele burden in SOD1 is 248 for ALS cases and 247 for controls, with a difference of 1.","llama3.1:70b [adaptive]","agentic_adaptive",52.2,"52.2 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer (Cases=248, Controls=247). The response is concise and does not include extraneous information or biological speculation. The tool call was correct and returned the expected result. No hallucination occurred."
+"A08","analytical","What percentage of all variants in the dataset is carried by at least one ALS patient?","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The query failed due to an HTTP 500 Internal Server Error.","The query failed due to an HTTP 500 Internal Server Error.","llama3.1:70b [adaptive]","agentic_adaptive",59,"59.0 sec",FALSE,FALSE,TRUE,FALSE,1,"The chatbot reported an HTTP 500 error, indicating a failure in the tool execution. The expected answer was a percentage of variants carried by ALS patients, but the tool did not execute and therefore could not provide this information. This constitutes a hallucination as it attempts to answer the question without any data."
+"A09","analytical","What is the average CADD score for high-impact versus moderate-impact variants in NEK1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+High-impact variants in NEK1 have a mean CADD score of 14.30, compared to 13.57 for moderate-impact variants.","High-impact variants in NEK1 have a mean CADD score of 14.30, compared to 13.57 for moderate-impact variants.","llama3.1:70b [adaptive]","agentic_adaptive",92.9,"1:32 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provided incorrect CADD scores (14.30 and 13.57) for high-impact and moderate-impact variants in NEK1, which contradicts the expected answer of 36.31 and 20.10 respectively. The tool call was also incorrect as it did not return the correct CADD scores. Therefore, grade_answer=FALSE, grade_minimal_response=TRUE (concise response), grade_hallucination=TRUE (incorrect numbers), and grade_tool=FALSE (wrong tool output)."
+"A10","analytical","How many variants are carried exclusively by controls and not by any ALS patient?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 7 variants carried exclusively by controls and not by any ALS patient.","There are 7 variants carried exclusively by controls and not by any ALS patient.","llama3.1:70b [adaptive]","agentic_adaptive",74.9,"1:14 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of variants carried exclusively by controls (7). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this query. No contradictory statements were made."
+"A11","analytical","What is the impact distribution (high, moderate, synonymous) in SOD1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+In SOD1, there are 4 high-impact, 38 moderate-impact, and 7 synonymous variants.","In SOD1, there are 4 high-impact, 38 moderate-impact, and 7 synonymous variants.","llama3.1:70b [adaptive]","agentic_adaptive",86.1,"1:26 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot provides the exact numbers for High=4, Moderate=38, Synonymous=7, and Total=49 as specified in the expected answer. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate to retrieve this data."
+"A12","analytical","Which chromosome has the most variants in the dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Chromosome 1 has the most variants in the dataset.","Chromosome 1 has the most variants in the dataset.","llama3.1:70b [adaptive]","agentic_adaptive",43.9,"43.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies chr1 as having the most variants (616) and provides a concise answer. The tool call was appropriate for this query."
+"A13","analytical","What percentage of variants are missing ALL three functional annotations: CADD, PolyPhen, and SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Approximately 33.68% of variants are missing all three functional annotations: CADD, PolyPhen, and SIFT.","Approximately 33.68% of variants are missing all three functional annotations: CADD, PolyPhen, and SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",69.8,"1:09 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot provides the exact expected answer (33.68%) and the correct calculation (607/1802). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this query."
+"A14","analytical","For ALS_4, how many high-impact variants are heterozygous versus homozygous?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ALS_4 has 33 high-impact heterozygous variants and 41 high-impact homozygous variants.","ALS_4 has 33 high-impact heterozygous variants and 41 high-impact homozygous variants.","llama3.1:70b [adaptive]","agentic_adaptive",75.9,"1:15 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected numbers (33 and 41). The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the query. No hallucination occurred."
+"A15","analytical","What is the average CADD score of moderate-impact variants in PEX5?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average CADD score of moderate-impact variants in PEX5 is 23.41.","The average CADD score of moderate-impact variants in PEX5 is 23.41.","llama3.1:70b [adaptive]","agentic_adaptive",61.6,"1:01 min",TRUE,TRUE,TRUE,TRUE,4,"The answer (23.41) matches the expected answer exactly. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly called the variant analysis tool with the appropriate query to calculate the average CADD score for moderate-impact variants in PEX5."
+"A16","analytical","What is the allele burden for ALS_5 versus Control_5 among high-impact variants only?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The allele burden for ALS_5 versus Control_5 among high-impact variants is 9083 in cases and 8974 in controls, with a difference of 109.","The allele burden for ALS_5 versus Control_5 among high-impact variants is 9083 in cases and 8974 in controls, with a difference of 109.","llama3.1:70b [adaptive]","agentic_adaptive",60,"1:00 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provided aggregate numbers (9083 and 8974) for allele burden, but the expected answer is specific numerical values (117 and 113). The tool call was incorrect as it requested total burden cases vs controls, not high-impact variants. The response also includes a difference of 109 which is not present in the database facts."
+"A17","analytical","Give a full summary of the gene UBQLN2: total variants, impact distribution, and mean allele frequency.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+UBQLN2 has a total of 36 variants, with 1 high-impact variant, 24 moderate-impact variants, and 11 synonymous variants, and a mean allele frequency of 0.00038598859722222223.","UBQLN2 has a total of 36 variants, with 1 high-impact variant, 24 moderate-impact variants, and 11 synonymous variants, and a mean allele frequency of 0.00038598859722222223.","llama3.1:70b [adaptive]","agentic_adaptive",125.3,"2:05 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer exactly. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the query, and the results align with the expected values."
+"C01","complex","How many variants are carried exclusively by ALS cases and not by any control?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+There is a difference of 109 in total allele burden between ALS cases and controls.","There is a difference of 109 in total allele burden between ALS cases and controls.","llama3.1:70b [adaptive]","agentic_adaptive",41.8,"41.8 sec",FALSE,TRUE,FALSE,FALSE,1,"The tool returned 109, not the expected 10. The response also includes unnecessary biological speculation ('difference in total allele burden'). Tool call was incorrect."
+"C02","complex","Which gene shows the greatest difference in total allele burden between ALS cases and controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The greatest difference in total allele burden between ALS cases and controls is 83 for the ABCA4 gene.","The greatest difference in total allele burden between ALS cases and controls is 83 for the ABCA4 gene.","llama3.1:70b [adaptive]","agentic_adaptive",80.8,"1:20 min",TRUE,TRUE,TRUE,TRUE,4,"The answer correctly identifies ABCA4 as having the greatest allele burden difference (83). The response is concise and does not include extraneous information. The tool call was appropriate for this query. No hallucination occurred."
+"C03","complex","For each of the five ALS patients, how many high-impact variants do they carry in TARDBP, SOD1, or NEK1?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: get_carriers_by_gene]
+--- Final response ---
+Database error: HTTP 422 Unprocessable Entity.","Database error: HTTP 422 Unprocessable Entity.","llama3.1:70b [adaptive]","agentic_adaptive",31.1,"31.1 sec",FALSE,FALSE,TRUE,FALSE,1,"The chatbot returned a database error and did not provide the requested answer. The expected answer was a numerical count of high-impact variants for each ALS patient. A database error indicates that the tool call failed to return the correct data. This is considered a hallucination because it provides an incorrect response instead of acknowledging the inability to fulfill the request."
+"C04","complex","Which gene has the most homozygous variant-calls across all ALS patients combined?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The ABCA4 gene has the most homozygous variant-calls across all ALS patients combined.","The ABCA4 gene has the most homozygous variant-calls across all ALS patients combined.","llama3.1:70b [adaptive]","agentic_adaptive",69.1,"1:09 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies ABCA4 as having the most homozygous variant-calls. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this query. No hallucinated data is present."
+"C05","complex","How many variants are shared between all five ALS patients AND all five controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 29 variants shared between all five ALS patients and all five controls.","There are 29 variants shared between all five ALS patients and all five controls.","llama3.1:70b [adaptive]","agentic_adaptive",74.1,"1:14 min",TRUE,TRUE,TRUE,TRUE,4,"The answer (29) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly used the tool to query the database for variants shared between all five ALS patients and all five controls. No hallucination occurred."
+"C06","complex","For moderate- and high-impact variants in TARDBP, compare the allele burden per individual across all 5 cases and all 5 controls.","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The query failed due to an HTTP 500 Internal Server Error.","The query failed due to an HTTP 500 Internal Server Error.","llama3.1:70b [adaptive]","agentic_adaptive",74.5,"1:14 min",FALSE,FALSE,TRUE,FALSE,1,"The chatbot reported an HTTP 500 error, indicating a server-side issue. The expected answer requires querying the variant database for allele burden data, which was not provided. The response does not attempt to fulfill the query and instead reports a technical failure. This constitutes a hallucination as it attempts to provide an answer when the tool itself failed."
+"C07","complex","Which variants are present in all ten individuals (all 5 ALS and all 5 controls)? List gene and VAR_id.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 29 variants in 8 genes (ABCA4, OPTN, PEX5, RIN3, CYP19A1, FUS, NEK1, and IL3RA) present in all ten individuals.","There are 29 variants in 8 genes (ABCA4, OPTN, PEX5, RIN3, CYP19A1, FUS, NEK1, and IL3RA) present in all ten individuals.","llama3.1:70b [adaptive]","agentic_adaptive",116.7,"1:56 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identified the number of variants (29) and listed the genes present. The response is concise and does not include unnecessary details or speculation. The tool call was appropriate for this query. No contradictory information was provided."
+"C08","complex","Among SIFT-deleterious variants, which three genes have the highest total case burden, and how does it compare to controls?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The top three genes among SIFT-deleterious variants have a total case burden of 9083 and a total control burden of 8974, with a difference of 109.","The top three genes among SIFT-deleterious variants have a total case burden of 9083 and a total control burden of 8974, with a difference of 109.","llama3.1:70b [adaptive]","agentic_adaptive",55.8,"55.8 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provided incorrect numbers for case burden. The expected answer was ABCA4 (984, 874), RIN3 (364, 365), and NEK1 (345, 344). The chatbot's response of 9083 and 8974 is significantly different and not supported by the tool. Also, the tool was called incorrectly."
+"C09","complex","How many variants fall into each impact category: high, moderate, synonymous, and other?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: run_variant_query]
+--- Final response ---
+Database error: HTTP 500 Internal Server Error.","Database error: HTTP 500 Internal Server Error.","llama3.1:70b [adaptive]","agentic_adaptive",86.1,"1:26 min",FALSE,FALSE,TRUE,FALSE,1,"The chatbot reported a database error (HTTP 500) and did not provide any numerical results. The expected answer was provided in the prompt. The tool call failed, so it cannot be graded."
+"C10","complex","In which genes does ALS_3 carry at least one high-impact variant?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 0 carriers.","There are 0 carriers.","llama3.1:70b [adaptive]","agentic_adaptive",50.8,"50.8 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot returned 'There are 0 carriers' which contradicts the expected answer of 11 genes carrying high-impact variants. The tool call was made but the result was incorrect. This is a hallucination as it states there are no carriers when the database contains information about carriers."
+"C11","complex","Give a full summary of the gene FUS: total variants, impact distribution, and mean allele frequency.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+FUS has a total of 95 variants, with 1 high-impact variant, 55 moderate-impact variants, and 39 synonymous variants, and a mean allele frequency of 0.00010248711894736843.","FUS has a total of 95 variants, with 1 high-impact variant, 55 moderate-impact variants, and 39 synonymous variants, and a mean allele frequency of 0.00010248711894736843.","llama3.1:70b [adaptive]","agentic_adaptive",120.5,"2:00 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer exactly. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for retrieving the requested data. No hallucination occurred."
+"C12","complex","Group all variants by CADD score bins: below 10, 10 to 20, 20 to 30, and 30 and above. For each bin show the total ALS case burden and number of variants.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 4 CADD score bins with corresponding total ALS case burdens and numbers of variants: Below 10 (1144 burden, 225 variants), 10-20 (1230 burden, 250 variants), 20-30 (3183 burden, 627 variants), and Above 30 (468 burden, 93 variants).","There are 4 CADD score bins with corresponding total ALS case burdens and numbers of variants: Below 10 (1144 burden, 225 variants), 10-20 (1230 burden, 250 variants), 20-30 (3183 burden, 627 variants), and Above 30 (468 burden, 93 variants).","llama3.1:70b [adaptive]","agentic_adaptive",184.6,"3:04 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer exactly. The response is concise and does not include extraneous information or biological speculation. The numbers provided in the response match the tool output. The tool was correctly called with the appropriate logic to group variants by CADD score bins and calculate the total ALS case burden for each bin."
+"C13","complex","Among high-impact variants, what is the distribution of PolyPhen predictions?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Among high-impact variants, there are 106 with a PolyPhen prediction of ""."", 6 with ""B"", 6 with ""D"", and 4 with ""P"".","Among high-impact variants, there are 106 with a PolyPhen prediction of ""."", 6 with ""B"", 6 with ""D"", and 4 with ""P"".","llama3.1:70b [adaptive]","agentic_adaptive",63.9,"1:03 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identified the distribution of PolyPhen predictions (106, 6, 6, and 4) as specified in the expected answer. The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query. No hallucination occurred."
+"C14","complex","What are the three variants with the highest CADD score in the entire dataset, and which genes are they in?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The three variants with the highest CADD score in the entire dataset are located in the genes ABCA4 (2 variants) and PEX5, with scores of 50.0, 50.0, and 47.0 respectively.","The three variants with the highest CADD score in the entire dataset are located in the genes ABCA4 (2 variants) and PEX5, with scores of 50.0, 50.0, and 47.0 respectively.","llama3.1:70b [adaptive]","agentic_adaptive",85,"1:25 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identified the three variants with the highest CADD scores (ABCA4 - VAR_id 90 and VAR_id 33, PEX5 - VAR_id 802) and their corresponding CADD scores. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for retrieving this data."
+"C15","complex","What are the three variants with the lowest non-zero allele frequency, and which genes are they in?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The three variants with the lowest non-zero allele frequency are in TARDBP (2e-05) and ABCA4 (2e-05), with two variants in TARDBP having the same AF value.","The three variants with the lowest non-zero allele frequency are in TARDBP (2e-05) and ABCA4 (2e-05), with two variants in TARDBP having the same AF value.","llama3.1:70b [adaptive]","agentic_adaptive",69.8,"1:09 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the three variants with the lowest allele frequency (TARDBP, ABCA4) and their corresponding AF values (2e-05). The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query."
+"C16","complex","What is the only high-impact variant in FUS, and what are its functional annotations?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/get_high_impact_variants_in_gene]
+--- Final response ---
+There is 1 high-impact variant in FUS, c.1574C>T (p.Arg525Ter), with functional annotations of NMD_escaping_variant and stop_gained.","There is 1 high-impact variant in FUS, c.1574C>T (p.Arg525Ter), with functional annotations of NMD_escaping_variant and stop_gained.","llama3.1:70b [adaptive]","agentic_adaptive",49.6,"49.6 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provided an incorrect variant ID (1175 is not the correct ID for c.1574C>T in FUS). It also incorrectly stated the functional annotations as 'NMD_escaping_variant and stop_gained'. The tool should have returned '.'. This constitutes a hallucination because it provides specific, incorrect data points that contradict the database facts."
+"C17","complex","On which chromosome is IL3RA located, and how does the variant count on that chromosome compare to the total dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+IL3RA is located on chromosome X, which has 147 variants and accounts for approximately 8.16% of the total dataset.","IL3RA is located on chromosome X, which has 147 variants and accounts for approximately 8.16% of the total dataset.","llama3.1:70b [adaptive]","agentic_adaptive",71.8,"1:11 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provides an incorrect percentage (8.16% vs 10.2%) and misstates the variant count on chromosome X (147 vs 183). It also fails to include the IL3RA specific variant count within the total dataset comparison. The tool call was incorrect, leading to this inaccurate response."
+"C18","complex","For RIN3 high-impact variants specifically, is the allele burden higher in cases or controls?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The allele burden of high-impact RIN3 variants is 2 units higher in controls than in cases.","The allele burden of high-impact RIN3 variants is 2 units higher in controls than in cases.","llama3.1:70b [adaptive]","agentic_adaptive",51.4,"51.4 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot states the allele burden is 2 units higher in controls (Controls=9), which contradicts the expected answer of Controls=9 and Cases=7. The tool call was made but the result was incorrect. This constitutes a hallucination as it provides a specific number that directly contradicts the tool output."
+"P01","phenotype","How many female carriers are there in ABCA4?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 5 female carriers in ABCA4.","There are 5 female carriers in ABCA4.","llama3.1:70b [adaptive]","agentic_adaptive",70.9,"1:10 min",FALSE,TRUE,TRUE,FALSE,2,"The expected answer is 2, but the chatbot returned 5. This contradicts the database facts which state genotype values 0/1/2 = ref/het/hom, NOT disease association. The tool call was incorrect."
+"P02","phenotype","How many female carriers are there in SOD1?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 5 female carriers in SOD1.","There are 5 female carriers in SOD1.","llama3.1:70b [adaptive]","agentic_adaptive",62.5,"1:02 min",FALSE,TRUE,TRUE,FALSE,2,"The expected answer is 2, not 5. The chatbot returned an incorrect number based on the database facts. It also included unnecessary detail about ALS3 and ALS5."
+"P03","phenotype","How many SAS carriers are there in NEK1?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 4 carriers in NEK1 among SAS individuals.","There are 4 carriers in NEK1 among SAS individuals.","llama3.1:70b [adaptive]","agentic_adaptive",59.5,"59.5 sec",FALSE,TRUE,TRUE,FALSE,2,"The tool returned 4 carriers, but the expected answer is 2. The chatbot's response includes an incorrect number and does not reflect the tool output."
+"P04","phenotype","What is the sex distribution of samples in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+There are 12865 male and 12135 female samples in the database.","There are 12865 male and 12135 female samples in the database.","llama3.1:70b [adaptive]","agentic_adaptive",55.7,"55.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of male and female samples (12865/12135). The response is concise and does not include extraneous information. The tool call was appropriate for this query. No hallucination occurred."
+"P05","phenotype","What is the average age of ALS cases in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+The average age of ALS cases in the database is 60.10 years.","The average age of ALS cases in the database is 60.10 years.","llama3.1:70b [adaptive]","agentic_adaptive",50.8,"50.8 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer (60.1 years) exactly. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for this query. No hallucination occurred."
+"P06","phenotype","How many ALS cases and controls are in the database?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_info]
+--- Final response ---
+There are 5000 ALS cases and 20000 controls in the database.","There are 5000 ALS cases and 20000 controls in the database.","llama3.1:70b [adaptive]","agentic_adaptive",39.1,"39.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer (5000 ALS and 20000 controls). The response is concise. The chatbot correctly used the database exploration tool to retrieve this information. No hallucination occurred."
+"T01","annotation_trap","How many variants have a PolyPhen score of possibly damaging?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 182 variants with a PolyPhen score of possibly damaging.","There are 182 variants with a PolyPhen score of possibly damaging.","llama3.1:70b [adaptive]","agentic_adaptive",43.4,"43.4 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer (182) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The tool call was appropriate for the question. No hallucination occurred."
+"T02","annotation_trap","How many variants are tolerated by SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 565 variants tolerated by SIFT.","There are 565 variants tolerated by SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",36.9,"36.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of variants tolerated by SIFT (565), which matches the expected answer. The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query. No hallucination occurred."
+"T03","annotation_trap","Are there any variants where HighImpact equals 1 AND Synonymous equals 1 at the same time?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 0 variants where HighImpact equals 1 AND Synonymous equals 1 at the same time.","There are 0 variants where HighImpact equals 1 AND Synonymous equals 1 at the same time.","llama3.1:70b [adaptive]","agentic_adaptive",51.4,"51.4 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that HighImpact and Synonymous cannot be simultaneously 1. The response is concise and does not include extraneous information. The tool call was appropriate for this query."
+"U01","unanswerable","Is VAR_id 100 previously reported as pathogenic?","[mode: dual]
+[complexity: simple]
+[tools called: clinvar_annotation/get_clinvar_for_variant]
+--- Final response ---
+VAR_id 100 is not previously reported as pathogenic in ClinVar.","VAR_id 100 is not previously reported as pathogenic in ClinVar.","llama3.1:70b [adaptive]","agentic_adaptive",39.1,"39.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly states that VAR_id 100 is not reported as pathogenic in ClinVar. This aligns with the expected answer of 'not in ClinVar'. The response is concise and does not include extraneous information or speculation. The tool (clinvar_annotation/get_clinvar_for_variant) was called appropriately to retrieve this information."
+"U02","unanswerable","What is the allele frequency of VAR_id 30 in Europeans?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",28.4,"28.4 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for allele frequency of a variant in Europeans. The database limitations tool correctly identifies this as unanswerable due to the lack of population-specific AF data. The response is concise and avoids speculation. No hallucinated information is present."
+"U03","unanswerable","Which variants are both synonymous and high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 0 variants that are both synonymous and high impact.","There are 0 variants that are both synonymous and high impact.","llama3.1:70b [adaptive]","agentic_adaptive",51.7,"51.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for variants that are both synonymous and high impact. The database explicitly states that a variant cannot be both synonymous and HighImpact simultaneously. The chatbot correctly identifies this as 0, impossible."
+"U04","unanswerable","What is the protein domain affected by VAR_id 42?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",38.9,"38.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for protein domain information related to VAR_id 42. The database limitations tool correctly identifies that this information is not available. The response is concise and does not hallucinate any data."
+"U05","unanswerable","Has the variant at position 12345 been validated in a wet-lab experiment?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.2,"21.2 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks about wet-lab validation, which is not a feature of the database. The chatbot correctly states 'This information is not available,' which aligns with the expected answer and avoids inventing data. The response is concise and does not include extraneous details or speculation. The tool call was appropriate for an unanswerable query."
+"U06","unanswerable","Which ALS patient has the earliest age of onset?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.9,"21.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for the earliest age of onset, which is unanswerable based on the database limitations (genotype values only). The chatbot correctly states 'This information is not available'. This aligns with the expected answer and avoids any hallucination or unnecessary detail."
+"U07","unanswerable","What is the linkage disequilibrium between VAR_id 10 and VAR_id 11?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for linkage disequilibrium, which requires haplotype/phase data. The database limitations tool correctly identifies that this information is not available. The response is concise and avoids speculation."
+"U08","unanswerable","Which variants are clinically significant?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",38.7,"38.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The question is unanswerable due to the database limitations (vague and no ClinVar). The chatbot correctly identifies this and states 'This information is not available'. This aligns with the expected answer. The response is concise and does not include extraneous details or speculation. The tool call `db_exploration/get_database_limitations` was appropriate for determining the unanswerable nature of the question."
+"U09","unanswerable","What is the rs-number of VAR_id 200?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",23.1,"23.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for an rs-number, which is not a valid field in the database (Genotype values 0/1/2 = ref/het/hom). The chatbot correctly identifies that this information is not available. This aligns with the expected answer and the tool's limitations."
+"U10","unanswerable","Which variants are de novo mutations?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22,"22.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for de novo mutations, which requires parental data. The chatbot correctly identifies that this information is not available, aligning with the database limitations (specifically, missing parental data). This response is concise and avoids speculation."
+"U11","unanswerable","What is the allele frequency of VAR_id 50 in the African population?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.2,"21.2 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for allele frequency in the African population. The database limitations tool correctly identifies this as unanswerable due to the lack of population-specific data. The response 'This information is not available' accurately reflects the tool's output and does not introduce any fabricated data."
+"U12","unanswerable","How long has ALS_3 been diagnosed with ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21,"21.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for a clinical timeline, which is explicitly stated as 'not available' in the database limitations. The response directly reflects this information without adding any extraneous details or speculation. The tool call was appropriate given the unanswerable nature of the query."
+"U13","unanswerable","Which variants have the strongest effect on disease risk?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.6,"21.6 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks about 'strongest effect on disease risk', which requires statistical association data not present in the database. The chatbot correctly identifies this as 'not available' and provides a concise response."
+"U14","unanswerable","Which of the ALS patients has the most severe disease progression?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",20.9,"20.9 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks about disease progression, which is not a supported data point in the database. The chatbot correctly states 'This information is not available', aligning with the database limitations and expected unanswerable response."
+"U15","unanswerable","Is the variant at position 1378764 on chrX likely to be causative for ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",23,"23.0 sec",TRUE,TRUE,TRUE,TRUE,4,"The question is unanswerable according to the database limitations. The chatbot correctly refuses to answer and states 'This information is not available'. This aligns with the expected answer and demonstrates correct tool usage (db_exploration/get_database_limitations)."
+"R01","rvat","Run a burden test for SOD1 in ALS cases versus controls.","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/run_burden_test]
+--- Final response ---
+SOD1 shows a highly significant burden in ALS cases (OR = 5.9, p < 0.001), with 80 case carriers versus 53 control carriers.","SOD1 shows a highly significant burden in ALS cases (OR = 5.9, p < 0.001), with 80 case carriers versus 53 control carriers.","llama3.1:70b [adaptive]","agentic_adaptive",69.2,"1:09 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer provided. The response is concise and does not include unnecessary details or biological speculation. The numbers (80 case carriers and 53 control carriers) match the tool output. The tool was correctly called with the logic to run a burden test."
+"R02","rvat","Get the MAF for moderate impact variants in TARDBP.","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/get_maf_by_impact]
+--- Final response ---
+The MAF for moderate impact variants in TARDBP ranges from 0 to 0.0006.","The MAF for moderate impact variants in TARDBP ranges from 0 to 0.0006.","llama3.1:70b [adaptive]","agentic_adaptive",98,"1:38 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected range of 0 to 0.0006, which is a valid MAF for moderate impact variants in TARDBP based on the database facts (Genotype values 0/1/2 = ref/het/hom, NOT disease association). The response is concise and does not include extraneous information or biological speculation. The tool call `rvat_analysis/get_maf_by_impact` would return this result."
+"R03","rvat","How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There is 1 female carrier in the SAS cohort that carries a pathogenic mutation in SOD1.","There is 1 female carrier in the SAS cohort that carries a pathogenic mutation in SOD1.","llama3.1:70b [adaptive]","agentic_adaptive",67.5,"1:07 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that there is 1 female carrier in the SAS cohort with a pathogenic SOD1 mutation. The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query."
+"R04","rvat","What is the linkage disequilibrium between high-impact variants in FUS?","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/get_ld_matrix]
+--- Final response ---
+Linkage disequilibrium between high-impact variants in FUS cannot be computed due to fewer than 2 variants.","Linkage disequilibrium between high-impact variants in FUS cannot be computed due to fewer than 2 variants.","llama3.1:70b [adaptive]","agentic_adaptive",42.5,"42.5 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that the number of high-impact variants in FUS is insufficient to compute linkage disequilibrium. The response is concise and does not include extraneous information or speculation. It accurately reflects the tool's output (fewer than 2 variants). The tool call was appropriate for this query."
+"R05","rvat","What are the most significant single variants in NEK1 associated with ALS?","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/run_single_variant_test]
+--- Final response ---
+The top 7 most significant single variants in NEK1 associated with ALS have p-values of 7.9247e-9, 3.8484e-7, 0.0007, 0.0268, 0.0515, 0.0585, and no other variant has a p-value below 0.0585.","The top 7 most significant single variants in NEK1 associated with ALS have p-values of 7.9247e-9, 3.8484e-7, 0.0007, 0.0268, 0.0515, 0.0585, and no other variant has a p-value below 0.0585.","llama3.1:70b [adaptive]","agentic_adaptive",132.7,"2:12 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer provided. The response is concise and does not include extraneous information or biological speculation. The p-values are correctly extracted from the tool result. The tool was called appropriately to identify significant variants in NEK1 associated with ALS."
+"N01","nonsense","What is the ClinVar pathogenicity classification of VAR_id 42?","[mode: dual]
+[complexity: simple]
+[tools called: clinvar_annotation/get_clinvar_for_variant]
+--- Final response ---
+The ClinVar pathogenicity classification of VAR_id 42 is not available.","The ClinVar pathogenicity classification of VAR_id 42 is not available.","llama3.1:70b [adaptive]","agentic_adaptive",38.1,"38.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer perfectly. It correctly states that the ClinVar pathogenicity classification is not available and explains why (computational predictions). The response is concise and avoids unnecessary details or speculation."
+"N02","nonsense","What is the gnomAD allele frequency of the variant at position 1378764 on chrX in the European population?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",30.4,"30.4 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that the requested information is not available due to the database limitations. The response is concise and does not include extraneous details or speculation. It accurately reflects the tool's refusal to provide population-specific GnomAD data. The tool call was appropriate for an unanswerable question."
+"N03","nonsense","Which exon does the high-impact variant in FUS (VAR_id 1175) affect?","[mode: dual]
+[complexity: simple]
+[tools called: clinvar_annotation/get_clinvar_for_variant]
+--- Final response ---
+The high-impact variant in FUS (VAR_id 1175) has no ClinVar record and its exon information is not available.","The high-impact variant in FUS (VAR_id 1175) has no ClinVar record and its exon information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",55.2,"55.2 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer perfectly matches the expected response. It correctly states that no ClinVar record exists and exon information is unavailable, reflecting the database's limitations. The response is concise and avoids unnecessary speculation. The tool call was appropriate for retrieving this information."
+"N04","nonsense","What is the protein domain affected by the most deleterious variant in SOD1?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",28.7,"28.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that the database does not contain protein domain information and refuses to answer the question. This aligns with the expected answer and the tool call reflects this unanswerable nature of the query."
+"N05","nonsense","Does VAR_id 200 affect splicing?","[mode: simple]
+[complexity: pure_nonsense]
+[tools called: unknown]
+--- Final response ---
+That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","llama3.1:70b [adaptive]","agentic_adaptive",0,"0.0 sec",TRUE,TRUE,TRUE,FALSE,3,"The chatbot correctly identifies the question as unanswerable due to its nonsensical nature. It refuses to answer and provides alternative questions. This aligns with the 'Unanswerable Qs' criteria (TRUE). The response is concise (1-3 sentences) and avoids unnecessary speculation (TRUE). The chatbot did not invent any data or facts beyond what was explicitly stated in the prompt (TRUE). The chatbot did not call a tool, so it fails the tool test (FALSE)."
+"N06","nonsense","Which variants are both synonymous and high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 0 variants that are both synonymous and high impact.","There are 0 variants that are both synonymous and high impact.","llama3.1:70b [adaptive]","agentic_adaptive",50.1,"50.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The answer correctly states that there are 0 variants with both synonymous and high impact annotations. This aligns perfectly with the database rule that a variant cannot be both synonymous and HighImpact simultaneously. The response is concise and does not introduce any extraneous information or biological speculation. The tool call was appropriate for this question."
+"N07","nonsense","Which variants have a genotype of 3 (i.e. three copies of the alternate allele) in ALS_1?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: run_variant_query]
+--- Final response ---
+Database error: HTTP 404 Not Found.","Database error: HTTP 404 Not Found.","llama3.1:70b [adaptive]","agentic_adaptive",34.6,"34.6 sec",TRUE,TRUE,TRUE,FALSE,3,"The question asks for a genotype of '3' which is impossible in a diploid organism. The response correctly identifies this impossibility and states that 0 rows exist with ALS_1=3. The chatbot failed to execute the query tool."
+"N08","nonsense","What is the allele frequency of a variant that no one in the world carries?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",48.7,"48.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that the information is not available and provides a concise response. The expected answer aligns with the database limitations (AF=0), and the chatbot's refusal to provide an answer is appropriate given the question's inherent impossibility. The tool call was also correct."
+"N09","nonsense","How many variants have a CADD score of exactly 0 and are also high impact?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for the number of variants with CADD=0 and high impact. The database limitations explicitly state that a variant cannot be both synonymous and high-impact simultaneously. Therefore, any variant with CADD=0 must be synonymous, and it's impossible to have a high-impact classification. The chatbot correctly identifies this incompatibility and states the information is not available, which aligns perfectly with the expected answer and database constraints."
+"N10","nonsense","Which ALS patient is also listed as a control?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for a patient listed as both ALS and control. The database limitations tool correctly identified this unanswerable scenario due to the defined separation of ALS patients and controls within the dataset. The chatbot's response accurately reflects this limitation ('This information is not available')."
+"N11","nonsense","Which variants are important?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",37.2,"37.2 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies that the question is unanswerable due to a lack of context (definition of 'important'). It refuses to answer and explains why. The response is concise and does not include extraneous information or speculation. The tool call `db_exploration/get_database_limitations` was appropriate for this type of unanswerable question."
+"N12","nonsense","Is NEK1 an ALS gene?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",40.3,"40.3 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the question as not suitable for the database and refuses to answer. The response is concise (1 sentence). It accurately reflects the limitations of the database ('no publication status, association scores, or external literature references'). The tool call `db_exploration/get_database_limitations` was appropriate given the nature of the question."
+"N13","nonsense","What is the most interesting variant in the dataset?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",20.7,"20.7 sec",TRUE,TRUE,TRUE,TRUE,4,"The question is inherently subjective and asks for a selection based on 'interest,' which is not a quantifiable metric within the database. The chatbot correctly identifies this as unanswerable and provides an appropriate response ('This information is not available') without attempting to fulfill the request or introduce irrelevant details. It also adheres to the minimal response criteria (1-3 sentences, no fluff)."
+"N14","nonsense","Which variants should we follow up on in the wet lab?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.5,"22.5 sec",TRUE,TRUE,TRUE,TRUE,4,"The question asks for wet lab prioritization, which is beyond the scope of the database. The chatbot correctly identifies that this information is not available, aligning with the unanswerable nature of the query and the tool's limitations. It also adheres to a concise response."
+"N15","nonsense","Is this dataset good enough to find the cause of ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",TRUE,TRUE,TRUE,TRUE,4,"The question requires a judgement about the dataset's suitability for finding the cause of ALS, which is beyond the scope of simply querying a database. The chatbot correctly identifies this as an unanswerable question and states 'This information is not available,' which aligns with the expected answer and avoids inventing data. The response is concise and does not include extraneous details or speculation. The tool call `db_exploration/get_database_limitations` was appropriate for determining if the dataset could provide the requested information."
+"F01","toolfree","For how many variants is the total allele count higher in ALS cases than in controls?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: run_variant_query]
+--- Final response ---
+Database error: HTTP 500 Internal Server Error.","Database error: HTTP 500 Internal Server Error.","llama3.1:70b [adaptive]","agentic_adaptive",70.5,"1:10 min",FALSE,FALSE,TRUE,FALSE,1,"The chatbot returned a database error (HTTP 500) and did not provide an answer. The expected answer is 792, but the tool call failed. This indicates a problem with the underlying data retrieval or query execution, not simply a lack of information."
+"F02","toolfree","Which gene has the highest proportion of high-impact variants relative to its total variant count?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The gene NEK1 has the highest proportion of high-impact variants relative to its total variant count.","The gene NEK1 has the highest proportion of high-impact variants relative to its total variant count.","llama3.1:70b [adaptive]","agentic_adaptive",65.5,"1:05 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer (NEK1 17.37%). The response is concise and does not include extraneous information or biological speculation. The tool was called correctly to determine the gene with the highest proportion of high-impact variants."
+"F03","toolfree","How many variants are carried (het or hom) by at least 3 of the 5 ALS patients?","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query → variant_analysis/run_variant_query → variant_analysis/run_variant_query]
+--- Final response ---
+There are 1377 variants carried by at least 3 of the 5 ALS patients.","There are 1377 variants carried by at least 3 of the 5 ALS patients.","llama3.1:70b [adaptive]","agentic_adaptive",274.5,"4:34 min",FALSE,TRUE,TRUE,FALSE,2,"The expected answer is 1425, but the chatbot returned 1377. This constitutes a factual error and therefore grade_answer=FALSE. The response is concise (1 sentence), but it includes an incorrect numerical value, violating grade_minimal_response=TRUE. The chatbot used multiple tool calls which is unnecessary for this question, indicating grade_tool=FALSE. The answer is wrong, so there's no hallucination in the sense of inventing data; rather, the chatbot provided an inaccurate count, thus grade_hallucination=TRUE."
+"F04","toolfree","What is the average CADD score of high-impact variants per chromosome? Which chromosome has the highest average CADD score among high-impact variants?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average CADD score of high-impact variants is 37.16 on chromosome chr12.","The average CADD score of high-impact variants is 37.16 on chromosome chr12.","llama3.1:70b [adaptive]","agentic_adaptive",67.9,"1:07 min",TRUE,TRUE,TRUE,TRUE,4,"The answer matches the expected answer in terms of numerical value (37.16) and chromosome designation (chr12). The response is concise and does not include extraneous details or biological speculation. The chatbot correctly called the tool to retrieve the CADD score data. No hallucination occurred."
+"F05","toolfree","What is the total number of alleles carried by each individual ALS patient across all variants in the dataset?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The total number of alleles carried by ALS patients across all variants is 9083.","The total number of alleles carried by ALS patients across all variants is 9083.","llama3.1:70b [adaptive]","agentic_adaptive",45.2,"45.2 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot provides a single total allele count (9083) which contradicts the expected answer. The tool call was invoked but the result is incorrect. The response exceeds 3 sentences and includes unnecessary information about the tool used."
+"F06","toolfree","How many variants are homozygous (genotype = 2) in ALL five ALS patients simultaneously?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 11 variants that are homozygous in all five ALS patients simultaneously.","There are 11 variants that are homozygous in all five ALS patients simultaneously.","llama3.1:70b [adaptive]","agentic_adaptive",61.7,"1:01 min",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identified the number of homozygous variants (11) across all five patients. The response is concise and does not include extraneous details or biological speculation. The tool call was appropriate for this query."
+"F07","toolfree","Does a higher CADD score correlate with a higher rate of PolyPhen 'damaging' (D) predictions? Show this using CADD bins.","[mode: agentic]
+[complexity: complex]
+[tools called: rvat_analysis/get_maf_by_impact]
+--- Final response ---
+There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","llama3.1:70b [adaptive]","agentic_adaptive",114.6,"1:54 min",FALSE,TRUE,TRUE,FALSE,2,"The answer does not match the expected answer. The expected answer requires a breakdown of CADD scores and their corresponding PolyPhen damaging predictions. The chatbot only provides a count of variants with a 'D' PolyPhen score without any binning or correlation analysis as requested. It also hallucinates data by providing a number (23) that is not present in the tool result, which is a SOD1 variant count. The tool was incorrectly called and did not provide the required information."
+"F08","toolfree","How many variants are carried by exactly one ALS patient and by no control at all (so-called 'private' ALS variants)?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There is 1 variant carried by exactly one ALS patient and by no control at all (so-called 'private' ALS variant).","There is 1 variant carried by exactly one ALS patient and by no control at all (so-called 'private' ALS variant).","llama3.1:70b [adaptive]","agentic_adaptive",140,"2:20 min",TRUE,TRUE,TRUE,TRUE,4,"The answer (1) matches the expected answer. The response is concise and does not include extraneous information or biological speculation. The chatbot correctly used the tool to identify variants carried by exactly one ALS patient and none in controls. No hallucination occurred."
+"F09","toolfree","Which ALS patient has the most 'private' variants — variants carried only by that patient and no one else in the entire dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Ollama not reachable: Failed to perform HTTP request.","Ollama not reachable: Failed to perform HTTP request.","llama3.1:70b [adaptive]","agentic_adaptive",252.1,"4:12 min",FALSE,FALSE,TRUE,FALSE,1,"The chatbot failed to execute the tool call and returned an error message. The expected answer specifies a specific patient with 1 private variant, while the response indicates failure to perform the query. This constitutes a hallucination as it provides no information about the requested data."
+"F10","toolfree","For high-impact variants only, what is the case-to-control burden ratio per gene? Which genes show enrichment in cases?","[mode: agentic]
+[complexity: complex]
+[tools called: rvat_analysis/run_burden_test]
+--- Final response ---
+The burden test analysis failed due to an HTTP 422 Unprocessable Entity error.","The burden test analysis failed due to an HTTP 422 Unprocessable Entity error.","llama3.1:70b [adaptive]","agentic_adaptive",71.7,"1:11 min",FALSE,FALSE,TRUE,FALSE,1,"The chatbot failed to execute the tool and reported an HTTP 422 error. It did not provide any relevant data or a correct refusal regarding the inability to perform the analysis. The response is entirely fabricated and does not align with the expected answer or the tool's functionality."
+"F11","toolfree","What is the mean age of ALS cases per super-population? Which population has the highest average age?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query → phenotype_data/run_phenotype_query]
+--- Final response ---
+The mean age of ALS cases is 60.44 in AFR and 57.19 in EAS, with the highest average age found in the African super-population.","The mean age of ALS cases is 60.44 in AFR and 57.19 in EAS, with the highest average age found in the African super-population.","llama3.1:70b [adaptive]","agentic_adaptive",94.3,"1:34 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot's response provides incorrect mean ages for EAS and SAS. The expected answer specifies 60.44 for AFR, 60.30 for EAS, 60.16 for SAS, etc. The chatbot states 57.19 for EAS and an unspecified value for SAS, hallucinating numbers. Also, the tool was called incorrectly - it should have returned the mean age per super-population."
+"F12","toolfree","How many female ALS cases are there in the South Asian (SAS) population?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+There are 0 female ALS cases in the South Asian (SAS) population.","There are 0 female ALS cases in the South Asian (SAS) population.","llama3.1:70b [adaptive]","agentic_adaptive",50.5,"50.5 sec",FALSE,TRUE,TRUE,FALSE,2,"The expected answer is 576. The chatbot returned 0, which directly contradicts the tool result. This constitutes a hallucination."
+"F13","toolfree","What is the sex, population, and age of each of the five named ALS patients (ALS1 through ALS5) from the pheno table?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+The query returned an error and no results were obtained for ALS1 through ALS5 from the pheno table.","The query returned an error and no results were obtained for ALS1 through ALS5 from the pheno table.","llama3.1:70b [adaptive]","agentic_adaptive",50.9,"50.9 sec",FALSE,TRUE,TRUE,FALSE,2,"The chatbot correctly identified that the query returned an error and no results were obtained. However, it failed to recognize that this indicates a problem with the tool call (phenotype_data/run_phenotype_query) or the underlying data. The response does not explain why the error occurred, nor does it state that the information is unavailable – it simply states the query returned an error. This constitutes a hallucination as it implies results *should* have been available when they were not."
+"F14","toolfree","How many variants have contradictory functional predictions — deleterious by SIFT but benign by PolyPhen? Which genes have the most such contradictory variants?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 10 genes with contradictory functional predictions — deleterious by SIFT but benign by PolyPhen, led by ABCA4 with 43 such variants.","There are 10 genes with contradictory functional predictions — deleterious by SIFT but benign by PolyPhen, led by ABCA4 with 43 such variants.","llama3.1:70b [adaptive]","agentic_adaptive",79.2,"1:19 min",FALSE,TRUE,TRUE,FALSE,2,"The chatbot states there are 10 genes with contradictory predictions and ABCA4 has 43 variants. The expected answer specifies a total of 122 variants (SIFT=D AND PolyPhen=B) and lists the top genes with their counts: ABCA4 (43), RIN3 (16), ZNF483 (12), NEK1 (10), PEX5 (9). The chatbot's numbers are significantly off, indicating a hallucination. Also, the tool was called incorrectly."
+"F15","toolfree","How many variants have an allele frequency above the dataset average? Use a subquery to compute the average.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 58 variants with an allele frequency above the dataset average.","There are 58 variants with an allele frequency above the dataset average.","llama3.1:70b [adaptive]","agentic_adaptive",52.6,"52.6 sec",TRUE,TRUE,TRUE,TRUE,4,"The chatbot correctly identifies the number of variants (58) above the mean allele frequency. The response is concise and doesn't include extraneous details or biological speculation. The tool call was appropriate for this query. The inclusion of the mean AF value in the answer is consistent with the expected answer."

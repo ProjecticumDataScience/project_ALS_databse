@@ -13,26 +13,24 @@ library(httr2)
 library(jsonlite)
 
 ## ── Source agentic pipeline logic ────────────────────────────
-## Load from app2.R — strip UI/server, keep pipeline functions
-agentic_script <- file.path(
+## pipeline.R contains all logic (no Shiny UI) — source directly
+pipeline_script <- file.path(
   path.expand("~/project_ALS_databse/scripts/agentic_surf"),
-  "app2.R"
+  "pipeline.R"
 )
-stopifnot(file.exists(agentic_script))
+stopifnot(file.exists(pipeline_script))
+source(pipeline_script)
+cat("Agentic pipeline loaded from:", pipeline_script, "\n")
 
-## Source only the pipeline logic (everything before shinyApp)
-agentic_lines <- readLines(agentic_script)
-shiny_line    <- which(grepl("^shinyApp\\(", agentic_lines))[1]
-if (!is.na(shiny_line)) {
-  tmp <- tempfile(fileext = ".R")
-  writeLines(agentic_lines[seq_len(shiny_line - 1)], tmp)
-  source(tmp)
-  unlink(tmp)
-} else {
-  source(agentic_script)
+## ── Model warmup ── pre-loads ORCH_MODEL and DECOMPOSE_MODEL into Ollama
+## memory ONCE before any benchmark question runs. Prevents the cold-start
+## timeouts that occur when the first question forces a model switch.
+cat("\n========== WARMUP ==========\n")
+warmup_result <- warmup_all_models()
+if (!warmup_result$ok) {
+  cat("WARNING: warmup had failures — first few benchmark questions may be slow/unreliable\n")
 }
-
-cat("Agentic pipeline loaded from:", agentic_script, "\n")
+cat("=============================\n\n")
 
 ## ── Session setup ────────────────────────────────────────────
 

@@ -68,6 +68,23 @@ if (length(cli_models) > 0) {
   MODELS_TO_TEST <- cli_models
 }
 
+## ── Logging setup ────────────────────────────────────────────
+## Write to a temp file during the run; move it into the grading dir at the end.
+LOG_TIMESTAMP <- format(Sys.time(), "%Y%m%d_%H%M%S")
+log_file_tmp  <- tempfile(pattern = paste0("pipeline_log_", LOG_TIMESTAMP, "_"), fileext = ".txt")
+
+con_log <- file(log_file_tmp, open = "wt")
+sink(con_log, append = FALSE, split = TRUE)
+## Note: message sink not supported on all R versions — stdout only
+
+cat("================================================================\n")
+cat("Project ALS — Benchmark Pipeline Log\n")
+cat("Started   :", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("Backends  :", paste(BACKENDS_TO_RUN, collapse = ", "), "\n")
+cat("Models    :", paste(MODELS_TO_TEST,  collapse = ", "), "\n")
+cat("Temp log  :", log_file_tmp, "\n")
+cat("================================================================\n\n")
+
 ## ── Step 1: Benchmark all backends, combine into one CSV ─────
 if (!visualise_only) {
   
@@ -125,3 +142,29 @@ cat("Models     :", paste(MODELS_TO_TEST,  collapse = ", "), "\n")
 cat("Results    :", if (exists("BENCHMARK_CSV")) BENCHMARK_CSV else "(skipped)", "\n")
 cat("Graded     :", if (exists("GRADED_FINAL_CSV")) GRADED_FINAL_CSV else "(skipped)", "\n")
 cat("Plots      :", path.expand(GRADING_DIR), "\n")
+
+## ── Close log and move to grading dir ────────────────────────
+cat("\n================================================================\n")
+cat("Pipeline finished:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("================================================================\n")
+sink()
+close(con_log)
+
+## Move temp log into the grading run dir, then delete the temp file
+if (exists("GRADED_FINAL_CSV") && !is.null(GRADED_FINAL_CSV)) {
+  grading_run_dir <- dirname(path.expand(GRADED_FINAL_CSV))
+  final_log <- file.path(grading_run_dir, paste0("pipeline_log_", LOG_TIMESTAMP, ".txt"))
+  file.copy(log_file_tmp, final_log, overwrite = TRUE)
+  file.remove(log_file_tmp)
+  cat("Log saved to:", final_log, "\n")
+} else {
+  ## Fallback: no grading dir — save next to the benchmark CSV
+  fallback_log <- file.path(
+    path.expand(GRADING_DIR),
+    paste0("pipeline_log_", LOG_TIMESTAMP, ".txt")
+  )
+  dir.create(path.expand(GRADING_DIR), recursive = TRUE, showWarnings = FALSE)
+  file.copy(log_file_tmp, fallback_log, overwrite = TRUE)
+  file.remove(log_file_tmp)
+  cat("Log saved to:", fallback_log, "\n")
+}

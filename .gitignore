@@ -48,3 +48,9 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 .positai
+
+# ── Project ALS additions ────────────────────────────────────────
+# Auto-generated cache/log files — not source, regenerated at runtime
+*.log
+mcp_servers/*.db
+scripts/agentic_surf/servers.json

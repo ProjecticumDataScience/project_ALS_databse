@@ -4,7 +4,7 @@
 
 ## ── Backends ─────────────────────────────────────────────────
 ## Options: "agentic_single", "agentic_dual", "agentic_adaptive"
-BACKENDS_TO_RUN <- c("agentic_single", "agentic_dual", "agentic_adaptive")
+BACKENDS_TO_RUN <- c("agentic_adaptive")
 
 ## ── Models ───────────────────────────────────────────────────
 MODELS_TO_TEST <- c("llama3.1:70b")
@@ -14,7 +14,7 @@ ORCH_MODELS_TO_TEST <- c("llama3.1:70b")
 SUB_MODELS_TO_TEST  <- c("llama3.1:70b")
 
 ## ── Adaptive backend ─────────────────────────────────────────
-SUB_SQL_MODEL    <- "duckdb-nsql"
+SUB_SQL_MODEL    <- "llama3.1:70b"
 SUB_REASON_MODEL <- "llama3.1:70b"
 
 ## ── Judge model ───────────────────────────────────────────────
