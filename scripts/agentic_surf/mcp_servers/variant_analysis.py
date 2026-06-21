@@ -84,6 +84,8 @@ def count_variants_by_impact() -> list[dict]:
     """
     Count variants grouped by impact category across all genes.
     Returns totals for HighImpact, ModerateImpact, and Synonymous.
+    Use this for "how many variants fall into each impact category" questions —
+    it already returns the full breakdown in one row, no further aggregation needed.
     """
     return _query(
         "SELECT "
@@ -240,6 +242,73 @@ def get_als_carrier_stats() -> list[dict]:
         "      THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_carried_by_als "
         "FROM varInfo_synthetic"
     )
+
+
+@mcp.tool()
+def get_cadd_polyphen_correlation(bin_width: int = 10,
+                                   impact: str = "all") -> list[dict]:
+    """
+    Show whether higher CADD scores correlate with a higher rate of PolyPhen
+    'damaging' (D) predictions, binned by CADD score range.
+
+    Returns one row per CADD bin with the variant count and the percentage
+    of variants in that bin predicted damaging by PolyPhen. A correctly
+    correlated dataset shows pct_polyphen_damaging increasing with cadd_bin_start.
+
+    Args:
+        bin_width: Width of each CADD score bin (default 10, e.g. 0-10, 10-20...)
+        impact:    'HIGH', 'MODERATE', 'SYNONYMOUS', or 'all' (default: 'all')
+    """
+    impact_map = {
+        "HIGH":       "AND HighImpact = '1'",
+        "MODERATE":   "AND ModerateImpact = '1'",
+        "SYNONYMOUS": "AND Synonymous = '1'",
+        "ALL":        "",
+    }
+    impact_filter = impact_map.get(impact.upper(), "")
+    bw = int(bin_width)
+
+    return _query(
+        f"SELECT "
+        f"  CAST(CAST(CADDphred AS REAL) / {bw} AS INTEGER) * {bw} AS cadd_bin_start, "
+        f"  CAST(CAST(CADDphred AS REAL) / {bw} AS INTEGER) * {bw} + {bw} AS cadd_bin_end, "
+        f"  COUNT(*) AS n_variants, "
+        f"  SUM(CASE WHEN PolyPhen = 'D' THEN 1 ELSE 0 END) AS n_polyphen_damaging, "
+        f"  ROUND(100.0 * SUM(CASE WHEN PolyPhen = 'D' THEN 1 ELSE 0 END) / COUNT(*), 2) "
+        f"    AS pct_polyphen_damaging "
+        f"FROM varInfo_synthetic "
+        f"WHERE CADDphred != '.' {impact_filter} "
+        f"GROUP BY cadd_bin_start "
+        f"ORDER BY cadd_bin_start"
+    )
+
+
+@mcp.tool()
+def count_variants_above_average(column: str = "AF") -> list[dict]:
+    """
+    Count how many variants have a value above the dataset-wide average for
+    a given numeric column. Computes the average and the comparison in a
+    single deterministic query, avoiding the subquery-construction errors
+    that come from hand-writing this pattern repeatedly.
+
+    Args:
+        column: Which column to compare against its average.
+                'AF' (default) or 'CADDphred'. Both stored as TEXT with
+                '.' for missing values, handled automatically.
+    """
+    col = column if column in ("AF", "CADDphred") else "AF"
+    return _query(
+        f"SELECT COUNT(*) AS n_above_average, "
+        f"  (SELECT ROUND(AVG(CAST({col} AS REAL)), 6) "
+        f"   FROM varInfo_synthetic WHERE {col} != '.') AS dataset_average "
+        f"FROM varInfo_synthetic "
+        f"WHERE {col} != '.' "
+        f"  AND CAST({col} AS REAL) > ( "
+        f"    SELECT AVG(CAST({col} AS REAL)) "
+        f"    FROM varInfo_synthetic WHERE {col} != '.' "
+        f"  )"
+    )
+
 
 @mcp.tool()
 def run_variant_query(sql: str) -> list[dict]:

@@ -176,6 +176,54 @@ def get_carrier_info(
     return _call_plumber("get_carrier_info", params)
 
 
+@mcp.tool()
+def get_carrier_count_filtered(
+    gene: str,
+    impact_filter: str = "high_moderate",
+    sex: int | None = None,
+    population: str | None = None,
+    phenotype: int | None = None
+) -> list[dict]:
+    """
+    Count UNIQUE carriers of variants in a gene, filtered by sex/population/phenotype.
+
+    Uses the FULL rvat cohort (25,000 samples) — NOT the small synthetic
+    10-sample genotype subset. Use this for questions like "how many female
+    carriers in the SAS population carry a pathogenic mutation in gene X".
+    A carrier with multiple qualifying variants is counted once, not once per
+    variant.
+
+    "Pathogenic mutation" in genomics is commonly approximated as high or
+    moderate impact (default impact_filter='high_moderate').
+    "Carrier" in a disease context typically means ALS cases specifically —
+    set phenotype=1 unless the question explicitly asks about controls or both.
+
+    Args:
+        gene:          Gene name e.g. 'SOD1', 'NEK1'. Required.
+        impact_filter: Variant filter: 'any', 'high', 'moderate',
+                       'high_moderate' (default — standard "pathogenic" proxy).
+        sex:           Optional sex filter: 1 (female), 2 (male). None = all.
+        population:    Optional superPop filter e.g. 'SAS', 'EUR', 'AFR'.
+                       None = all populations.
+        phenotype:     Optional case/control filter: 1 (ALS case), 0 (control).
+                       None = both. Most "carrier of a pathogenic mutation"
+                       questions implicitly mean ALS cases — default to 1
+                       unless the question explicitly asks about controls.
+
+    Returns:
+        n_unique_carriers — the count of DISTINCT individuals matching all
+        filters. This is the correct number to report for "how many carriers"
+        questions. n_variant_carrier_rows is the raw row count before dedup
+        and should NOT be used as the answer if it differs from n_unique_carriers.
+    """
+    params = {"gene": gene, "impact_filter": impact_filter}
+    if sex is not None:
+        params["sex"] = sex
+    if population is not None:
+        params["population"] = population
+    if phenotype is not None:
+        params["phenotype"] = phenotype
+    return _call_plumber("get_carrier_count_filtered", params)
 
 
 @mcp.tool()

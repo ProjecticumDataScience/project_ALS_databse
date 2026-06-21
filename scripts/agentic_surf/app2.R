@@ -232,18 +232,7 @@ ui <- page_sidebar(
     tags$details(
       class = "sb-section",
       tags$summary("Example Questions"),
-      div(class = "sb-section-body",
-          tags$ul(
-            style = "padding-left:14px; margin:0;",
-            tags$li(actionLink("ex1", "How many variants are in ABCA4?")),
-            tags$li(actionLink("ex2", "How many variants in SOD1 are high impact?")),
-            tags$li(actionLink("ex3", "How many genes are in the database?")),
-            tags$li(actionLink("ex4", "How many total variants are in the database?")),
-            tags$li(actionLink("ex5", "How many variants have PolyPhen predicted damaging?")),
-            tags$li(actionLink("ex6", "Which gene has the fewest variants?")),
-            tags$li(actionLink("ex7", "How many high-impact variants does ALS_3 carry?")),
-            tags$li(actionLink("ex8", "What is the average age of ALS patients?"))
-          ))
+      div(class = "sb-section-body", uiOutput("example_questions_ui"))
     ),
     
     tags$details(
@@ -482,16 +471,23 @@ server <- function(input, output, session) {
                  border-radius:6px; border-left:4px solid #2A9D8F;", els)
   })
   
-  ex_map <- list(
-    ex1 = "How many variants are in ABCA4?",
-    ex2 = "How many variants in SOD1 are high impact?",
-    ex3 = "How many genes are in the database?",
-    ex4 = "How many total variants are in the database?",
-    ex5 = "How many variants have PolyPhen predicted damaging?",
-    ex6 = "Which gene has the fewest variants?",
-    ex7 = "How many high-impact variants does ALS_3 carry?",
-    ex8 = "What is the average age of ALS patients?"
+  ## Example questions are sourced from REASONING_EXAMPLES in pipeline.R —
+  ## the same patterns the model has been shown, so user phrasing aligns
+  ## with what the system actually handles well.
+  ex_map <- setNames(
+    as.list(EXAMPLE_QUESTIONS_FOR_UI),
+    paste0("ex", seq_along(EXAMPLE_QUESTIONS_FOR_UI))
   )
+  
+  output$example_questions_ui <- renderUI({
+    tags$ul(
+      style = "padding-left:14px; margin:0;",
+      lapply(names(ex_map), function(id) {
+        tags$li(actionLink(id, ex_map[[id]]))
+      })
+    )
+  })
+  
   for (id in names(ex_map)) {
     local({
       q <- ex_map[[id]]

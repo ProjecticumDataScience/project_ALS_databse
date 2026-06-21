@@ -304,6 +304,99 @@ function(gene, impact_filter = "high", var_id = NULL, res = NULL) {
 }
 
 
+
+## ════════════════════════════════════════════════════════════════════════════
+## ENDPOINT 10: get_carrier_count_filtered
+## ════════════════════════════════════════════════════════════════════════════
+
+#* Count carriers of variants in a gene, filtered by sex/population/phenotype
+#*
+#* Builds on get_carrier_info but counts UNIQUE individuals matching specific
+#* phenotype filters (sex, population, case/control status) against the FULL
+#* rvat cohort (25,000 samples), not a synthetic subset. Use this for
+#* questions like "how many female carriers in the SAS population carry a
+#* pathogenic mutation in gene X" — note: "carrier" questions about disease
+#* risk typically mean ALS CASES specifically, so phenotype defaults to
+#* cases only (1) unless the question asks about controls or both.
+#*
+#* @param gene Gene name (required).
+#* @param impact_filter Variant filter: any, high, moderate, high_moderate
+#*                      (default: high_moderate — common "pathogenic" proxy).
+#* @param sex Optional sex filter: 1 (female), 2 (male). NULL = all.
+#* @param population Optional superPop filter, e.g. 'SAS', 'EUR'. NULL = all.
+#* @param phenotype Optional case/control filter: 1 (ALS case), 0 (control).
+#*                  NULL = both. Most "carrier" questions implicitly mean cases.
+#* @post /get_carrier_count_filtered
+function(gene, impact_filter = "high_moderate", sex = NULL, population = NULL,
+         phenotype = NULL, res = NULL) {
+  tryCatch({
+    if (is.null(gene) || gene == "")
+      return(list(error = "gene parameter is required"))
+    
+    vsf_path <- make_varset(gene, impact_filter)
+    vsf      <- varSetFile(vsf_path)
+    vs       <- tryCatch(getVarSet(vsf, unit = gene), error = function(e) NULL)
+    
+    if (is.null(vs) || length(vs) == 0)
+      return(list(gene = gene, error = "No variants found"))
+    
+    GT <- getGT(db, varSet = vs, cohort = "pheno")
+    
+    if (ncol(GT) == 0 || nrow(GT) == 0)
+      return(list(gene = gene, error = "Empty genotype matrix"))
+    
+    ## Get full carrier list against the real cohort (not synthetic subset)
+    carriers <- getCarriers(
+      GT,
+      colDataFields = c("pheno", "sex", "superPop", "pop")
+    )
+    
+    df <- as.data.frame(carriers)
+    
+    if (nrow(df) == 0)
+      return(list(
+        gene = gene, impact_filter = impact_filter,
+        n_carriers = 0,
+        message = "No carriers found"
+      ))
+    
+    ## Apply optional filters
+    if (!is.null(sex) && sex != "") {
+      sex_num <- as.integer(sex)
+      if ("sex" %in% colnames(df)) df <- df[df$sex == sex_num, , drop = FALSE]
+    }
+    if (!is.null(population) && population != "") {
+      pop_upper <- toupper(population)
+      if ("superPop" %in% colnames(df)) df <- df[toupper(df$superPop) == pop_upper, , drop = FALSE]
+    }
+    if (!is.null(phenotype) && phenotype != "") {
+      pheno_num <- as.integer(phenotype)
+      if ("pheno" %in% colnames(df)) df <- df[df$pheno == pheno_num, , drop = FALSE]
+    }
+    
+    ## Count UNIQUE individuals — a person carrying multiple qualifying
+    ## variants in the same gene should only be counted once.
+    n_variant_carrier_rows <- nrow(df)
+    df_unique <- df[!duplicated(df$IID), , drop = FALSE]
+    
+    list(
+      gene           = gene,
+      impact_filter  = impact_filter,
+      sex_filter     = if (!is.null(sex)) as.integer(sex) else NA,
+      population_filter  = if (!is.null(population)) toupper(population) else NA,
+      phenotype_filter   = if (!is.null(phenotype)) as.integer(phenotype) else NA,
+      n_unique_carriers  = nrow(df_unique),
+      n_variant_carrier_rows = n_variant_carrier_rows,
+      note = "n_unique_carriers is the count of distinct individuals — use this for 'how many carriers' questions",
+      carriers       = df_to_rows(df_unique)
+    )
+    
+  }, error = function(e) {
+    list(gene = gene, error = e$message)
+  })
+}
+
+
 ## ════════════════════════════════════════════════════════════════════════════
 ## ENDPOINT 5: server_status
 ## ════════════════════════════════════════════════════════════════════════════

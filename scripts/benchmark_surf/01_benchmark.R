@@ -1,6 +1,6 @@
 ## ============================================================
 ## 01_benchmark.R — Agentic pipeline benchmark (full question set)
-## 110 questions across 9 categories
+## 111 questions across 9 categories
 ## ============================================================
 
 if (!exists("BACKEND"))    BACKEND    <- "agentic_single"
@@ -191,7 +191,7 @@ benchmark_questions <- list(
   list(id="R05", category="rvat",
        question="What are the most significant single variants in NEK1 associated with ALS?"),
 
-  # ── NONSENSE (15) ────────────────────────────────────────────
+  # ── NONSENSE (16) ────────────────────────────────────────────
   ## Category 1: Missing annotation (N01-N05)
   list(id="N01", category="nonsense",
        question="What is the ClinVar pathogenicity classification of VAR_id 42?"),
@@ -225,6 +225,9 @@ benchmark_questions <- list(
        question="Which variants should we follow up on in the wet lab?"),
   list(id="N15", category="nonsense",
        question="Is this dataset good enough to find the cause of ALS?"),
+  ## Category 4: Pure nonsense / gibberish (N16)
+  list(id="N16", category="nonsense",
+       question="jasdkjahdkjahdas"),
 
   # ── TOOLFREE (15) ────────────────────────────────────────────
   ## Variant-level SQL (F01-F10)
@@ -262,7 +265,7 @@ benchmark_questions <- list(
        question="How many variants have an allele frequency above the dataset average? Use a subquery to compute the average.")
 )
 
-cat("Total questions:", length(benchmark_questions), "\n")  ## should be 110
+cat("Total questions:", length(benchmark_questions), "\n")  ## should be 111
 
 ## ── Setup / ask wrappers ─────────────────────────────────────
 setup_session  <- function(model_name) agentic_setup(model_name)
@@ -289,12 +292,20 @@ run_benchmark <- function(model_name, questions) {
       sprintf("%.1f sec", elapsed_sec)
     }
     cat(sprintf("         \u21b3 %.1f sec\n", elapsed_sec))
-    results[[q$id]] <- list(
+    ## Flatten phase timing into named columns (decompose_sec, route_sec, etc.)
+    ## so they show up directly in the combined CSV for analysis/plotting.
+    pt <- out$phase_timing
+    phase_cols <- if (!is.null(pt)) {
+      nm <- names(pt)
+      vals <- sapply(pt, function(x) if (is.null(x)) NA_real_ else as.numeric(x))
+      setNames(as.list(vals), paste0("phase_", nm, "_sec"))
+    } else list()
+    results[[q$id]] <- c(list(
       id=q$id, category=q$category, question=q$question,
       full=out$full, response=out$response,
       model=model_name, backend=BACKEND,
       elapsed_sec=elapsed_sec, elapsed_fmt=elapsed_fmt
-    )
+    ), phase_cols)
     Sys.sleep(2)
   }
   results
@@ -309,13 +320,7 @@ output_dir <- path.expand(file.path(
 dir.create(output_dir, recursive=TRUE)
 cat("Output folder:", output_dir, "\n")
 
-all_results <- data.frame(
-  id=character(), category=character(), question=character(),
-  full=character(), response=character(),
-  model=character(), backend=character(),
-  elapsed_sec=numeric(), elapsed_fmt=character(),
-  stringsAsFactors=FALSE
-)
+all_results_list <- list()
 
 models_for_this_backend <- if (BACKEND == "agentic_dual") {
   pairs <- expand.grid(orch=ORCH_MODELS_TO_TEST, sub=SUB_MODELS_TO_TEST,
@@ -345,14 +350,36 @@ for (model_name in models_for_this_backend) {
   }
   writeLines(output, file.path(output_dir, paste0(model_clean, ".txt")))
   for (r in results) {
-    all_results <- rbind(all_results, data.frame(
-      id=r$id, category=r$category, question=r$question,
-      full=r$full, response=r$response,
-      model=model_name, backend=BACKEND,
-      elapsed_sec=r$elapsed_sec, elapsed_fmt=r$elapsed_fmt,
-      stringsAsFactors=FALSE
-    ))
+    ## Build each row as a single-row data.frame so phase_* columns (which
+    ## vary per-question depending on which phases fired) line up by name
+    ## rather than position. Missing phase columns become NA automatically.
+    row_df <- as.data.frame(c(
+      list(id=r$id, category=r$category, question=r$question,
+           full=r$full, response=r$response,
+           model=model_name, backend=BACKEND,
+           elapsed_sec=r$elapsed_sec, elapsed_fmt=r$elapsed_fmt),
+      r[grepl("^phase_", names(r))]
+    ), stringsAsFactors = FALSE)
+    all_results_list[[length(all_results_list) + 1]] <- row_df
   }
+}
+
+## Combine all rows — fills missing phase_* columns with NA where a
+## particular question/backend never triggered that phase.
+all_columns <- unique(unlist(lapply(all_results_list, names)))
+all_results <- do.call(rbind, lapply(all_results_list, function(df) {
+  missing <- setdiff(all_columns, names(df))
+  for (m in missing) df[[m]] <- NA
+  df[all_columns]
+}))
+if (is.null(all_results)) {
+  all_results <- data.frame(
+    id=character(), category=character(), question=character(),
+    full=character(), response=character(),
+    model=character(), backend=character(),
+    elapsed_sec=numeric(), elapsed_fmt=character(),
+    stringsAsFactors=FALSE
+  )
 }
 
 BENCHMARK_CSV <- file.path(output_dir, "all_backends_combined.csv")

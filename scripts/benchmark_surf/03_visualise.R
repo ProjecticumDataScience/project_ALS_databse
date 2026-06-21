@@ -551,4 +551,88 @@ if (any(new_cats %in% unique(averaged$category))) {
   cat("Plot 8 skipped — no nonsense or toolfree questions in data\n")
 }
 
-cat("\nAll plots saved to:", output_dir, "\n")
+## ══════════════════════════════════════════════════════════════
+## PLOT 9: Phase timing breakdown — where time goes per category
+## ══════════════════════════════════════════════════════════════
+phase_cols <- grep("^phase_.*_sec$", colnames(combined), value = TRUE)
+## Exclude the two summary/total columns — these aren't individual phase
+## durations, they're the SUM of the phases below. Including them here
+## double-counts time and shows up as a misleading "NA" bar (since they
+## have no friendly label) that dwarfs the real per-phase breakdown.
+phase_cols <- setdiff(phase_cols, c("phase_total_phase_sum_sec", "phase_wall_clock_total_sec"))
+
+if (length(phase_cols) > 0) {
+  
+  ## Friendly phase names for the legend
+  phase_label_map <- c(
+    phase_decompose_sec    = "Decompose",
+    phase_route_sec        = "Route",
+    phase_sql_gen_sec      = "SQL Generate",
+    phase_validate_sec     = "Validate",
+    phase_mcp_call_sec     = "MCP Call",
+    phase_self_correct_sec = "Self-Correct",
+    phase_summarize_sec    = "Summarize"
+  )
+  
+  phase_timing <- combined %>%
+    filter(!is.na(category), category %in% cats_in_data) %>%
+    select(backend, category, all_of(phase_cols)) %>%
+    pivot_longer(cols = all_of(phase_cols),
+                 names_to = "phase", values_to = "seconds") %>%
+    filter(!is.na(seconds)) %>%
+    mutate(phase = recode(phase, !!!phase_label_map)) %>%
+    group_by(backend, category, phase) %>%
+    summarise(mean_sec = mean(seconds, na.rm = TRUE), .groups = "drop") %>%
+    mutate(category = factor(category,
+                             levels = cats_in_data,
+                             labels = ALL_CATEGORY_SHORT[match(cats_in_data, ALL_CATEGORIES)]))
+  
+  ## Consistent phase colour order regardless of which phases are present
+  phase_order <- c("Decompose", "Route", "SQL Generate", "Validate",
+                   "MCP Call", "Self-Correct", "Summarize")
+  phase_timing$phase <- factor(phase_timing$phase,
+                               levels = intersect(phase_order, unique(phase_timing$phase)))
+  
+  phase_colors <- c(
+    "Decompose"    = "#9B5DE5",
+    "Route"        = "#457B9D",
+    "SQL Generate" = "#F4A261",
+    "Validate"     = "#E9C46A",
+    "MCP Call"     = "#2A9D8F",
+    "Self-Correct" = "#E63946",
+    "Summarize"    = "#06D6A0"
+  )
+  
+  p9 <- ggplot(phase_timing,
+               aes(x = category, y = mean_sec, fill = phase)) +
+    geom_col(position = "stack", width = 0.65, alpha = 0.92) +
+    scale_fill_manual(values = phase_colors, name = "Phase") +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.08)),
+      labels = function(x) ifelse(x >= 60,
+                                  sprintf("%d:%02d min",
+                                          as.integer(x) %/% 60L,
+                                          as.integer(x) %% 60L),
+                                  sprintf("%.0f sec", x))
+    ) +
+    facet_wrap(~backend, ncol = length(backends_in_data)) +
+    labs(
+      title    = "Where time goes — phase breakdown per question category",
+      subtitle = "Stacked average duration of each pipeline phase, by category",
+      x = NULL, y = "Mean elapsed time (stacked)",
+      caption  = "Decompose/Route/SQL Generate/Validate are LLM calls · MCP Call is the database/tool query · Self-Correct only fires on SQL errors"
+    ) +
+    theme_als() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+  
+  ggsave(file.path(output_dir, "plot_phase_timing.png"), p9,
+         width = max(12, n_cat_panels * 1.6 * length(backends_in_data)), height = 6, dpi = 300)
+  cat("Plot 9 saved\n")
+  
+} else {
+  cat("Plot 9 skipped — no phase_*_sec columns in data (older benchmark run without phase timing)\n")
+}
+
+cat("
+All plots saved to:", output_dir, "
+")

@@ -136,6 +136,7 @@ agentic_ask <- function(session, question) {
   
   list(
     full     = full,
-    response = result$text %||% "(no response)"
+    response = result$text %||% "(no response)",
+    phase_timing = result$phase_timing
   )
 }

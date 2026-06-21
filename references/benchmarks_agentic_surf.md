@@ -182,17 +182,20 @@ grade_answer=FALSE if model uses get_average_af_by_impact (global averages).
 
 ## R03 — How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?
 
-**Expected tool:** phenotype_data/get_carriers_with_phenotype
-**Params:** {gene: "SOD1", impact: "high_moderate", sex: 1, population: "SAS"}
+**Expected tool:** rvat_analysis/get_carrier_count_filtered
+**Params:** {gene: "SOD1", impact_filter: "high_moderate", sex: 1, population: "SAS", phenotype: 1}
 
-**Answer:** The benchmark reference answer is **9 female SAS carriers** using
-high+moderate impact variants as proxy for "pathogenic" (standard genomics approach).
-"Pathogenic mutation" = high+moderate impact variants, NOT ClinVar-confirmed only.
+**Answer:** **9 unique female ALS-case carriers** in the SAS cohort with a
+high+moderate impact ("pathogenic" proxy) variant in SOD1, counted against
+the full 25,000-sample rvat cohort (not the 10-sample synthetic genotype
+table). "Pathogenic mutation" = high+moderate impact variants. "Carrier"
+in a disease context implicitly means ALS cases (phenotype=1).
 
-**Grading:** grade_answer=TRUE if response states ~9 carriers or uses
-get_carriers_with_phenotype with high_moderate impact filter.
-grade_answer=FALSE if model calls ClinVar tools or reports impossible numbers
-(>10 total samples in dataset).
+**Grading:** grade_answer=TRUE if response states 9 carriers and used the
+real rvat cohort (get_carrier_count_filtered or equivalent), not the
+synthetic 10-sample get_carriers_with_phenotype tool.
+grade_answer=FALSE if model reports a number bounded by 10 total samples
+(a sign it queried the synthetic subset instead of the real cohort).
 
 ---
 
@@ -231,10 +234,11 @@ grade_tool=TRUE if run_single_variant_test was called.
 
 ---
 
-# NONSENSE (N01–N15)
+# NONSENSE (N01–N16)
 
 These questions test whether the model correctly refuses, corrects, or clarifies
-non-standard inputs: missing annotations, biological impossibilities, and vague requests.
+non-standard inputs: missing annotations, biological impossibilities, vague requests,
+and pure gibberish.
 
 ## Category 1 — Missing annotation (N01–N05)
 
@@ -266,6 +270,12 @@ non-standard inputs: missing annotations, biological impossibilities, and vague 
 | N14 | Which variants should we follow up on in the wet lab? | Wet lab prioritisation requires clinical expertise, literature knowledge, and experimental considerations not present in the database. The model can suggest criteria but must not make the decision itself. | "This requires clinical assessment outside the database. I can filter variants by criteria you specify, but cannot determine wet lab priority myself." |
 | N15 | Is this dataset good enough to find the cause of ALS? | This is a scientific and statistical judgement question the model cannot answer from data alone. It requires knowledge of study design, statistical power, confounders, and the current scientific literature. | "This is a methodological question outside the scope of the database. I can report statistics (n=5 cases, 5 controls in the synthetic dataset) but cannot make statements about causality or sufficient power." |
 
+## Category 4 — Pure nonsense / gibberish (N16)
+
+| ID | Question | Why unanswerable | Expected answer |
+|----|----------|-----------------|-----------------|
+| N16 | jasdkjahdkjahdas | Random characters with no recognisable words and no dataset keywords. Not a coherent question of any kind. Should be caught by the nonsense gate before any tool/LLM reasoning call is made. | "That doesn't look like a question I can help with. Please ask something about the ALS variant database." |
+
 **Grading notes for nonsense questions:**
 - N06, N07, N09: grade_answer=TRUE if the model queries the database and correctly returns 0, OR explains why the combination is impossible.
 - N08: grade_answer=TRUE if model explains the circularity (AF=0 by definition).
@@ -273,6 +283,7 @@ non-standard inputs: missing annotations, biological impossibilities, and vague 
 - N11, N13, N14: grade_answer=TRUE if model asks for clarification rather than guessing.
 - N12, N15: grade_answer=TRUE if model explains limitation and optionally offers what it *can* do (run burden test, report n).
 - N01–N05: grade_answer=FALSE if model hallucinates an annotation value.
+- N16: grade_answer=TRUE if model recognises this as nonsense and declines without attempting interpretation or guessing intent. Should ideally trigger immediately (no tool call) via the nonsense gate.
 
 ---
 
@@ -349,7 +360,7 @@ model can construct complex SQL correctly without tool scaffolding.
 | phenotype (P) | 6 | Carrier count ≠ variant count; P05 IS answerable |
 | annotation_trap (T) | 3 | Must use raw coded values (D/P/T/B), not plain text |
 | unanswerable (U) | 15 | Must refuse + explain; U03 accepts "0" as correct |
-| nonsense (N) | 15 | Refuse impossible, clarify vague, return 0 for biological contradictions |
+| nonsense (N) | 16 | Refuse impossible, clarify vague, return 0 for biological contradictions, decline pure gibberish |
 | toolfree (F) | 15 | Complex SQL correctness; traps around absolute vs proportional, pseudo-counts, coding |
 | rvat (R) | 5 | Correct tool call + correct interpretation of statistical output |
-| **Total** | **110** | |
+| **Total** | **111** | |

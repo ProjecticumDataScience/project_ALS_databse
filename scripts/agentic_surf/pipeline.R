@@ -88,69 +88,42 @@ AVAILABLE_MODELS <- list(
 ## Default Ollama keep_alive behaviour (5m) — NOT extended, because on this
 ## CPU-only server, keeping multiple models loaded simultaneously causes
 ## resource contention rather than helping. Only one model (70b) is used
-## throughout the pipeline now, so this matters less, but we don't force
-## long residency to avoid memory pressure issues.
-OLLAMA_KEEP_ALIVE <- "5m"
+## throughout the pipeline now, so the original justification for a short
+## keep_alive (avoiding memory pressure from a second model) no longer
+## applies. A short keep_alive now just risks the model unloading between
+## warmup and the first real question (or during any gap between questions),
+## forcing an expensive reload from disk — likely the cause of occasional
+## very slow first-question timings. Set generously long since nothing else
+## competes for memory.
+OLLAMA_KEEP_ALIVE <- "30m"
 
-warmup_model <- function(model, timeout_sec = 120) {
-  body <- list(
-    model       = model,
-    prompt      = "ping",
-    stream      = FALSE,
-    keep_alive  = OLLAMA_KEEP_ALIVE,
-    options     = list(num_predict = 1)
-  )
-  start <- Sys.time()
-  result <- tryCatch({
-    resp <- request(OLLAMA_URL) |>
-      req_url_path("/api/generate") |>
-      req_body_json(body) |>
-      req_timeout(timeout_sec) |>
-      req_perform()
-    resp_body_json(resp)
-    elapsed <- round(as.numeric(Sys.time() - start, units = "secs"), 1)
-    list(ok = TRUE, model = model, elapsed = elapsed)
-  }, error = function(e) {
-    elapsed <- round(as.numeric(Sys.time() - start, units = "secs"), 1)
-    list(ok = FALSE, model = model, elapsed = elapsed, error = e$message)
-  })
-  result
-}
 
-## Warm up all models used by the pipeline. Call once at startup —
-## before the Shiny app accepts input, or before a benchmark run begins.
-## status_fn: optional callback(msg) for UI progress updates, e.g. Shiny progress
-warmup_all_models <- function(models = NULL, status_fn = NULL) {
-  if (is.null(models)) {
-    models <- unique(c(ORCH_MODEL, DECOMPOSE_MODEL))
-  }
 
-  report <- list()
-  for (m in models) {
-    msg <- paste0("Warming up ", m, "...")
-    cat("[WARMUP]", msg, "\n")
-    if (!is.null(status_fn)) status_fn(msg)
+## Known param-name synonyms the model sometimes uses instead of the actual
+## parameter name in a tool's function signature. Maps wrong_name → correct_name
+## per tool, so a plausible-but-incorrect param doesn't cause an avoidable 422.
+PARAM_NAME_ALIASES <- list(
+  get_sample_burden = list(sample_name = "sample_id", sample = "sample_id", id = "sample_id"),
+  get_carrier_count_filtered = list(impact = "impact_filter"),
+  count_carriers_above_threshold = list(threshold = "min_carriers", min_count = "min_carriers"),
+  count_variants_above_average = list(metric = "column", field = "column")
+)
 
-    res <- warmup_model(m)
-    report[[m]] <- res
-
-    if (res$ok) {
-      cat("[WARMUP] ", m, "ready in", res$elapsed, "sec\n")
-    } else {
-      cat("[WARMUP] ", m, "FAILED:", res$error, "\n")
+normalize_params <- function(tool_name, params) {
+  aliases <- PARAM_NAME_ALIASES[[tool_name]]
+  if (is.null(aliases) || length(params) == 0) return(params)
+  for (wrong_name in names(aliases)) {
+    if (wrong_name %in% names(params)) {
+      correct_name <- aliases[[wrong_name]]
+      cat("[PARAM-FIX]", tool_name, "— renaming param", wrong_name, "→", correct_name, "\n")
+      names(params)[names(params) == wrong_name] <- correct_name
     }
   }
-
-  all_ok <- all(sapply(report, function(r) r$ok))
-  if (!is.null(status_fn)) {
-    status_fn(if (all_ok) "All models warmed up" else "Warmup had issues — see log")
-  }
-  cat("[WARMUP] Complete. All models ready:", all_ok, "\n")
-
-  list(ok = all_ok, models = report)
+  params
 }
 
 call_mcp <- function(server_prefix, tool_name, body = list()) {
+  body <- normalize_params(tool_name, body)
   url <- paste0(MCP_BASE, "/", server_prefix, "/", tool_name)
   tryCatch({
     resp <- request(url) |>
@@ -209,7 +182,13 @@ parse_json_response <- function(raw) {
 
 check_mcp_error <- function(raw) {
   parsed <- tryCatch(fromJSON(raw, simplifyVector = FALSE), error = function(e) NULL)
-  if (!is.null(parsed$error)) parsed$error else NULL
+  if (is.null(parsed$error)) return(NULL)
+  ## Always coerce to a plain character string — fromJSON with
+  ## simplifyVector=FALSE can return a list here, which breaks
+  ## downstream cat()/paste0() calls (e.g. in self-correction).
+  err <- parsed$error
+  if (is.list(err)) err <- paste(unlist(err), collapse = " ")
+  as.character(err)
 }
 
 ## ── Result sanity checker ────────────────────────────────────────────────────
@@ -234,10 +213,14 @@ check_result_sanity <- function(raw_result, tool, params) {
     }
   }
   
-  ## For carrier queries: more than 10 unique IIDs is impossible (only 10 named individuals)
-  if (grepl("get_carriers_with_phenotype", tool) || grepl("IID", result_str)) {
+  ## For carrier queries against the SYNTHETIC 10-sample subset specifically:
+  ## more than 10 unique IIDs is impossible (only 10 named individuals exist there).
+  ## This does NOT apply to rvat_analysis/get_carrier_count_filtered, which
+  ## correctly queries the full 25,000-sample real cohort — large counts there
+  ## are expected and valid, not a sign of error.
+  if (grepl("get_carriers_with_phenotype", tool, fixed = TRUE)) {
     n_iid <- length(gregexpr('"IID"', result_str)[[1]])
-    if (n_iid > 10) return(paste("Carrier query returned", n_iid, "results — expected max 10"))
+    if (n_iid > 10) return(paste("Carrier query returned", n_iid, "results — expected max 10 from the synthetic subset"))
   }
   
   ## For gene-specific queries, result spanning 12 genes suggests missing WHERE
@@ -277,14 +260,19 @@ TOOL_DESCRIPTIONS_SIMPLE <- paste(
   "variant_analysis/get_average_af_by_impact          — avg AF by impact | params: {}\n",
   "variant_analysis/summarize_variants_by_gene        — gene summary | params: {min_variants}\n",
   "genotype_analysis/get_high_impact_homozygous_ALS   — homozygous ALS | params: {}\n",
-  "genotype_analysis/get_total_burden_cases_vs_controls — burden | params: {gene}\n",
+  "genotype_analysis/get_total_burden_cases_vs_controls — GROUP totals only, cases vs controls | params: {gene}\n",
+  "genotype_analysis/get_sample_burden                — PER-SAMPLE het/hom/total counts. Omit sample_id for ALL samples (one row each, use for 'which sample has most X'); set sample_id for ONE specific sample | params: {sample_id?, impact:'ALL' unless specified, group?}\n",
+  "genotype_analysis/count_carriers_above_threshold   — variants carried by >=N people in a group | params: {min_carriers, group, impact}\n",
   "genotype_analysis/get_carriers_by_gene             — carriers | params: {gene, group}\n",
-  "genotype_analysis/get_dosage_ratio_by_gene         — case/control ratio | params: {}\n",
+  "genotype_analysis/get_dosage_ratio_by_gene         — case/control ratio, has enriched_in_cases flag | params: {impact}\n",
   "genotype_analysis/get_case_enriched_variants       — case-enriched | params: {top_n}\n",
   "db_exploration/get_database_limitations            — what is NOT available | params: {}\n",
   "db_exploration/get_database_info                   — database overview, ALS cases vs controls count | params: {}\n",
   "phenotype_data/get_age_distribution                — average age of ALS cases and controls | params: {}\n",
   "variant_analysis/get_als_carrier_stats             — % variants carried by \u22651 ALS patient | params: {}\n",
+  "variant_analysis/count_variants_by_impact          — counts per impact category, whole dataset | params: {}\n",
+  "variant_analysis/get_cadd_polyphen_correlation     — CADD-binned PolyPhen=D rate | params: {bin_width, impact}\n",
+  "variant_analysis/count_variants_above_average      — count above dataset average for a column | params: {column}\n",
   "variant_analysis/run_variant_query                 — free SQL on varInfo_synthetic | params: {sql}\n",
   sep = ""
 )
@@ -455,6 +443,117 @@ classify_complexity <- function(question) {
 
 ## Keywords that signal a question may need per-entity grouping or comparison.
 ## Only these trigger decomposition — simple single-fact questions skip it.
+# ══════════════════════════════════════════════════════════════════════════════
+# REASONING EXAMPLES
+# A small set of worked examples teaching the model HOW to discern question
+# intent and conventions — not literal answers to memorize, but reasoning
+# patterns that generalize to new phrasings of similar questions.
+#
+# These are also surfaced as example questions in the app sidebar (see
+# EXAMPLE_QUESTIONS_FOR_UI below), so the user sees the same patterns the
+# model has been shown — aligning user phrasing with model capability.
+# ══════════════════════════════════════════════════════════════════════════════
+
+REASONING_EXAMPLES <- list(
+  list(
+    question = "How many female carriers in the SAS population have a pathogenic mutation in SOD1?",
+    reasoning = paste0(
+      "'Pathogenic mutation' has no exact database column — the standard genomics ",
+      "convention is to use high+moderate impact variants as a proxy. ",
+      "'Carrier' in a disease-research question usually means an ALS case, but this ",
+      "isn't explicit here — if the tool can report whether it filtered to cases only, ",
+      "say so in the answer so the scope is clear. This needs the real cohort (not a ",
+      "small synthetic subset) since it asks about a specific population subgroup."
+    ),
+    tool = "rvat_analysis/get_carrier_count_filtered",
+    params = "gene=SOD1, impact_filter=high_moderate, sex=1, population=SAS"
+  ),
+  list(
+    question = "How many variants are carried exclusively by ALS cases and not by any control?",
+    reasoning = paste0(
+      "'Exclusively by X and not by Y' is a filtered COUNT over specific rows — ",
+      "it needs every case column > 0 AND every control column = 0. ",
+      "A tool that returns one aggregate total (like a burden sum) cannot answer ",
+      "this; it would need a direct query that can express this row-level condition."
+    ),
+    tool = "variant_analysis/run_variant_query",
+    params = "sql: SELECT COUNT(*) FROM ... WHERE (ALS_1>0 OR ... OR ALS_5>0) AND Control_1=0 AND ... AND Control_5=0"
+  ),
+  list(
+    question = "Which gene shows the greatest difference in burden between cases and controls?",
+    reasoning = paste0(
+      "'Difference between X and Y' means both sides need to be computed together ",
+      "so they can be subtracted and compared, per gene. A tool returning a ratio ",
+      "or a single side's total isn't enough — the comparison must happen within ",
+      "one query that groups by gene and computes both sums."
+    ),
+    tool = "variant_analysis/run_variant_query",
+    params = "sql: SELECT gene_name, ABS(SUM(case_cols) - SUM(control_cols)) AS diff FROM ... GROUP BY gene_name ORDER BY diff DESC"
+  ),
+  list(
+    question = "What is the average CADD score for variants predicted deleterious by both SIFT and PolyPhen, compared to variants predicted benign by both?",
+    reasoning = paste0(
+      "'X compared to Y' is different from 'the difference between X and Y' — ",
+      "'compared to' asks for BOTH values reported side by side so the reader can see ",
+      "each group's actual score, not just a single subtracted delta. Collapsing this ",
+      "to one number (e.g. 'the difference is 14.0') loses which group is higher and ",
+      "what either group's real value is. Compute both averages in one query using ",
+      "separate CASE WHEN expressions, and report both numbers in the answer."
+    ),
+    tool = "variant_analysis/run_variant_query",
+    params = "sql: SELECT AVG(CASE WHEN SIFT='D' AND PolyPhen='D' THEN CAST(CADDphred AS REAL) END) AS avg_deleterious, AVG(CASE WHEN SIFT='T' AND PolyPhen='B' THEN CAST(CADDphred AS REAL) END) AS avg_benign FROM varInfo_synthetic"
+  ),
+  list(
+    question = "What is the average age of ALS cases in the database?",
+    reasoning = paste0(
+      "Before answering, check whether the data actually supports the claim — ",
+      "don't answer from assumption or general knowledge. This is a concrete, ",
+      "answerable question with a specific tool for it; querying first avoids ",
+      "guessing or hallucinating a plausible-sounding number."
+    ),
+    tool = "phenotype_data/get_age_distribution",
+    params = "(no params needed)"
+  ),
+  list(
+    question = "What is the allele frequency of VAR_id 30 in the European population?",
+    reasoning = paste0(
+      "This asks for a population-specific value that the database does not ",
+      "contain — only a single global AF column exists, with no per-population ",
+      "breakdown. Recognising what data genuinely doesn't exist (vs. what just ",
+      "needs the right tool) prevents both hallucination and unnecessary tool calls."
+    ),
+    tool = "db_exploration/get_database_limitations",
+    params = "(no params needed)"
+  ),
+  list(
+    question = "Is NEK1 an ALS gene?",
+    reasoning = paste0(
+      "This asks for a literature/biological judgement the database cannot make — ",
+      "it has no publication or curated-association data. The database CAN compute ",
+      "statistical association (a burden test) but that is not the same as confirming ",
+      "gene status in the literature; the answer should distinguish these honestly ",
+      "rather than overstating what a burden test proves."
+    ),
+    tool = "db_exploration/get_database_limitations",
+    params = "(no params needed — or offer a burden test as a related but distinct option)"
+  )
+)
+
+## Render reasoning examples as a prompt block — used in router/decompose/agentic prompts
+render_reasoning_examples <- function(examples = REASONING_EXAMPLES) {
+  paste(sapply(examples, function(ex) {
+    paste0(
+      "Q: ", ex$question, "\n",
+      "Reasoning: ", ex$reasoning, "\n",
+      "Tool: ", ex$tool, "\n",
+      "Params: ", ex$params, "\n"
+    )
+  }), collapse = "\n")
+}
+
+## Plain question text only — used for app sidebar example questions
+EXAMPLE_QUESTIONS_FOR_UI <- sapply(REASONING_EXAMPLES, function(ex) ex$question)
+
 DECOMPOSE_TRIGGERS <- c(
   "each", "every", "per ", "per-", "for each", "for every",
   "all five", "all 5", "all ten", "all 10",
@@ -538,11 +637,21 @@ route_question <- function(question, entities, decomp = NULL, orch_model = ORCH_
     "variant_analysis/count_variants_in_gene         → 'how many variants in [gene]'\n",
     "variant_analysis/get_high_impact_variants_in_gene → 'show/list high-impact in [gene]'\n",
     "variant_analysis/count_sift_deleterious_in_gene  → 'SIFT deleterious in [gene]'\n",
-    "variant_analysis/get_highest_af_variant          → 'highest allele frequency variant'\n",
+    "variant_analysis/get_highest_af_variant          → 'highest allele FREQUENCY (AF)' ONLY — returns exactly 1 variant\n",
+    "  NEVER use this for CADD score questions — AF and CADD are DIFFERENT columns. 'highest CADD score' or 'top N by CADD' → run_variant_query with ORDER BY CAST(CADDphred AS REAL) DESC LIMIT N\n",
+    "  If the question asks for MORE THAN ONE variant (top 3, three highest, etc.), this tool cannot help — use run_variant_query with LIMIT N instead\n",
     "variant_analysis/get_als_carrier_stats           → 'what % variants carried by ALS'\n",
+    "variant_analysis/count_variants_by_impact         → 'how many fall into each impact category' (whole dataset)\n",
+    "variant_analysis/get_cadd_polyphen_correlation    → 'does CADD correlate with PolyPhen / show by CADD bins'\n",
+    "variant_analysis/count_variants_above_average     → 'variants above the dataset average [AF/CADD]'\n",
     "variant_analysis/run_variant_query               → any other count/filter/aggregate on variants\n",
-    "genotype_analysis/get_total_burden_cases_vs_controls → 'total allele burden cases vs controls'\n",
-    "genotype_analysis/get_dosage_ratio_by_gene       → 'ratio / enrichment per gene'\n",
+    "genotype_analysis/get_total_burden_cases_vs_controls → GROUP TOTALS only ('total burden cases vs controls')\n",
+    "genotype_analysis/get_sample_burden              → ANY per-SAMPLE question — 'which sample has highest/lowest X' (omit sample_id) OR 'how many variants does ALS_1 carry' (set sample_id)\n",
+    "  IMPORTANT: set impact='ALL' unless the question explicitly names a level (high/moderate/synonymous) — do NOT default to high-impact silently\n",
+    "  CRITICAL: this tool groups by SAMPLE, never by GENE. 'Which GENE has the most X' (any X — homozygous calls, variants, burden) ALWAYS needs run_variant_query with GROUP BY gene_name, NEVER get_sample_burden.\n",
+    "genotype_analysis/count_carriers_above_threshold → 'carried by at least N of the 5 [ALS/control] patients'\n",
+    "genotype_analysis/get_dosage_ratio_by_gene       → 'ratio / enrichment per gene' | params: {impact: 'HIGH'/'MODERATE'/'SYNONYMOUS'/'ALL'}\n",
+    "  PREFER this over run_variant_query for any case/control ratio or enrichment question — it has built-in Laplace smoothing and an enriched_in_cases column. Pass impact='HIGH' for 'high-impact variants only' questions.\n",
     "genotype_analysis/get_carriers_by_gene           → 'carriers in gene'\n",
     "genotype_analysis/get_case_enriched_variants     → 'case-enriched variants'\n",
     "db_exploration/get_database_info                 → 'how many ALS cases/controls in database'\n",
@@ -550,7 +659,7 @@ route_question <- function(question, entities, decomp = NULL, orch_model = ORCH_
     "phenotype_data/get_age_distribution              → 'average age of ALS cases'\n",
     "phenotype_data/get_sex_distribution              → 'sex breakdown of samples'\n",
     "phenotype_data/get_population_counts             → 'samples per population'\n",
-    "phenotype_data/get_carriers_with_phenotype       → 'female/male/SAS/EUR carriers in [gene]'\n",
+    "phenotype_data/get_carriers_with_phenotype       → plain 'female/male/SAS/EUR carriers in [gene]' with NO mention of pathogenic/impact/mutation type\n",
     "phenotype_data/run_phenotype_query               → any SQL on pheno table (age/sex/pop filters)\n",
     "clinvar_annotation/get_clinvar_for_variant       → 'ClinVar / pathogenic / reported for VAR_id N'\n",
     "rvat_analysis/run_burden_test                    → 'burden test / association / p-value for [gene]'\n",
@@ -558,9 +667,17 @@ route_question <- function(question, entities, decomp = NULL, orch_model = ORCH_
     "rvat_analysis/run_single_variant_test            → 'per-variant significance / most significant variants in [gene]'\n",
     "rvat_analysis/get_maf_by_impact                  → 'MAF / minor allele frequency for [gene]'\n",
     "rvat_analysis/get_ld_matrix                      → 'linkage disequilibrium / LD between variants'\n",
-    "rvat_analysis/get_cohort_summary                 → 'cohort size / sample counts'\n\n",
+    "rvat_analysis/get_cohort_summary                 → 'cohort size / sample counts'\n",
+    "rvat_analysis/get_carrier_count_filtered         → carrier question that explicitly mentions 'pathogenic', 'mutation', 'high-impact', or 'moderate-impact' | params: {gene, impact_filter, sex, population, phenotype}\n\n",
+    "DISAMBIGUATION — these two tools sound similar, pick based on EXACT wording:\n",
+    "  'How many female carriers in [gene]?' (no impact/pathogenic mentioned) → get_carriers_with_phenotype\n",
+    "  'How many female carriers with a pathogenic mutation in [gene]?' (impact/pathogenic mentioned) → get_carrier_count_filtered\n",
+    "  If the question does NOT use the word 'pathogenic' or name an impact level, ALWAYS use get_carriers_with_phenotype.\n\n",
 
-    "ROUTING RULES:\n",
+    "WORKED EXAMPLES — study the reasoning, not just the answer:\n",
+    render_reasoning_examples(), "\n",
+
+    "ROUTING RULES (structural facts that always apply):\n",
     "  - run_variant_query ALWAYS uses server=variant_analysis, NEVER genotype_analysis\n",
     "  - 'SIFT tolerated / SIFT=T / tolerated variants' → run_variant_query WHERE SIFT='T'\n",
     "  - 'SIFT deleterious without a specific gene' → run_variant_query WHERE SIFT='D'\n",
@@ -568,13 +685,20 @@ route_question <- function(question, entities, decomp = NULL, orch_model = ORCH_
     "  - 'greatest DIFFERENCE in burden' → variant_analysis/run_variant_query\n",
     "  - 'how many variants total in dataset' → run_variant_query\n",
     "  - 'ClinVar' without a specific VAR_id number → get_database_limitations\n",
-    "  - 'population-specific AF / in Europeans / in SAS' → get_database_limitations\n",
+    "  - 'allele frequency in Europeans/SAS/population-specific AF value' (asking for a number) → get_database_limitations\n",
     "  - 'splicing / protein domain / wet-lab / de novo / onset / pathogenic without VAR_id' → get_database_limitations\n",
     "  - 'Is X an ALS gene / is this gene associated with ALS' → get_database_limitations\n",
     "  - 'which variants are important / should we follow up' → get_database_limitations\n",
-    "  - Any question about sex/age/population of carriers → get_carriers_with_phenotype\n",
+    "  - 'how many [carriers] in [population/sex] with pathogenic/high-impact/high-moderate mutation' → ",
+    "rvat_analysis/get_carrier_count_filtered, params: {gene, impact_filter:'high_moderate', sex (1=female/2=male if specified), population (if specified), phenotype:1}\n",
+    "    NOTE: this is a CARRIER COUNT question (uses the real 25000-sample cohort), NOT an allele-frequency question\n",
+    "    NOTE: 'carrier' questions about disease default to phenotype=1 (ALS cases) unless the question asks about controls\n",
+    "  - Any other question about sex/age/population of carriers → get_carriers_with_phenotype\n",
     "  - If computation=per_entity_breakdown: this needs a GROUP BY query → run_variant_query, ",
-    "NEVER a single-summary tool like get_total_burden_cases_vs_controls\n",
+    "NEVER a single-summary tool like get_total_burden_cases_vs_controls or get_sample_burden with one sample_id set\n",
+    "    These per-sample burden tools take only ONE sample_id and ONE impact filter — they CANNOT express ",
+    "'for each of several patients, across several named genes' in one call. Use run_variant_query with ",
+    "WHERE gene_name IN ('GENE1','GENE2','GENE3') and SUM(CASE WHEN sample_x>0...) per patient instead.\n",
     "  - If computation=comparison and needs_grouping=true: needs per-group aggregation → run_variant_query, ",
     "NOT a tool that returns one overall total\n",
     "  - If computation=aggregate and entities_involved has no specific gene: likely run_variant_query on whole dataset\n\n",
@@ -648,8 +772,11 @@ SQL_SCHEMA <- paste0(
   "  AF TEXT (global allele freq, missing='.'),\n",
   "  HighImpact TEXT ('0'/'1'), ModerateImpact TEXT ('0'/'1'), Synonymous TEXT ('0'/'1'),\n",
   "  CADDphred TEXT (missing='.'), SIFT TEXT ('D'/'T'/'.'), PolyPhen TEXT ('D'/'P'/'B'/'.'),\n",
-  "  ALS_1..ALS_5 INTEGER (0=ref/1=het/2=hom), Control_1..Control_5 INTEGER\n",
-  "Table: pheno — IID TEXT, sex INTEGER (1=female/2=male), pop TEXT, superPop TEXT, age REAL, pheno INTEGER (1=case/0=ctrl)\n\n",
+  "  ALS_1..ALS_5 INTEGER (0=ref/1=het/2=hom — ONLY 0, 1, or 2 are valid; genotype 3+ does not exist in diploid data), Control_1..Control_5 INTEGER (same range)\n",
+  "Table: pheno — IID TEXT, sex INTEGER (1=female/2=male), pop TEXT, superPop TEXT, age REAL, pheno INTEGER (1=case/0=ctrl)\n",
+  "  pop = specific population code (e.g. 'PJL','BEB','GIH' — many distinct values)\n",
+  "  superPop = continental/regional group (e.g. 'SAS','EUR','AFR','EAS','AMR' — only 5 values)\n",
+  "  A region name like SAS/EUR/AFR/EAS/AMR ALWAYS means superPop, NEVER pop\n\n",
   "RULES (SQLite only — no DuckDB syntax):\n",
   "  1. Missing = '.' not NULL → use !='.', NEVER IS NOT NULL\n",
   "  2. HighImpact/ModerateImpact/Synonymous are TEXT → WHERE HighImpact='1'\n",
@@ -657,14 +784,140 @@ SQL_SCHEMA <- paste0(
   "  4. CHROM: 'chr1','chrX' — always include prefix\n",
   "  5. Gene: gene_name='SOD1' — always single-quote\n",
   "  6. No ::REAL or ::INTEGER — use CAST() instead\n",
-  "  7. Per-sample burden: SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5)\n",
+  "  7. TWO DIFFERENT THINGS — do not confuse them:\n",
+  "     'how many VARIANTS does X carry/have' → COUNT(*) WHERE X > 0 (counts variants, ignores zygosity)\n",
+  "     'total BURDEN / allele dosage for X' → SUM(X) (sums genotype values 0/1/2, weights homozygous double)\n",
+  "     If the question says 'how many variants', use COUNT. Only use SUM(ALS_1+ALS_2+...) when 'burden' or 'allele count' is explicitly asked.\n",
   "  8. Private variants: ((ALS_1>0 AND ALS_2=0 AND ALS_3=0 AND ALS_4=0 AND ALS_5=0) OR ...) AND Control_1=0...\n",
   "  9. Absolute difference: ABS(SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) - SUM(Control_1+...)) AS abs_diff\n",
   " 10. PolyPhen codes: D=damaging, P=possibly_damaging, B=benign — single letter only\n",
+  "     'Deleterious' or 'damaging' (without further qualifier) means PolyPhen='D' ONLY — do NOT include 'P' unless the question explicitly says 'possibly damaging' or 'damaging or possibly damaging'\n",
   " 11. For DISTINCT list: SELECT DISTINCT gene_name (not just SELECT gene_name)\n",
   " 12. Always include GROUP BY when using aggregate functions with other columns\n",
-  " 13. AGGREGATE IN WHERE IS INVALID — use a subquery: SELECT COUNT(*) FROM (SELECT VAR_id, SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) AS s FROM varInfo_synthetic GROUP BY VAR_id) WHERE s > 0\n"
+  " 13. AGGREGATE IN WHERE IS INVALID — use a subquery: SELECT COUNT(*) FROM (SELECT VAR_id, SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5) AS s FROM varInfo_synthetic GROUP BY VAR_id) WHERE s > 0\n",
+  " 14. TEXT values in IN(...) must be quoted: IID IN ('ALS1','ALS2','ALS3') NOT IID IN (ALS1,ALS2,ALS3)\n",
+  " 15. 'At least N of the 5 patients' needs ALL FIVE columns summed and compared, not nested OR/AND:\n",
+  "     (CASE WHEN ALS_1>0 THEN 1 ELSE 0 END + CASE WHEN ALS_2>0 THEN 1 ELSE 0 END + ... all 5 ...) >= N\n",
+  " 16. If asked about a genotype value (e.g. 'genotype of 3'), query for the EXACT literal number stated —\n",
+  "     even if it's outside the valid 0-2 range. Do NOT substitute a different, valid-looking number.\n",
+  "     'genotype = 3' must produce WHERE ALS_1 = 3 (correctly returns 0 rows), never WHERE ALS_1 = 2.\n"
 )
+
+## Single lightweight ping — just loads weights into memory.
+warmup_ping <- function(model, timeout_sec = 120) {
+  body <- list(
+    model       = model,
+    prompt      = "ping",
+    stream      = FALSE,
+    keep_alive  = OLLAMA_KEEP_ALIVE,
+    options     = list(num_predict = 1)
+  )
+  start <- Sys.time()
+  tryCatch({
+    resp <- request(OLLAMA_URL) |>
+      req_url_path("/api/generate") |>
+      req_body_json(body) |>
+      req_timeout(timeout_sec) |>
+      req_perform()
+    resp_body_json(resp)
+    list(ok = TRUE, elapsed = round(as.numeric(Sys.time() - start, units = "secs"), 1))
+  }, error = function(e) {
+    list(ok = FALSE, elapsed = round(as.numeric(Sys.time() - start, units = "secs"), 1), error = e$message)
+  })
+}
+
+## Exercises the actual reasoning patterns used in the pipeline — JSON
+## classification (like the router/decomposer) and SQL generation (like
+## generate_sql) — so the model's first REAL call isn't also its first
+## time producing that kind of output this session.
+warmup_exercise <- function(model, timeout_sec = 120) {
+  results <- list()
+
+  ## JSON-mode exercise — mirrors router/decompose output shape
+  json_result <- tryCatch({
+    raw <- call_ollama(
+      "How many variants in SOD1?",
+      system_prompt = "Output ONLY JSON: {\"server\": \"...\", \"tool\": \"...\", \"params\": {}}",
+      model = model, json_mode = TRUE, num_predict = 50
+    )
+    list(ok = TRUE, sample = substr(raw, 1, 80))
+  }, error = function(e) list(ok = FALSE, error = e$message))
+  results$json_exercise <- json_result
+
+  ## SQL-generation exercise — mirrors generate_sql output shape
+  sql_result <- tryCatch({
+    raw <- call_ollama(
+      "Generate a SQLite query: count variants where HighImpact='1' in gene SOD1",
+      system_prompt = paste0("Output ONLY SQL, no explanation.\n", SQL_SCHEMA),
+      model = model, json_mode = FALSE, num_predict = 100
+    )
+    list(ok = TRUE, sample = substr(raw, 1, 80))
+  }, error = function(e) list(ok = FALSE, error = e$message))
+  results$sql_exercise <- sql_result
+
+  results
+}
+
+warmup_model <- function(model, timeout_sec = 120) {
+  start <- Sys.time()
+
+  ping <- warmup_ping(model, timeout_sec)
+  if (!ping$ok) {
+    return(list(ok = FALSE, model = model, elapsed = ping$elapsed, error = ping$error))
+  }
+
+  exercises <- warmup_exercise(model, timeout_sec)
+  elapsed   <- round(as.numeric(Sys.time() - start, units = "secs"), 1)
+
+  all_ok <- ping$ok && exercises$json_exercise$ok && exercises$sql_exercise$ok
+  list(
+    ok      = all_ok,
+    model   = model,
+    elapsed = elapsed,
+    ping_elapsed = ping$elapsed,
+    json_ok = exercises$json_exercise$ok,
+    sql_ok  = exercises$sql_exercise$ok,
+    error   = if (!all_ok) {
+      paste(c(
+        if (!exercises$json_exercise$ok) paste("JSON exercise:", exercises$json_exercise$error),
+        if (!exercises$sql_exercise$ok)  paste("SQL exercise:", exercises$sql_exercise$error)
+      ), collapse = " | ")
+    } else NULL
+  )
+}
+
+## Warm up all models used by the pipeline. Call once at startup —
+## before the Shiny app accepts input, or before a benchmark run begins.
+## status_fn: optional callback(msg) for UI progress updates, e.g. Shiny progress
+warmup_all_models <- function(models = NULL, status_fn = NULL) {
+  if (is.null(models)) {
+    models <- unique(c(ORCH_MODEL, DECOMPOSE_MODEL))
+  }
+
+  report <- list()
+  for (m in models) {
+    msg <- paste0("Warming up ", m, "...")
+    cat("[WARMUP]", msg, "\n")
+    if (!is.null(status_fn)) status_fn(msg)
+
+    res <- warmup_model(m)
+    report[[m]] <- res
+
+    if (res$ok) {
+      cat("[WARMUP] ", m, "ready in", res$elapsed, "sec\n")
+    } else {
+      cat("[WARMUP] ", m, "FAILED:", res$error, "\n")
+    }
+  }
+
+  all_ok <- all(sapply(report, function(r) r$ok))
+  if (!is.null(status_fn)) {
+    status_fn(if (all_ok) "All models warmed up" else "Warmup had issues — see log")
+  }
+  cat("[WARMUP] Complete. All models ready:", all_ok, "\n")
+
+  list(ok = all_ok, models = report)
+}
 
 generate_sql <- function(question, table = "varInfo_synthetic",
                          sql_model = ORCH_MODEL,
@@ -687,10 +940,20 @@ generate_sql <- function(question, table = "varInfo_synthetic",
         "IMPORTANT: This needs a SEPARATE result per entity — use GROUP BY, do not collapse to one row.\n"
       else "",
       if (identical(decomp$computation, "per_entity_breakdown"))
-        "IMPORTANT: Use individual columns (e.g. ALS_1, ALS_2...) in SELECT/CASE, one output column or row per entity.\n"
+        paste0(
+          "IMPORTANT: Use individual columns (e.g. ALS_1, ALS_2...) in SELECT/CASE, one output column or row per entity.\n",
+          "If the question asks 'how many VARIANTS' per entity, use COUNT(CASE WHEN entity>0 AND ... THEN 1 END), ",
+          "NOT SUM(entity) — SUM adds up genotype dosage (0/1/2) which overcounts vs the number of variants.\n"
+        )
       else "",
       if (identical(decomp$computation, "comparison"))
-        "IMPORTANT: Compute both sides of the comparison in the same query, then compare (e.g. ABS(a-b)).\n"
+        paste0(
+          "IMPORTANT: Compute BOTH sides of the comparison as SEPARATE named columns ",
+          "in the same query (e.g. avg_group_a, avg_group_b) so both actual values are visible. ",
+          "Do NOT collapse to a single subtracted delta (e.g. AVG(a) - AVG(b) AS diff) — ",
+          "that loses which side is higher and what either value actually is. ",
+          "Only add a difference/delta column IN ADDITION TO the two separate values, never instead of them.\n"
+        )
       else ""
     )
   } else ""
@@ -710,14 +973,31 @@ generate_sql <- function(question, table = "varInfo_synthetic",
   # Validate basic SQL structure
   is_valid_sql <- grepl("^SELECT", raw, ignore.case = TRUE) &&
                   !grepl("::", raw, fixed = TRUE) &&
-                  nchar(raw) > 10
+                  nchar(raw) > 15 &&
+                  toupper(trimws(raw)) != "SELECT"
 
   if (!is_valid_sql) {
-    cat("[SQL-GEN] First attempt invalid (", substr(raw, 1, 60), "), retrying\n")
+    cat("[SQL-GEN] First attempt invalid/truncated (raw: '", raw, "'), retrying with stronger prompt\n")
     Sys.sleep(1)
-    raw <- call_ollama(prompt, system_prompt = sys, model = orch_model,
-                       json_mode = FALSE, num_predict = 400)
+    ## Retry with an explicit, more forceful instruction — since sql_model and
+    ## orch_model may be the same model, just repeating the identical call
+    ## tends to reproduce the same truncation. Force a complete query instead.
+    retry_prompt <- paste0(
+      prompt, "\n\n",
+      "IMPORTANT: Your previous attempt returned an incomplete or empty query. ",
+      "You MUST write the FULL query including SELECT, FROM, and any WHERE/GROUP BY clauses. ",
+      "Do not stop after just 'SELECT'. Write the complete working SQL statement now."
+    )
+    raw <- call_ollama(retry_prompt, system_prompt = sys, model = orch_model,
+                       json_mode = FALSE, num_predict = 500)
     raw <- trimws(gsub("```sql|```", "", raw))
+
+    ## One more check — if still bad, this will be caught by validate_sql()
+    ## downstream and trigger the self-correction path with the real error.
+    still_invalid <- !grepl("^SELECT", raw, ignore.case = TRUE) || nchar(raw) <= 15
+    if (still_invalid) {
+      cat("[SQL-GEN] Retry also produced invalid SQL (raw: '", raw, "')\n")
+    }
   }
 
   cat("[SQL-GEN] Generated SQL:", substr(raw, 1, 120), "\n")
@@ -780,21 +1060,151 @@ validate_sql <- function(sql, question) {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
+# SQL SELF-CORRECTION
+# When a query fails at execution time (HTTP 500 from the MCP server), feed
+# the actual database error back to the model and let it fix its own query.
+# This is feedback-driven correction, not pre-written rules — the model sees
+# what specifically went wrong and reasons about how to fix it.
+# ══════════════════════════════════════════════════════════════════════════════
+
+correct_sql_from_error <- function(failed_sql, error_message, question,
+                                   orch_model = ORCH_MODEL) {
+  ## Defensive coercion — error_message should always be a string by this
+  ## point, but guard against list/other types reaching cat()/paste0().
+  error_message <- if (is.list(error_message)) paste(unlist(error_message), collapse = " ") else as.character(error_message)
+  failed_sql    <- as.character(failed_sql)
+
+  sys <- paste0(
+    "You wrote a SQLite query that failed when executed. Fix it based on the ",
+    "actual database error message.\n",
+    "Output ONLY the corrected SQL. No explanation. No markdown. Start with SELECT.\n\n",
+    SQL_SCHEMA
+  )
+
+  prompt <- paste0(
+    "Original question: ", question, "\n\n",
+    "Your SQL query:\n", failed_sql, "\n\n",
+    "Database error when this ran:\n", error_message, "\n\n",
+    "Common causes: aggregate functions (SUM/COUNT/AVG) used directly in WHERE ",
+    "instead of a subquery; column that doesn't exist; wrong table referenced; ",
+    "syntax error.\n\n",
+    "Write the CORRECTED complete SQL query. Output ONLY the SQL."
+  )
+
+  raw <- call_ollama(prompt, system_prompt = sys, model = orch_model,
+                     json_mode = FALSE, num_predict = 400)
+  raw <- trimws(gsub("```sql|```", "", raw))
+
+  cat("[SELF-CORRECT] Original error:", substr(error_message, 1, 100), "\n")
+  cat("[SELF-CORRECT] Corrected SQL:", substr(raw, 1, 150), "\n")
+
+  raw
+}
+
+## Wrapper: call MCP, and if it fails with run_variant_query/run_phenotype_query,
+## try once to self-correct the SQL and re-run. Returns the same shape as
+## call_mcp's raw_result (a string), but may be the corrected attempt's result.
+call_mcp_with_retry <- function(server, tool, params, question,
+                                orch_model = ORCH_MODEL, allow_retry = TRUE) {
+  raw_result <- call_mcp(server, tool, params)
+  mcp_err    <- check_mcp_error(raw_result)
+
+  if (is.null(mcp_err) || !allow_retry || is.null(params$sql)) {
+    return(list(raw_result = raw_result, mcp_err = mcp_err, retried = FALSE))
+  }
+
+  ## Only retry for SQL-based tools where we can actually fix the query
+  if (!tool %in% c("run_variant_query", "run_phenotype_query")) {
+    return(list(raw_result = raw_result, mcp_err = mcp_err, retried = FALSE))
+  }
+
+  cat("[MCP-RETRY] Query failed, attempting self-correction\n")
+  corrected_sql <- correct_sql_from_error(params$sql, mcp_err, question, orch_model)
+
+  val <- validate_sql(corrected_sql, question)
+  if (!val$ok) {
+    cat("[MCP-RETRY] Corrected SQL also failed validation, giving up\n")
+    return(list(raw_result = raw_result, mcp_err = mcp_err, retried = TRUE))
+  }
+
+  params$sql <- val$sql
+  raw_result2 <- call_mcp(server, tool, params)
+  mcp_err2    <- check_mcp_error(raw_result2)
+
+  if (is.null(mcp_err2)) {
+    cat("[MCP-RETRY] Self-correction succeeded\n")
+  } else {
+    cat("[MCP-RETRY] Self-correction also failed:", mcp_err2, "\n")
+  }
+
+  list(raw_result = raw_result2, mcp_err = mcp_err2, retried = TRUE,
+       corrected_params = params)
+}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # NEW classify_tool — thin wrapper using route + generate + validate
 # Replaces the old monolithic classify_tool
 # ══════════════════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PHASE TIMING
+# Tracks how long each distinct phase of answering a question takes —
+# decompose, route, sql_gen, validate, mcp_call, self_correct, summarize.
+# Returned alongside the answer so the benchmark can aggregate per-category
+# averages and show where time is actually spent.
+# ══════════════════════════════════════════════════════════════════════════════
+
+new_phase_timer <- function() {
+  env <- new.env()
+  env$phases <- list()
+  env$start  <- Sys.time()
+  env
+}
+
+## Records the duration of a named phase. Call immediately after the phase
+## completes, passing the Sys.time() captured immediately before it started.
+record_phase <- function(timer, phase_name, phase_start) {
+  elapsed <- round(as.numeric(Sys.time() - phase_start, units = "secs"), 3)
+  ## Accumulate if the same phase fires more than once (e.g. retries)
+  if (is.null(timer$phases[[phase_name]])) {
+    timer$phases[[phase_name]] <- elapsed
+  } else {
+    timer$phases[[phase_name]] <- timer$phases[[phase_name]] + elapsed
+  }
+  invisible(elapsed)
+}
+
+## Convenience wrapper — times an arbitrary expression as a named phase.
+## Usage: result <- time_phase(timer, "decompose", decompose_question(q))
+time_phase_expr <- function(timer, phase_name, expr) {
+  t0  <- Sys.time()
+  val <- expr
+  record_phase(timer, phase_name, t0)
+  val
+}
+
+## Returns a flat named list of phase durations plus total, suitable for
+## merging into a results row (e.g. cbind into the benchmark data.frame).
+phase_timer_summary <- function(timer) {
+  total <- round(as.numeric(Sys.time() - timer$start, units = "secs"), 3)
+  c(timer$phases, list(total_phase_sum = sum(unlist(timer$phases)), wall_clock_total = total))
+}
+
 classify_tool <- function(question, orch_model = ORCH_MODEL,
                           tool_desc = TOOL_DESCRIPTIONS_SIMPLE,
-                          sql_model = ORCH_MODEL) {
+                          sql_model = ORCH_MODEL,
+                          timer = NULL) {
   entities <- extract_entities(question)
 
   # Step 0: Decompose — only for questions with complexity signals
   # Simple single-fact questions skip this to save LLM calls + avoid Ollama overload
+  t0 <- Sys.time()
   decomp <- if (needs_decompose(question)) {
     cat("[DECOMPOSE] Triggered — question has complexity signals\n")
     d <- decompose_question(question)
     if (identical(d$computation, "impossible")) {
+      if (!is.null(timer)) record_phase(timer, "decompose", t0)
       return(list(ok = TRUE, server = "db_exploration", tool = "get_database_limitations",
                  params = list()))
     }
@@ -803,9 +1213,12 @@ classify_tool <- function(question, orch_model = ORCH_MODEL,
     cat("[DECOMPOSE] Skipped — simple question\n")
     NULL
   }
+  if (!is.null(timer)) record_phase(timer, "decompose", t0)
 
   # Step 1: Route — informed by the decomposition, not just question text
+  t0 <- Sys.time()
   route <- route_question(question, entities, decomp, orch_model)
+  if (!is.null(timer)) record_phase(timer, "route", t0)
   if (!route$ok) return(list(ok = FALSE, error = route$error))
 
   server <- route$server
@@ -817,18 +1230,28 @@ classify_tool <- function(question, orch_model = ORCH_MODEL,
   needs_sql <- tool %in% c("run_variant_query", "run_phenotype_query")
   if (needs_sql && is.null(params$sql)) {
     target_table <- if (tool == "run_phenotype_query") "pheno" else "varInfo_synthetic"
+    t0 <- Sys.time()
     sql <- generate_sql(question, table = target_table,
                         sql_model = sql_model, orch_model = orch_model,
                         decomp = decomp)
+    if (!is.null(timer)) record_phase(timer, "sql_gen", t0)
 
     # Step 3: Validate
+    t0 <- Sys.time()
     val <- validate_sql(sql, question)
     if (!val$ok) {
       cat("[CLASSIFY] SQL validation failed, retrying with orchestrator\n")
+      if (!is.null(timer)) record_phase(timer, "validate", t0)
+      t0 <- Sys.time()
       sql <- generate_sql(question, table = target_table,
                           sql_model = orch_model, orch_model = orch_model,
                           decomp = decomp)
+      if (!is.null(timer)) record_phase(timer, "sql_gen", t0)
+      t0 <- Sys.time()
       val <- validate_sql(sql, question)
+      if (!is.null(timer)) record_phase(timer, "validate", t0)
+    } else {
+      if (!is.null(timer)) record_phase(timer, "validate", t0)
     }
     params$sql <- val$sql
   }
@@ -842,18 +1265,40 @@ classify_tool <- function(question, orch_model = ORCH_MODEL,
 
 summarize_result <- function(question, steps_log, result_json,
                              row_count = NULL, orch_model = ORCH_MODEL) {
+  ## Hard guard: if the result is genuinely empty, don't even call the LLM —
+  ## return a deterministic message. This prevents the model from fabricating
+  ## specific-sounding details (HGVS notation, sample IDs, etc.) to "fill in"
+  ## a result that has nothing in it. Seen in practice: an empty [] result
+  ## for a high-impact-variant lookup produced a fully invented variant with
+  ## fake annotations that don't exist anywhere in the schema.
+  trimmed_result <- trimws(result_json %||% "")
+  is_empty_result <- trimmed_result %in% c("", "[]", "{}", "null", "NULL")
+  if (is_empty_result) {
+    cat("[SUMMARIZE] Result is empty — returning deterministic message, skipping LLM\n")
+    return("No matching result was found in the database for this question.")
+  }
+
   sys <- paste0(
-    PROMPTS$data_description, "\n\n",
+    PROMPTS$extra_instructions, "\n\n",
     "You are a professional ALS bioinformatics assistant. ",
     "Answer in English only. ONE sentence only for count/lookup questions. ",
     "State the exact number or answer and nothing else. ",
     "ABSOLUTE RULES:\n",
     "- ONE sentence for any question asking how many, which, what number, list, or show.\n",
+    "- 'ONE SENTENCE' does NOT mean 'one number'. If the question asks for a value PER patient/gene/category ",
+    "(e.g. 'for each of the five patients...', 'per gene...'), the one sentence must still report ALL of the ",
+    "individual values, not a sum or total that wasn't asked for. A single sentence CAN and should list several ",
+    "values (e.g. 'ALS_1: 22, ALS_2: 28, ALS_3: 26, ALS_4: 21, ALS_5: 24').\n",
     "- NEVER add a second sentence that starts with: this suggests, this indicates, this may, this could, this means, these variants, this gene, highlighting.\n",
     "- NEVER say: based on our analysis, the query returned, we found X rows, this result is based on.\n",
     "- NEVER add biological commentary, disease associations, or speculation.\n",
     "- NEVER use Dutch. English only.\n",
     "- Always use exact numbers. The AF column is GLOBAL only.\n",
+    "- If the result is empty, blank, an empty list [], or contains no actual data: ",
+    "say so plainly (e.g. 'No matching variant was found.'). ",
+    "NEVER invent a specific value, ID, name, or annotation to fill an empty result — ",
+    "this includes HGVS notation, variant consequence terms, sample IDs, or any other ",
+    "specific-sounding detail not literally present in the result below.\n",
     "CORRECT:\n",
     "Q: How many variants in SOD1 have PolyPhen=D? A: There are 23 variants in SOD1 with a PolyPhen score of D (damaging).\n",
     "Q: Average CADD high vs moderate NEK1? A: High-impact variants in NEK1 have a mean CADD of 36.31, compared to 20.10 for moderate-impact variants.\n",
@@ -886,6 +1331,15 @@ summarize_result <- function(question, steps_log, result_json,
       "The NUMBER OF CARRIERS = number of rows returned (count the IID entries).\n",
       "n_qualifying_variants is how many variants that person carries, NOT the carrier count.\n",
       "State: There are X carriers, where X equals the number of rows shown.\n\n"
+    )
+  } else if (grepl("get_carrier_count_filtered", tools_called)) {
+    paste0(
+      "IMPORTANT: Use n_unique_carriers as the answer — this is the count of DISTINCT\n",
+      "individuals, already deduplicated. Do NOT use n_variant_carrier_rows.\n",
+      "If phenotype_filter is 1, these are ALS cases only. If 0, controls only.\n",
+      "If phenotype_filter is null/missing, the count includes BOTH cases and controls —\n",
+      "in that case, briefly note this (e.g. 'across both cases and controls') so the\n",
+      "scope of the count is clear.\n\n"
     )
   } else if (grepl("get_total_burden_cases_vs_controls", tools_called)) {
     paste0(
@@ -981,6 +1435,10 @@ is_unanswerable <- function(question) {
     "population.specific.*frequency", "frequency.*population.specific",
     "how long.*diagnosed", "duration.*diagnosis",
     "most severe", "severity",
+    ## U01: "previously reported as pathogenic" — no ClinVar/literature data
+    "previously reported", "reported as pathogenic",
+    ## U08: clinical significance has no column — too vague + no ClinVar
+    "clinically significant",
     ## U07: LD between specific VAR_ids (no gene → get_ld_matrix always fails with 422)
     "linkage disequilibrium between var_id", "ld between var_id",
     ## N10: ALS patient listed as control (logically impossible)
@@ -1001,6 +1459,7 @@ is_unanswerable <- function(question) {
 
 run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
                                  progress_fn = NULL) {
+  timer       <- new_phase_timer()
   steps_log   <- character(0)
   last_result <- ""
   last_df     <- NULL
@@ -1008,19 +1467,24 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
   ## Hard pre-check
   if (is_unanswerable(question)) {
     cat("[AGENTIC] Pre-check: question flagged as unanswerable, routing to limitations\n")
+    t0 <- Sys.time()
     raw_result  <- call_mcp("db_exploration", "get_database_limitations", list())
+    record_phase(timer, "mcp_call", t0)
     steps_log   <- "db_exploration/get_database_limitations"
     last_result <- raw_result
     last_df     <- result_to_df(raw_result)
     if (!is.null(progress_fn)) progress_fn("Formulating answer...", MAX_STEPS + 1)
+    t0 <- Sys.time()
     summary_text <- summarize_result(question, steps_log, raw_result,
                                      NULL, orch_model = orch_model)
+    record_phase(timer, "summarize", t0)
     return(list(ok = TRUE, text = summary_text, tool = steps_log, params = list(),
                 df = last_df, mode = "agentic", steps = 1, steps_log = steps_log,
-                complexity = "unanswerable_precheck"))
+                complexity = "unanswerable_precheck", phase_timing = phase_timer_summary(timer)))
   }
   
   entities <- extract_entities(question)
+  t0 <- Sys.time()
   decomp    <- if (needs_decompose(question)) {
     cat("[DECOMPOSE] Triggered for agentic question\n")
     decompose_question(question)
@@ -1028,6 +1492,7 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     cat("[DECOMPOSE] Skipped — simple agentic question\n")
     NULL
   }
+  record_phase(timer, "decompose", t0)
   entity_hint <- paste0(
     "Extracted entities from the question:\n",
     if (!is.na(entities$gene))       paste0("  gene = '", entities$gene, "'\n") else "",
@@ -1064,9 +1529,15 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
       progress_fn(paste0("Agentic step ", step, "/", MAX_STEPS, "..."), step)
     
     step_sys <- paste0(
-      PROMPTS$data_description, "\n\n",
+      PROMPTS$extra_instructions, "\n\n",
       "You are an ALS bioinformatics assistant. Select the NEXT tool to answer the question.\n",
-      "If the context already contains a complete answer, output {status:final}.\n\n",
+      "If the context already contains a complete answer, output {status:final}.\n",
+      "STOP CRITERIA — output {status:final} immediately if ANY of these are true:\n",
+      "  - The question asks for a value 'per gene' or 'per group' and the last result is ALREADY a table with one row per gene/group matching that grouping\n",
+      "  - The question asks a single yes/no, count, or specific-value question and the last result already contains that value\n",
+      "  - You already have the data needed to compute every part of the question, even if it requires simple arithmetic on the result you have\n",
+      "Do NOT call additional tools 'to be thorough' or to explore related but unrequested angles (e.g. running a statistical test the question did not ask for).\n",
+      "Only continue if the last result is GENUINELY missing something the question explicitly asked for.\n\n",
 
       "DATABASE SCHEMA (varInfo_synthetic):\n",
       "  gene_name, VAR_id, CHROM (chr1/chrX), POS, REF, ALT\n",
@@ -1082,22 +1553,43 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
       "  - CHROM: 'chr1','chrX' — always include prefix\n",
       "  - Gene: gene_name='SOD1' — always quote\n",
       "  - Per-sample burden: SUM(ALS_1+ALS_2+ALS_3+ALS_4+ALS_5)\n",
+      "  - 'How many VARIANTS does X carry' → COUNT(*) WHERE X>0, NOT SUM(X). SUM is only for 'burden/allele dosage' questions.\n",
       "  - Private variants: ((ALS_1>0 AND ALS_2=0...) OR ...) AND Control_1=0...\n",
       "  - Absolute difference: ABS(SUM(cases) - SUM(controls))\n",
       "  - For carrier count per sample: SELECT DISTINCT gene_name WHERE ALS_x>0\n",
       "  - pheno=1 is ALS case, pheno=0 is control\n\n",
 
+      "WORKED EXAMPLES — study the reasoning, not just the answer:\n",
+      render_reasoning_examples(), "\n",
+
       "TOOL SELECTION:\n",
       "  SQL on varInfo_synthetic → variant_analysis/run_variant_query {sql}\n",
       "  SQL on pheno/SM tables → phenotype_data/run_phenotype_query {sql}\n",
       "  Carriers with phenotype → phenotype_data/get_carriers_with_phenotype {gene, impact, sex?, population?}\n",
+      "    Use this when the question does NOT mention 'pathogenic' or any impact level — plain 'female carriers in [gene]'\n",
+      "  CARRIER COUNT with pathogenic/high-impact + population/sex filter (real 25000-sample cohort) → ",
+      "rvat_analysis/get_carrier_count_filtered {gene, impact_filter:'high_moderate', sex?, population?, phenotype:1}\n",
+      "    Use this ONLY when the question explicitly says 'pathogenic', 'mutation', 'high-impact', or 'moderate-impact'\n",
+      "    Defaults phenotype=1 (ALS cases) since 'carrier of a pathogenic mutation' implies disease cases\n",
+      "    NEVER use phenotype_data/get_carriers_with_phenotype for this — it only covers 10 synthetic samples\n",
       "  Burden test → rvat_analysis/run_burden_test {gene, test:firth, impact_filter:high_moderate}\n",
+      "  Case/control RATIO or ENRICHMENT per gene (any impact level, no specific gene named) → genotype_analysis/get_dosage_ratio_by_gene {impact}\n",
+      "    PREFER this over hand-writing run_variant_query SQL for ratio questions — it has built-in smoothing and an enriched_in_cases column, less error-prone\n",
       "  MAF for gene → rvat_analysis/get_maf_by_impact {gene, impact_filter}\n",
       "  LD between variants → rvat_analysis/get_ld_matrix {gene, impact_filter}\n",
       "  Per-variant association → rvat_analysis/run_single_variant_test {gene}\n",
       "  ClinVar for VAR_id → clinvar_annotation/get_clinvar_for_variant {var_id}\n",
       "  Not in database → db_exploration/get_database_limitations {}\n",
-      "  DB overview → db_exploration/get_database_info {}\n\n",
+      "  DB overview → db_exploration/get_database_info {}\n",
+      "  ANY per-sample burden question → genotype_analysis/get_sample_burden {sample_id?, impact?, group?}\n",
+      "    Omit sample_id for 'which sample has highest/lowest X' (returns all samples). Set sample_id for 'how many variants does ALS_1 carry' (returns one row).\n",
+      "    NEVER use get_total_burden_cases_vs_controls for per-sample questions — it only returns group totals\n",
+      "    Set impact='ALL' unless the question explicitly names high/moderate/synonymous — do NOT silently default to high-impact\n",
+      "    CRITICAL: groups by SAMPLE only. 'Which GENE has the most X' needs run_variant_query with GROUP BY gene_name instead, NEVER this tool.\n",
+      "  'Carried by at least N of 5 patients' → genotype_analysis/count_carriers_above_threshold {min_carriers, group?, impact?}\n",
+      "  Impact category counts, whole dataset → variant_analysis/count_variants_by_impact {} — already returns the full breakdown, no GROUP BY needed\n",
+      "  CADD vs PolyPhen correlation by bins → variant_analysis/get_cadd_polyphen_correlation {bin_width?, impact?}\n",
+      "  Variants above dataset average (AF/CADD) → variant_analysis/count_variants_above_average {column}\n\n",
 
       "RESULT SANITY:\n",
       "  - If a count result equals 1802 (total rows), the SQL filter is wrong — do not accept it\n",
@@ -1118,9 +1610,11 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     )
     
     cat("[AGENTIC] Step", step, "— querying LLM\n")
+    t0 <- Sys.time()
     raw_decision <- call_ollama(step_prompt, system_prompt = step_sys,
                                 model = orch_model, json_mode = TRUE,
                                 num_predict = 400)
+    record_phase(timer, "route", t0)
     cat("[AGENTIC] Step", step, "— LLM raw decision:", raw_decision, "\n")
     decision <- parse_json_response(raw_decision)
     
@@ -1161,6 +1655,21 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     params <- if (is.null(decision$params)) list() else as.list(decision$params)
     params <- params[!sapply(params, function(v) is.null(v) || identical(v, ""))]
     
+    ## Structural correction: run_variant_query/run_phenotype_query only exist
+    ## under specific servers — this is a fact about the system, not a routing
+    ## preference. The router (route_question) already enforces this; the
+    ## agentic loop needs the same correction since it parses tool decisions
+    ## independently. Without this, a wrong server causes an HTTP 404 that
+    ## self-correction can never fix (it's not a SQL problem).
+    if (tool == "run_variant_query" && server != "variant_analysis") {
+      cat("[AGENTIC] Step", step, "— correcting server for run_variant_query:", server, "→ variant_analysis\n")
+      server <- "variant_analysis"
+    }
+    if (tool == "run_phenotype_query" && server != "phenotype_data") {
+      cat("[AGENTIC] Step", step, "— correcting server for run_phenotype_query:", server, "→ phenotype_data\n")
+      server <- "phenotype_data"
+    }
+    
     if (is.null(tool) || nchar(tool) == 0) {
       cat("[AGENTIC] Step", step, "— empty tool, breaking\n")
       break
@@ -1171,13 +1680,21 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     if (needs_sql && is.null(params$sql)) {
       target_table <- if (tool == "run_phenotype_query") "pheno" else "varInfo_synthetic"
       sql_context  <- paste0(question, "\nContext so far:\n", substr(context, 1, 500))
+      t0 <- Sys.time()
       generated_sql <- generate_sql(sql_context, table = target_table,
-                                    sql_model = "duckdb-nsql", orch_model = orch_model)
+                                    sql_model = orch_model, orch_model = orch_model)
+      record_phase(timer, "sql_gen", t0)
+      t0 <- Sys.time()
       val <- validate_sql(generated_sql, question)
+      record_phase(timer, "validate", t0)
       if (!val$ok) {
+        t0 <- Sys.time()
         generated_sql <- generate_sql(sql_context, table = target_table,
                                       sql_model = orch_model, orch_model = orch_model)
+        record_phase(timer, "sql_gen", t0)
+        t0 <- Sys.time()
         val <- validate_sql(generated_sql, question)
+        record_phase(timer, "validate", t0)
       }
       params$sql <- val$sql
       cat("[AGENTIC] Step", step, "— SQL generated for", tool, "\n")
@@ -1187,8 +1704,26 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     cat("[AGENTIC] Step", step, "— calling:", step_label,
         "| params:", paste(names(params), unlist(params), sep = "=", collapse = ", "), "\n")
     
+    t0 <- Sys.time()
     raw_result <- call_mcp(server, tool, params)
+    record_phase(timer, "mcp_call", t0)
     mcp_err    <- check_mcp_error(raw_result)
+    
+    ## Self-correct once if it's a SQL tool that failed — feed the real error back
+    if (!is.null(mcp_err) && tool %in% c("run_variant_query", "run_phenotype_query") && !is.null(params$sql)) {
+      cat("[AGENTIC] Step", step, "— SQL failed, attempting self-correction\n")
+      t0 <- Sys.time()
+      corrected_sql <- correct_sql_from_error(params$sql, mcp_err, question, orch_model)
+      val <- validate_sql(corrected_sql, question)
+      if (val$ok) {
+        params$sql <- val$sql
+        raw_result <- call_mcp(server, tool, params)
+        mcp_err    <- check_mcp_error(raw_result)
+        if (is.null(mcp_err)) cat("[AGENTIC] Step", step, "— self-correction succeeded\n")
+      }
+      record_phase(timer, "self_correct", t0)
+    }
+    
     steps_log  <- c(steps_log, step_label)
     
     if (!is.null(mcp_err)) {
@@ -1264,9 +1799,11 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
   
   final_result <- if (nchar(best_result) > 0) best_result else context
   final_df     <- if (!is.null(best_df)) best_df else last_df
+  t0 <- Sys.time()
   summary_text <- summarize_result(question, steps_log, final_result,
                                    if (!is.null(final_df)) nrow(final_df) else NULL,
                                    orch_model = orch_model)
+  record_phase(timer, "summarize", t0)
   list(
     ok        = TRUE,
     text      = summary_text,
@@ -1275,7 +1812,8 @@ run_agentic_pipeline <- function(question, orch_model = ORCH_MODEL,
     df        = last_df,
     mode      = "agentic",
     steps     = length(steps_log),
-    steps_log = steps_log
+    steps_log = steps_log,
+    phase_timing = phase_timer_summary(timer)
   )
 }  ## end run_agentic_pipeline
 
@@ -1303,10 +1841,12 @@ run_single_pipeline <- function(question, model, progress_fn = NULL) {
   cat("[SIMPLE] Params:", paste(names(params), unlist(params), sep = "=", collapse = ", "), "\n")
   
   if (!is.null(progress_fn)) progress_fn("Executing query via MCP...", 2)
-  raw_result <- call_mcp(server, tool, params)
+  attempt <- call_mcp_with_retry(server, tool, params, question, orch_model = model)
+  raw_result <- attempt$raw_result
+  if (isTRUE(attempt$retried) && !is.null(attempt$corrected_params)) params <- attempt$corrected_params
   cat("[SIMPLE] Result:", substr(raw_result, 1, 200), "\n")
   
-  mcp_err <- check_mcp_error(raw_result)
+  mcp_err <- attempt$mcp_err
   if (!is.null(mcp_err)) return(list(ok = FALSE, text = paste("Database error:", mcp_err),
                                      tool = tool, df = NULL))
   
@@ -1324,15 +1864,16 @@ run_single_pipeline <- function(question, model, progress_fn = NULL) {
 run_dual_pipeline <- function(question, orch_model, sub_model,
                               sub_sql = NULL, sub_reason = NULL,
                               progress_fn = NULL) {
+  timer <- new_phase_timer()
   if (!is.null(progress_fn)) progress_fn("Orchestrator interpreting question...", 1)
   
-  cl <- classify_tool(question, orch_model = orch_model)
+  cl <- classify_tool(question, orch_model = orch_model, timer = timer)
   if (!cl$ok) {
     cl <- classify_tool(paste0(question, "\nRespond with ONLY a JSON object."),
-                        orch_model = orch_model)
+                        orch_model = orch_model, timer = timer)
   }
   if (!cl$ok) return(list(ok = FALSE, text = paste("Classification failed:", cl$error),
-                          tool = NULL, df = NULL))
+                          tool = NULL, df = NULL, phase_timing = phase_timer_summary(timer)))
   
   server <- cl$server
   tool   <- cl$tool
@@ -1347,19 +1888,27 @@ run_dual_pipeline <- function(question, orch_model, sub_model,
   cat("[DUAL] Tool:", server, "/", tool, "| SQL ready:", !is.null(params$sql), "\n")
 
   if (!is.null(progress_fn)) progress_fn("Executing query via MCP...", 3)
-  raw_result <- call_mcp(server, tool, params)
+  t0 <- Sys.time()
+  attempt <- call_mcp_with_retry(server, tool, params, question, orch_model = orch_model)
+  record_phase(timer, "mcp_call", t0)
+  if (isTRUE(attempt$retried)) record_phase(timer, "self_correct", t0)
+  raw_result <- attempt$raw_result
+  if (isTRUE(attempt$retried) && !is.null(attempt$corrected_params)) params <- attempt$corrected_params
   cat("[DUAL] Result:", substr(raw_result, 1, 200), "\n")
   
-  mcp_err <- check_mcp_error(raw_result)
+  mcp_err <- attempt$mcp_err
   if (!is.null(mcp_err)) return(list(ok = FALSE, text = paste("Database error:", mcp_err),
-                                     tool = tool, df = NULL))
+                                     tool = tool, df = NULL, phase_timing = phase_timer_summary(timer)))
   
   if (!is.null(progress_fn)) progress_fn("Formulating answer...", 4)
   df <- result_to_df(raw_result)
+  t0 <- Sys.time()
   summary_text <- summarize_result(question, paste0(server, "/", tool), raw_result,
                                    nrow(df), orch_model = orch_model)
+  record_phase(timer, "summarize", t0)
   list(ok = TRUE, text = summary_text, tool = paste0(server, "/", tool),
-       df = df, mode = "dual", params = params)
+       df = df, mode = "dual", params = params,
+       phase_timing = phase_timer_summary(timer))
 }
 
 ## ── Master dispatcher ─────────────────────────────────────────────────────
