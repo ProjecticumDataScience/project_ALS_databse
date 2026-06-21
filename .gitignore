@@ -54,3 +54,4 @@ rsconnect/
 *.log
 mcp_servers/*.db
 scripts/agentic_surf/servers.json
+scripts/agentic_surf/mcp_servers/clinvar_cache.db

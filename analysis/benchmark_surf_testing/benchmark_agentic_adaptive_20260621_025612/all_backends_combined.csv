@@ -1,0 +1,556 @@
+"id","category","question","full","response","model","backend","elapsed_sec","elapsed_fmt","phase_decompose_sec","phase_route_sec","phase_sql_gen_sec","phase_validate_sec","phase_mcp_call_sec","phase_summarize_sec","phase_total_phase_sum_sec","phase_wall_clock_total_sec","phase_self_correct_sec"
+"S01","simple","How many variants in SOD1 have a PolyPhen score of D (damaging)?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","There are 23 variants in SOD1 with a PolyPhen score of D (damaging).","llama3.1:70b [adaptive]","agentic_adaptive",93.8,"1:33 min",0,18.648,14.905,0.025,0.028,57.021,90.627,90.657,NA
+"S02","simple","List all unique chromosomes present in the varInfo_synthetic table.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 10 unique chromosomes present in the varInfo_synthetic table: chr1, chr4, chr9, chr10, chr12, chr14, chr15, chr16, chr21, and chrX.","There are 10 unique chromosomes present in the varInfo_synthetic table: chr1, chr4, chr9, chr10, chr12, chr14, chr15, chr16, chr21, and chrX.","llama3.1:70b [adaptive]","agentic_adaptive",60.1,"1:00 min",0.003,15.207,9.875,0,0.025,32.682,57.792,57.805,NA
+"S03","simple","How many variants have a CADD score above 30 and are in the gene ABCA4?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 34 variants in ABCA4 with a CADD score above 30.","There are 34 variants in ABCA4 with a CADD score above 30.","llama3.1:70b [adaptive]","agentic_adaptive",59.3,"59.3 sec",0,22.141,17.761,0,0.013,16.635,56.55,56.551,NA
+"S04","simple","How many synonymous variants are there in the entire dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_by_impact]
+--- Final response ---
+There are 533 synonymous variants in the entire dataset.","There are 533 synonymous variants in the entire dataset.","llama3.1:70b [adaptive]","agentic_adaptive",33.7,"33.7 sec",0,15.902,NA,NA,0.013,15.579,31.494,31.495,NA
+"S05","simple","How many variants are present in the gene OPTN?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_in_gene]
+--- Final response ---
+There are 121 variants present in the gene OPTN.","There are 121 variants present in the gene OPTN.","llama3.1:70b [adaptive]","agentic_adaptive",34.4,"34.4 sec",0,17.915,NA,NA,0.013,14.258,32.186,32.188,NA
+"S06","simple","How many high-impact variants are located on chromosome X?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 14 high-impact variants located on chromosome X.","There are 14 high-impact variants located on chromosome X.","llama3.1:70b [adaptive]","agentic_adaptive",45.1,"45.1 sec",0,14.66,13.208,0,0.013,13.759,41.64,41.641,NA
+"S07","simple","How many variants are predicted deleterious by both SIFT and PolyPhen simultaneously?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 343 variants predicted deleterious by both SIFT and PolyPhen simultaneously.","There are 343 variants predicted deleterious by both SIFT and PolyPhen simultaneously.","llama3.1:70b [adaptive]","agentic_adaptive",82.7,"1:22 min",29.349,16.966,15.344,0,0.012,18.641,80.312,80.314,NA
+"S08","simple","How many variants is ALS_2 homozygous for?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_burden_per_sample]
+--- Final response ---
+ALS_2 is homozygous for 606 variants.","ALS_2 is homozygous for 606 variants.","llama3.1:70b [adaptive]","agentic_adaptive",41.4,"41.4 sec",0,22.721,NA,NA,0.014,16.324,39.059,39.06,NA
+"S09","simple","How many distinct genes are present in the varInfo_synthetic table?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 12 distinct genes present in the varInfo_synthetic table.","There are 12 distinct genes present in the varInfo_synthetic table.","llama3.1:70b [adaptive]","agentic_adaptive",43.3,"43.3 sec",0,16.683,9.579,0,0.011,14.858,41.131,41.132,NA
+"S10","simple","How many variants are in the dataset in total?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 1802 variants in the dataset in total.","There are 1802 variants in the dataset in total.","llama3.1:70b [adaptive]","agentic_adaptive",38.3,"38.3 sec",0,13.685,7.546,0,0.012,15.008,36.251,36.252,NA
+"S11","simple","How many variants does each gene have? Order by most variants.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ABCA4 has 587 variants, RIN3 has 220 variants, NEK1 has 189 variants, IL3RA has 146 variants, PEX5 has 124 variants, OPTN has 121 variants, ZNF483 has 112 variants, FUS has 95 variants, CYP19A1 has 89 variants, SOD1 has 49 variants, UBQLN2 has 36 variants, and TARDBP has 27 variants.","ABCA4 has 587 variants, RIN3 has 220 variants, NEK1 has 189 variants, IL3RA has 146 variants, PEX5 has 124 variants, OPTN has 121 variants, ZNF483 has 112 variants, FUS has 95 variants, CYP19A1 has 89 variants, SOD1 has 49 variants, UBQLN2 has 36 variants, and TARDBP has 27 variants.","llama3.1:70b [adaptive]","agentic_adaptive",152.9,"2:32 min",27.444,18.121,41.237,0,0.014,63.804,150.62,150.621,NA
+"S12","simple","How many variants have a missing CADD score?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 607 variants with a missing CADD score.","There are 607 variants with a missing CADD score.","llama3.1:70b [adaptive]","agentic_adaptive",41.4,"41.4 sec",0,15.709,10.384,0,0.013,13.018,39.124,39.126,NA
+"S13","simple","How many variants have all three annotations available: CADD, PolyPhen, and SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 1131 variants that have all three annotations available: CADD, PolyPhen, and SIFT.","There are 1131 variants that have all three annotations available: CADD, PolyPhen, and SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",55.3,"55.3 sec",0,15.102,18.689,0,0.013,19.155,52.959,52.961,NA
+"S14","simple","How many high-impact variants are in ABCA4?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_by_impact]
+--- Final response ---
+There are 122 high-impact variants in ABCA4.","There are 122 high-impact variants in ABCA4.","llama3.1:70b [adaptive]","agentic_adaptive",38.8,"38.8 sec",0,19.428,NA,NA,0.013,17.061,36.502,36.503,NA
+"S15","simple","How many variants have an allele frequency of exactly zero?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 36 variants with an allele frequency of exactly zero.","There are 36 variants with an allele frequency of exactly zero.","llama3.1:70b [adaptive]","agentic_adaptive",38.7,"38.7 sec",0,13.676,9.247,0,0.012,13.626,36.561,36.563,NA
+"S16","simple","How many variants does SIFT predict as deleterious in OPTN?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_sift_deleterious_in_gene]
+--- Final response ---
+There are 28 variants in OPTN that SIFT predicts as deleterious.","There are 28 variants in OPTN that SIFT predicts as deleterious.","llama3.1:70b [adaptive]","agentic_adaptive",41.2,"41.2 sec",0,20.902,NA,NA,0.013,17.021,37.936,37.938,NA
+"A01","analytical","Which variant in NEK1 has the lowest non-zero allele frequency?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The variant in NEK1 has an allele frequency of 0.","The variant in NEK1 has an allele frequency of 0.","llama3.1:70b [adaptive]","agentic_adaptive",56.2,"56.2 sec",0,19.649,19.71,0,0.013,14.512,53.884,53.886,NA
+"A02","analytical","What proportion of all variants in the dataset are classified as high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_by_impact]
+--- Final response ---
+122 out of 1802 variants (6.8%) are classified as high impact.","122 out of 1802 variants (6.8%) are classified as high impact.","llama3.1:70b [adaptive]","agentic_adaptive",37.9,"37.9 sec",0,16.094,NA,NA,0.012,19.418,35.524,35.524,NA
+"A03","analytical","For each gene, what is the ratio of high-impact to synonymous variants? Only show genes with at least 5 of each.","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ABCA4: 0.27, IL3RA: 0.37, NEK1: 0.65, OPTN: 0.26, PEX5: 0.18.","ABCA4: 0.27, IL3RA: 0.37, NEK1: 0.65, OPTN: 0.26, PEX5: 0.18.","llama3.1:70b [adaptive]","agentic_adaptive",325.2,"5:25 min",29.798,260.849,NA,NA,0.012,34.347,325.006,325.073,NA
+"A04","analytical","Which control sample carries the highest total burden of high-impact variants?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_burden_all_samples]
+--- Final response ---
+The control sample with the highest total burden of high-impact variants is Control_2_burden with a value of 134.","The control sample with the highest total burden of high-impact variants is Control_2_burden with a value of 134.","llama3.1:70b [adaptive]","agentic_adaptive",47.7,"47.7 sec",0,19.334,NA,NA,0.014,26.058,45.406,45.407,NA
+"A05","analytical","What is the average CADD score for variants predicted deleterious by both SIFT and PolyPhen, compared to variants predicted benign by both?","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average CADD score for variants predicted deleterious by both SIFT and PolyPhen is 26.04, compared to 12.02 for variants predicted benign by both.","The average CADD score for variants predicted deleterious by both SIFT and PolyPhen is 26.04, compared to 12.02 for variants predicted benign by both.","llama3.1:70b [adaptive]","agentic_adaptive",133.3,"2:13 min",33.84,68.178,NA,NA,0.013,28.004,130.035,130.038,NA
+"A06","analytical","What is the average allele frequency per chromosome? Which chromosome has the highest?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average allele frequency per chromosome is chr10: 0.00265, chr1: 0.00255, chrX: 0.00177, chr4: 0.00147, chr14: 0.00115, chr15: 0.00078, chr12: 0.00014, chr16: 0.00010, chr21: 0.00007, chr9: 0.00004, and the highest is on chromosome 10 with an average allele frequency of 0.00265.","The average allele frequency per chromosome is chr10: 0.00265, chr1: 0.00255, chrX: 0.00177, chr4: 0.00147, chr14: 0.00115, chr15: 0.00078, chr12: 0.00014, chr16: 0.00010, chr21: 0.00007, chr9: 0.00004, and the highest is on chromosome 10 with an average allele frequency of 0.00265.","llama3.1:70b [adaptive]","agentic_adaptive",154.7,"2:34 min",29.932,16.4,30.497,0,0.012,75.901,152.742,152.743,NA
+"A07","analytical","What is the total allele burden in SOD1 for ALS cases versus controls?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+The total allele burden in SOD1 is 248 for ALS cases and 247 for controls, with a difference of 1.","The total allele burden in SOD1 is 248 for ALS cases and 247 for controls, with a difference of 1.","llama3.1:70b [adaptive]","agentic_adaptive",85,"1:25 min",28.977,25.192,NA,NA,0.014,28.529,82.712,82.713,NA
+"A08","analytical","What percentage of all variants in the dataset is carried by at least one ALS patient?","[mode: agentic]
+[complexity: complex]
+[tools called: genotype_analysis/count_carriers_above_threshold → variant_analysis/run_variant_query → genotype_analysis/get_burden_all_samples → genotype_analysis/count_carriers_above_threshold → variant_analysis/run_variant_query]
+--- Final response ---
+There are 1795 unique variants carried by at least one ALS patient in the dataset.","There are 1795 unique variants carried by at least one ALS patient in the dataset.","llama3.1:70b [adaptive]","agentic_adaptive",160.1,"2:40 min",0,137.502,NA,NA,0.063,22.486,160.051,160.063,NA
+"A09","analytical","What is the average CADD score for high-impact versus moderate-impact variants in NEK1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+High-impact variants in NEK1 have a mean CADD of 14.30, compared to 20.10 for moderate-impact variants.","High-impact variants in NEK1 have a mean CADD of 14.30, compared to 20.10 for moderate-impact variants.","llama3.1:70b [adaptive]","agentic_adaptive",202.4,"3:22 min",36.772,20.421,117.477,0,0.013,25.064,199.747,199.749,NA
+"A10","analytical","How many variants are carried exclusively by controls and not by any ALS patient?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 7 variants carried exclusively by controls and not by any ALS patient.","There are 7 variants carried exclusively by controls and not by any ALS patient.","llama3.1:70b [adaptive]","agentic_adaptive",74.2,"1:14 min",0,16.057,38.862,0,0.012,16.927,71.858,71.86,NA
+"A11","analytical","What is the impact distribution (high, moderate, synonymous) in SOD1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_by_impact]
+--- Final response ---
+There are 122 high-impact, 1147 moderate-impact, and 533 synonymous variants in SOD1.","There are 122 high-impact, 1147 moderate-impact, and 533 synonymous variants in SOD1.","llama3.1:70b [adaptive]","agentic_adaptive",77.4,"1:17 min",29.3,24.469,NA,NA,0.012,21.144,74.925,74.926,NA
+"A12","analytical","Which chromosome has the most variants in the dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Chromosome 1 has the most variants in the dataset.","Chromosome 1 has the most variants in the dataset.","llama3.1:70b [adaptive]","agentic_adaptive",48.8,"48.8 sec",0,13.547,19.553,0,0.013,13.411,46.524,46.526,NA
+"A13","analytical","What percentage of variants are missing ALL three functional annotations: CADD, PolyPhen, and SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Approximately 33.68% of variants are missing all three functional annotations: CADD, PolyPhen, and SIFT.","Approximately 33.68% of variants are missing all three functional annotations: CADD, PolyPhen, and SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",70.9,"1:10 min",0,16.148,28.419,0,0.012,23.401,67.98,67.981,NA
+"A14","analytical","For ALS_4, how many high-impact variants are heterozygous versus homozygous?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ALS_4 has 33 high-impact heterozygous variants and 41 high-impact homozygous variants.","ALS_4 has 33 high-impact heterozygous variants and 41 high-impact homozygous variants.","llama3.1:70b [adaptive]","agentic_adaptive",143.1,"2:23 min",41.91,19.494,56.086,0,0.013,22.708,140.211,140.213,NA
+"A15","analytical","What is the average CADD score of moderate-impact variants in PEX5?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average CADD score of moderate-impact variants in PEX5 is 23.41.","The average CADD score of moderate-impact variants in PEX5 is 23.41.","llama3.1:70b [adaptive]","agentic_adaptive",63.4,"1:03 min",0,18.719,21.996,0,0.011,19.469,60.195,60.198,NA
+"A16","analytical","What is the allele burden for ALS_5 versus Control_5 among high-impact variants only?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_total_burden_cases_vs_controls]
+--- Final response ---
+ALS_5 has a total allele burden of 9083 among high-impact variants, compared to Control_5's total allele burden of 8974, with a difference of 109.","ALS_5 has a total allele burden of 9083 among high-impact variants, compared to Control_5's total allele burden of 8974, with a difference of 109.","llama3.1:70b [adaptive]","agentic_adaptive",99.1,"1:39 min",29.1,33.155,NA,NA,0.013,34.328,96.596,96.598,NA
+"A17","analytical","Give a full summary of the gene UBQLN2: total variants, impact distribution, and mean allele frequency.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+UBQLN2 has a total of 113 variants, with an impact distribution of 1 high-impact, 24 moderate-impact, and 11 synonymous variants, and a mean allele frequency of 0.00038598859722222223.","UBQLN2 has a total of 113 variants, with an impact distribution of 1 high-impact, 24 moderate-impact, and 11 synonymous variants, and a mean allele frequency of 0.00038598859722222223.","llama3.1:70b [adaptive]","agentic_adaptive",216.3,"3:36 min",32.918,18.717,119.041,0,0.018,42.717,213.411,213.413,NA
+"C01","complex","How many variants are carried exclusively by ALS cases and not by any control?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 10 variants carried exclusively by ALS cases and not by any control.","There are 10 variants carried exclusively by ALS cases and not by any control.","llama3.1:70b [adaptive]","agentic_adaptive",71.2,"1:11 min",0,14.64,38.933,0,0.013,15.288,68.874,68.875,NA
+"C02","complex","Which gene shows the greatest difference in total allele burden between ALS cases and controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The greatest difference in total allele burden between ALS cases and controls is observed for ABCA4, with an absolute difference of 83.","The greatest difference in total allele burden between ALS cases and controls is observed for ABCA4, with an absolute difference of 83.","llama3.1:70b [adaptive]","agentic_adaptive",170.2,"2:50 min",31.876,16.779,75.638,0,0.015,43.507,167.815,167.816,NA
+"C03","complex","For each of the five ALS patients, how many high-impact variants do they carry in TARDBP, SOD1, or NEK1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ALS_1 carries 22 high-impact variants in TARDBP, SOD1, or NEK1, ALS_2 carries 28, ALS_3 carries 26, ALS_4 carries 21, and ALS_5 carries 24.","ALS_1 carries 22 high-impact variants in TARDBP, SOD1, or NEK1, ALS_2 carries 28, ALS_3 carries 26, ALS_4 carries 21, and ALS_5 carries 24.","llama3.1:70b [adaptive]","agentic_adaptive",203.9,"3:23 min",47.81,19.991,97.415,0,0.012,35.351,200.579,200.581,NA
+"C04","complex","Which gene has the most homozygous variant-calls across all ALS patients combined?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: get_burden_per_sample]
+--- Final response ---
+Database error: HTTP 422 Unprocessable Entity.","Database error: HTTP 422 Unprocessable Entity.","llama3.1:70b [adaptive]","agentic_adaptive",21.7,"21.7 sec",0,18.443,NA,NA,0.093,NA,18.536,18.537,NA
+"C05","complex","How many variants are shared between all five ALS patients AND all five controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 29 variants shared between all five ALS patients and all five controls.","There are 29 variants shared between all five ALS patients and all five controls.","llama3.1:70b [adaptive]","agentic_adaptive",110.8,"1:50 min",33.877,18.513,38.315,0,0.013,17.539,108.257,108.259,NA
+"C06","complex","For moderate- and high-impact variants in TARDBP, compare the allele burden per individual across all 5 cases and all 5 controls.","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+No allele burden data was returned due to an internal server error.","No allele burden data was returned due to an internal server error.","llama3.1:70b [adaptive]","agentic_adaptive",273.1,"4:33 min",55.522,70.118,NA,NA,0.026,20.067,269.805,269.808,124.072
+"C07","complex","Which variants are present in all ten individuals (all 5 ALS and all 5 controls)? List gene and VAR_id.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ABCA4: VAR_id 65, 99, 231, 303, 317, 350, 357, 480, 565; OPTN: VAR_id 662, 696; PEX5: VAR_id 766, 858, 860; RIN3: VAR_id 1062, 1074; CYP19A1: VAR_id 1084; FUS: VAR_id 1182; NEK1: VAR_id 1353, 1379, 1400, 1463, 1465, 1466, 1498; IL3RA: VAR_id 1626, 1689, 1737, 1739.","ABCA4: VAR_id 65, 99, 231, 303, 317, 350, 357, 480, 565; OPTN: VAR_id 662, 696; PEX5: VAR_id 766, 858, 860; RIN3: VAR_id 1062, 1074; CYP19A1: VAR_id 1084; FUS: VAR_id 1182; NEK1: VAR_id 1353, 1379, 1400, 1463, 1465, 1466, 1498; IL3RA: VAR_id 1626, 1689, 1737, 1739.","llama3.1:70b [adaptive]","agentic_adaptive",198.9,"3:18 min",31.765,16.237,43.138,0,0.014,104.616,195.77,195.772,NA
+"C08","complex","Among SIFT-deleterious variants, which three genes have the highest total case burden, and how does it compare to controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+ABCA4 has a case burden of 984 and control burden of 874, RIN3 has a case burden of 364 and control burden of 365, and NEK1 has a case burden of 345 and control burden of 344.","ABCA4 has a case burden of 984 and control burden of 874, RIN3 has a case burden of 364 and control burden of 365, and NEK1 has a case burden of 345 and control burden of 344.","llama3.1:70b [adaptive]","agentic_adaptive",180,"3:00 min",35.508,21.381,80.361,0,0.012,39.722,176.984,176.985,NA
+"C09","complex","How many variants fall into each impact category: high, moderate, synonymous, and other?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_by_impact]
+--- Final response ---
+There are 122 high-impact, 1147 moderate-impact, 533 synonymous, and 0 other variants.","There are 122 high-impact, 1147 moderate-impact, 533 synonymous, and 0 other variants.","llama3.1:70b [adaptive]","agentic_adaptive",76.5,"1:16 min",31.906,20.389,NA,NA,0.011,21.505,73.811,73.813,NA
+"C10","complex","In which genes does ALS_3 carry at least one high-impact variant?","[mode: agentic]
+[complexity: complex]
+[tools called: genotype_analysis/get_carriers_with_phenotype]
+--- Final response ---
+No carriers were found for ALS_3 carrying at least one high-impact variant.","No carriers were found for ALS_3 carrying at least one high-impact variant.","llama3.1:70b [adaptive]","agentic_adaptive",60.2,"1:00 min",0,34.832,NA,NA,0.018,25.332,60.182,60.184,NA
+"C11","complex","Give a full summary of the gene FUS: total variants, impact distribution, and mean allele frequency.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+FUS has a total of 321 variants, with an impact distribution of 1 high-impact variant, 55 moderate-impact variants, and 265 synonymous variants, and a mean allele frequency of 0.00010248711894736843.","FUS has a total of 321 variants, with an impact distribution of 1 high-impact variant, 55 moderate-impact variants, and 265 synonymous variants, and a mean allele frequency of 0.00010248711894736843.","llama3.1:70b [adaptive]","agentic_adaptive",199.2,"3:19 min",31.797,20.431,104.303,0,0.013,39.827,196.371,196.372,NA
+"C12","complex","Group all variants by CADD score bins: below 10, 10 to 20, 20 to 30, and 30 and above. For each bin show the total ALS case burden and number of variants.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The total ALS case burden and number of variants for each CADD score bin are: Below 10: 4202 burden, 827 variants; 10-20: 1230 burden, 249 variants; 20-30: 3183 burden, 626 variants; Above 30: 468 burden, 93 variants.","The total ALS case burden and number of variants for each CADD score bin are: Below 10: 4202 burden, 827 variants; 10-20: 1230 burden, 249 variants; 20-30: 3183 burden, 626 variants; Above 30: 468 burden, 93 variants.","llama3.1:70b [adaptive]","agentic_adaptive",205.2,"3:25 min",34.752,21.3,94.78,0,0.013,49.824,200.669,200.671,NA
+"C13","complex","Among high-impact variants, what is the distribution of PolyPhen predictions?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+Among high-impact variants, PolyPhen predictions are distributed as follows: 106 have no prediction (.), 6 are Benign (B), 6 are Damaging (D), and 4 are Possibly Damaging (P).","Among high-impact variants, PolyPhen predictions are distributed as follows: 106 have no prediction (.), 6 are Benign (B), 6 are Damaging (D), and 4 are Possibly Damaging (P).","llama3.1:70b [adaptive]","agentic_adaptive",98.6,"1:38 min",29.43,17.941,15.161,0,0.011,33.632,96.175,96.175,NA
+"C14","complex","What are the three variants with the highest CADD score in the entire dataset, and which genes are they in?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The three variants with the highest CADD score in the entire dataset are ABCA4:VAR_90 and PEX5:VAR_802 with a score of 50.0, and ABCA4:VAR_33 with a score of 47.0.","The three variants with the highest CADD score in the entire dataset are ABCA4:VAR_90 and PEX5:VAR_802 with a score of 50.0, and ABCA4:VAR_33 with a score of 47.0.","llama3.1:70b [adaptive]","agentic_adaptive",83.5,"1:23 min",0,16.413,23.58,0,0.012,39.882,79.887,79.888,NA
+"C15","complex","What are the three variants with the lowest non-zero allele frequency, and which genes are they in?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The three variants with the lowest non-zero allele frequency are in genes TARDBP (AF=0), ABCA4 (AF=0), and ABCA4 (AF=0).","The three variants with the lowest non-zero allele frequency are in genes TARDBP (AF=0), ABCA4 (AF=0), and ABCA4 (AF=0).","llama3.1:70b [adaptive]","agentic_adaptive",61.1,"1:01 min",0,14.726,15.63,0,0.012,28.53,58.898,58.9,NA
+"C16","complex","What is the only high-impact variant in FUS, and what are its functional annotations?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/get_high_impact_variants_in_gene]
+--- Final response ---
+No matching result was found in the database for this question.","No matching result was found in the database for this question.","llama3.1:70b [adaptive]","agentic_adaptive",23.7,"23.7 sec",0,21.135,NA,NA,0.013,0,21.148,21.149,NA
+"C17","complex","On which chromosome is IL3RA located, and how does the variant count on that chromosome compare to the total dataset?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+IL3RA is located on chromosome X, which has 147 variants compared to a total of 1802 variants in the dataset, resulting in an absolute difference of 1655.","IL3RA is located on chromosome X, which has 147 variants compared to a total of 1802 variants in the dataset, resulting in an absolute difference of 1655.","llama3.1:70b [adaptive]","agentic_adaptive",139,"2:19 min",33.929,18.325,53.166,0,0.013,29.781,135.214,135.215,NA
+"C18","complex","For RIN3 high-impact variants specifically, is the allele burden higher in cases or controls?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_dosage_ratio_by_gene]
+--- Final response ---
+For RIN3 high-impact variants, the allele burden is higher in controls (dosage ratio = 0.8).","For RIN3 high-impact variants, the allele burden is higher in controls (dosage ratio = 0.8).","llama3.1:70b [adaptive]","agentic_adaptive",77.9,"1:17 min",0,24.084,NA,NA,0.014,51.064,75.162,75.164,NA
+"P01","phenotype","How many female carriers are there in ABCA4?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 5 female carriers in ABCA4.","There are 5 female carriers in ABCA4.","llama3.1:70b [adaptive]","agentic_adaptive",74.2,"1:14 min",0,33.598,NA,NA,0.028,40.553,74.179,74.182,NA
+"P02","phenotype","How many female carriers are there in SOD1?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_carriers_with_phenotype]
+--- Final response ---
+There are 5 female carriers in SOD1.","There are 5 female carriers in SOD1.","llama3.1:70b [adaptive]","agentic_adaptive",64.9,"1:04 min",0,32.496,NA,NA,0.029,32.388,64.913,64.915,NA
+"P03","phenotype","How many SAS carriers are there in NEK1?","[mode: agentic]
+[complexity: complex]
+[tools called: rvat_analysis/get_carrier_count_filtered]
+--- Final response ---
+There are 1252 SAS carriers in NEK1 across both cases and controls.","There are 1252 SAS carriers in NEK1 across both cases and controls.","llama3.1:70b [adaptive]","agentic_adaptive",145.8,"2:25 min",0,49.668,NA,NA,2.355,93.502,145.525,145.792,NA
+"P04","phenotype","What is the sex distribution of samples in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+There are 12865 male samples and 12135 female samples in the database.","There are 12865 male samples and 12135 female samples in the database.","llama3.1:70b [adaptive]","agentic_adaptive",88.8,"1:28 min",27.255,40.253,NA,NA,0.021,21.276,88.805,88.807,NA
+"P05","phenotype","What is the average age of ALS cases in the database?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/get_age_distribution]
+--- Final response ---
+The average age of ALS cases in the database is 60.1 years.","The average age of ALS cases in the database is 60.1 years.","llama3.1:70b [adaptive]","agentic_adaptive",60.3,"1:00 min",0,31.214,NA,NA,0.02,27.018,58.252,58.254,NA
+"P06","phenotype","How many ALS cases and controls are in the database?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_info]
+--- Final response ---
+There are 5000 ALS cases and 20000 controls in the database.","There are 5000 ALS cases and 20000 controls in the database.","llama3.1:70b [adaptive]","agentic_adaptive",42.1,"42.1 sec",0,14.816,NA,NA,0.014,25.307,40.137,40.138,NA
+"T01","annotation_trap","How many variants have a PolyPhen score of possibly damaging?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 182 variants that have a PolyPhen score of possibly damaging.","There are 182 variants that have a PolyPhen score of possibly damaging.","llama3.1:70b [adaptive]","agentic_adaptive",43.5,"43.5 sec",0,14.093,12.529,0,0.012,14.964,41.598,41.6,NA
+"T02","annotation_trap","How many variants are tolerated by SIFT?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 565 variants tolerated by SIFT.","There are 565 variants tolerated by SIFT.","llama3.1:70b [adaptive]","agentic_adaptive",38.5,"38.5 sec",0,12.829,9.856,0,0.013,13.804,36.502,36.503,NA
+"T03","annotation_trap","Are there any variants where HighImpact equals 1 AND Synonymous equals 1 at the same time?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+No matching variant was found where HighImpact equals 1 and Synonymous equals 1 at the same time.","No matching variant was found where HighImpact equals 1 and Synonymous equals 1 at the same time.","llama3.1:70b [adaptive]","agentic_adaptive",80.9,"1:20 min",25.237,17.304,17.224,0,0.013,18.346,78.124,78.126,NA
+"U01","unanswerable","Is VAR_id 100 previously reported as pathogenic?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",30.3,"30.3 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U02","unanswerable","What is the allele frequency of VAR_id 30 in Europeans?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U03","unanswerable","Which variants are both synonymous and high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+No matching result was found in the database for this question.","No matching result was found in the database for this question.","llama3.1:70b [adaptive]","agentic_adaptive",55.7,"55.7 sec",24.423,15.95,13.083,0,0.012,0,53.468,53.47,NA
+"U04","unanswerable","What is the protein domain affected by VAR_id 42?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",30.3,"30.3 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U05","unanswerable","Has the variant at position 12345 been validated in a wet-lab experiment?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.3,"22.3 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U06","unanswerable","Which ALS patient has the earliest age of onset?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",20.9,"20.9 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U07","unanswerable","What is the linkage disequilibrium between VAR_id 10 and VAR_id 11?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.8,"22.8 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U08","unanswerable","Which variants are clinically significant?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",20.5,"20.5 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U09","unanswerable","What is the rs-number of VAR_id 200?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",23.3,"23.3 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U10","unanswerable","Which variants are de novo mutations?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.8,"21.8 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U11","unanswerable","What is the allele frequency of VAR_id 50 in the African population?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.4,"21.4 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U12","unanswerable","How long has ALS_3 been diagnosed with ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.5,"22.5 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U13","unanswerable","Which variants have the strongest effect on disease risk?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",20.9,"20.9 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U14","unanswerable","Which of the ALS patients has the most severe disease progression?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.3,"21.3 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"U15","unanswerable","Is the variant at position 1378764 on chrX likely to be causative for ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.7,"22.7 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"R01","rvat","Run a burden test for SOD1 in ALS cases versus controls.","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/run_burden_test]
+--- Final response ---
+SOD1 shows a highly significant burden in ALS cases (OR = 5.9, p < 0.001), with 80 case carriers versus 53 control carriers.","SOD1 shows a highly significant burden in ALS cases (OR = 5.9, p < 0.001), with 80 case carriers versus 53 control carriers.","llama3.1:70b [adaptive]","agentic_adaptive",94.5,"1:34 min",29.349,22.961,NA,NA,0.914,38.903,92.127,92.127,NA
+"R02","rvat","Get the MAF for moderate impact variants in TARDBP.","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/get_maf_by_impact]
+--- Final response ---
+The MAF for moderate impact variants in TARDBP is 0.0001 (VAR_id: SUMMARY), 0.0006 (VAR_id: 6), and 0 (VAR_id: 14, 25, 21, 15, 4, 1, 19, 16, 22, 3, 20).","The MAF for moderate impact variants in TARDBP is 0.0001 (VAR_id: SUMMARY), 0.0006 (VAR_id: 6), and 0 (VAR_id: 14, 25, 21, 15, 4, 1, 19, 16, 22, 3, 20).","llama3.1:70b [adaptive]","agentic_adaptive",127.5,"2:07 min",0,23.616,NA,NA,0.2,100.961,124.777,124.78,NA
+"R03","rvat","How many female carriers are there in the SAS cohort that carry a pathogenic mutation in SOD1?","[mode: agentic]
+[complexity: complex]
+[tools called: rvat_analysis/get_carrier_count_filtered]
+--- Final response ---
+There are 13 female carriers across both cases and controls in the SAS cohort that carry a pathogenic mutation in SOD1.","There are 13 female carriers across both cases and controls in the SAS cohort that carry a pathogenic mutation in SOD1.","llama3.1:70b [adaptive]","agentic_adaptive",161.7,"2:41 min",32.235,61.664,NA,NA,0.285,67.55,161.734,161.744,NA
+"R04","rvat","What is the linkage disequilibrium between high-impact variants in FUS?","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/get_ld_matrix]
+--- Final response ---
+Linkage disequilibrium between high-impact variants in FUS cannot be computed due to fewer than 2 variants.","Linkage disequilibrium between high-impact variants in FUS cannot be computed due to fewer than 2 variants.","llama3.1:70b [adaptive]","agentic_adaptive",47,"47.0 sec",0,20.258,NA,NA,0.149,23.843,44.25,44.252,NA
+"R05","rvat","What are the most significant single variants in NEK1 associated with ALS?","[mode: dual]
+[complexity: simple]
+[tools called: rvat_analysis/run_single_variant_test]
+--- Final response ---
+The most significant single variants in NEK1 associated with ALS have p-values of 7.9247e-9 (VAR_id 1470), 3.8484e-7 (VAR_id 1350), and 0.0007 (VAR_id 1345).","The most significant single variants in NEK1 associated with ALS have p-values of 7.9247e-9 (VAR_id 1470), 3.8484e-7 (VAR_id 1350), and 0.0007 (VAR_id 1345).","llama3.1:70b [adaptive]","agentic_adaptive",126.2,"2:06 min",0,20.999,NA,NA,3.077,99.772,123.848,123.897,NA
+"N01","nonsense","What is the ClinVar pathogenicity classification of VAR_id 42?","[mode: dual]
+[complexity: simple]
+[tools called: clinvar_annotation/get_clinvar_for_variant]
+--- Final response ---
+The ClinVar pathogenicity classification for VAR_id 42 is not available.","The ClinVar pathogenicity classification for VAR_id 42 is not available.","llama3.1:70b [adaptive]","agentic_adaptive",65.5,"1:05 min",24.057,19.975,NA,NA,0.014,18.966,63.012,63.013,NA
+"N02","nonsense","What is the gnomAD allele frequency of the variant at position 1378764 on chrX in the European population?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",30.2,"30.2 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N03","nonsense","Which exon does the high-impact variant in FUS (VAR_id 1175) affect?","[mode: dual]
+[complexity: simple]
+[tools called: clinvar_annotation/get_clinvar_for_variant]
+--- Final response ---
+No exon information is available for VAR_id 1175 in FUS as it has no ClinVar record.","No exon information is available for VAR_id 1175 in FUS as it has no ClinVar record.","llama3.1:70b [adaptive]","agentic_adaptive",50.6,"50.6 sec",0,20.923,NA,NA,0.638,26.278,47.839,47.84,NA
+"N04","nonsense","What is the protein domain affected by the most deleterious variant in SOD1?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",28.8,"28.8 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N05","nonsense","Does VAR_id 200 affect splicing?","[mode: simple]
+[complexity: pure_nonsense]
+[tools called: unknown]
+--- Final response ---
+That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","llama3.1:70b [adaptive]","agentic_adaptive",0,"0.0 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N06","nonsense","Which variants are both synonymous and high impact?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+No matching result was found in the database for this question.","No matching result was found in the database for this question.","llama3.1:70b [adaptive]","agentic_adaptive",56,"56.0 sec",26.515,16.717,10.705,0,0.012,0,53.949,53.951,NA
+"N07","nonsense","Which variants have a genotype of 3 (i.e. three copies of the alternate allele) in ALS_1?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+No matching result was found in the database for this question.","No matching result was found in the database for this question.","llama3.1:70b [adaptive]","agentic_adaptive",32.9,"32.9 sec",0,18.599,11.175,0,0.012,0,29.786,29.787,NA
+"N08","nonsense","What is the allele frequency of a variant that no one in the world carries?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",43,"43.0 sec",0,15.799,NA,NA,0.009,24.77,40.578,40.579,NA
+"N09","nonsense","How many variants have a CADD score of exactly 0 and are also high impact?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.4,"21.4 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N10","nonsense","Which ALS patient is also listed as a control?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.1,"21.1 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N11","nonsense","Which variants are important?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",40.4,"40.4 sec",0,15.157,NA,NA,0.01,22.856,38.023,38.024,NA
+"N12","nonsense","Is NEK1 an ALS gene?","[mode: dual]
+[complexity: simple]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",42.2,"42.2 sec",0,16.941,NA,NA,0.009,23.157,40.107,40.108,NA
+"N13","nonsense","What is the most interesting variant in the dataset?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21,"21.0 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N14","nonsense","Which variants should we follow up on in the wet lab?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",22.7,"22.7 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N15","nonsense","Is this dataset good enough to find the cause of ALS?","[mode: simple]
+[complexity: unanswerable_precheck]
+[tools called: db_exploration/get_database_limitations]
+--- Final response ---
+This information is not available.","This information is not available.","llama3.1:70b [adaptive]","agentic_adaptive",21.2,"21.2 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"N16","nonsense","jasdkjahdkjahdas","[mode: simple]
+[complexity: pure_nonsense]
+[tools called: unknown]
+--- Final response ---
+That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","That doesn't look like a question I can help with. Please ask something about the ALS variant database — for example: 'How many high-impact variants are in SOD1?' or 'Run a burden test for NEK1.'","llama3.1:70b [adaptive]","agentic_adaptive",2.5,"2.5 sec",NA,NA,NA,NA,NA,NA,NA,NA,NA
+"F01","toolfree","For how many variants is the total allele count higher in ALS cases than in controls?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 792 variants where the total allele count is higher in ALS cases than in controls.","There are 792 variants where the total allele count is higher in ALS cases than in controls.","llama3.1:70b [adaptive]","agentic_adaptive",77.8,"1:17 min",0,16.255,38.658,0,0.012,20.529,75.454,75.456,NA
+"F02","toolfree","Which gene has the highest proportion of high-impact variants relative to its total variant count?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The gene NEK1 has the highest proportion of high-impact variants relative to its total variant count.","The gene NEK1 has the highest proportion of high-impact variants relative to its total variant count.","llama3.1:70b [adaptive]","agentic_adaptive",74.2,"1:14 min",0,15.175,37.268,0,0.011,18.649,71.103,71.105,NA
+"F03","toolfree","How many variants are carried (het or hom) by at least 3 of the 5 ALS patients?","[mode: agentic]
+[complexity: complex]
+[tools called: genotype_analysis/count_carriers_above_threshold]
+--- Final response ---
+There are 1425 variants carried (het or hom) by at least 3 of the 5 ALS patients.","There are 1425 variants carried (het or hom) by at least 3 of the 5 ALS patients.","llama3.1:70b [adaptive]","agentic_adaptive",57.1,"57.1 sec",0,35.054,NA,NA,0.011,22.041,57.106,57.109,NA
+"F04","toolfree","What is the average CADD score of high-impact variants per chromosome? Which chromosome has the highest average CADD score among high-impact variants?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+The average CADD scores of high-impact variants per chromosome are chr1: 34.94, chr10: 36.29, chr12: 37.16, chr14: 35.5, chr15: 35.5, chr21: 33.7, chr4: 36.31, chr9: 33.0, and chrX: 26.55, with chromosome 12 having the highest average CADD score among high-impact variants.","The average CADD scores of high-impact variants per chromosome are chr1: 34.94, chr10: 36.29, chr12: 37.16, chr14: 35.5, chr15: 35.5, chr21: 33.7, chr4: 36.31, chr9: 33.0, and chrX: 26.55, with chromosome 12 having the highest average CADD score among high-impact variants.","llama3.1:70b [adaptive]","agentic_adaptive",153.5,"2:33 min",29.639,21.525,32.108,0,0.012,66.954,150.238,150.24,NA
+"F05","toolfree","What is the total number of alleles carried by each individual ALS patient across all variants in the dataset?","[mode: dual]
+[complexity: simple]
+[tools called: genotype_analysis/get_burden_all_samples]
+--- Final response ---
+ALS_1: 1828, ALS_2: 1817, ALS_3: 1793, ALS_4: 1880, ALS_5: 1765, Control_1: 1745, Control_2: 1734, Control_3: 1835, Control_4: 1854, Control_5: 1806.","ALS_1: 1828, ALS_2: 1817, ALS_3: 1793, ALS_4: 1880, ALS_5: 1765, Control_1: 1745, Control_2: 1734, Control_3: 1835, Control_4: 1854, Control_5: 1806.","llama3.1:70b [adaptive]","agentic_adaptive",104.4,"1:44 min",31.687,17.715,NA,NA,0.013,52.198,101.613,101.613,NA
+"F06","toolfree","How many variants are homozygous (genotype = 2) in ALL five ALS patients simultaneously?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 11 variants that are homozygous in all five ALS patients simultaneously.","There are 11 variants that are homozygous in all five ALS patients simultaneously.","llama3.1:70b [adaptive]","agentic_adaptive",102.2,"1:42 min",41.176,17.257,22.72,0,0.011,18.073,99.237,99.238,NA
+"F07","toolfree","Does a higher CADD score correlate with a higher rate of PolyPhen 'damaging' (D) predictions? Show this using CADD bins.","[mode: agentic]
+[complexity: complex]
+[tools called: variant_analysis/get_cadd_polyphen_correlation]
+--- Final response ---
+The percentage of PolyPhen 'damaging' predictions increases with higher CADD scores in bins 0-10 (3.11%), 10-20 (12.0%), and 20-30 (56.3%), but decreases or remains at 0% in higher bins: 30-40 (43.04%), 40-50 (0.0%), and 50-60 (0.0%).","The percentage of PolyPhen 'damaging' predictions increases with higher CADD scores in bins 0-10 (3.11%), 10-20 (12.0%), and 20-30 (56.3%), but decreases or remains at 0% in higher bins: 30-40 (43.04%), 40-50 (0.0%), and 50-60 (0.0%).","llama3.1:70b [adaptive]","agentic_adaptive",117,"1:57 min",0,46.518,NA,NA,0.013,67.241,113.772,113.775,NA
+"F08","toolfree","How many variants are carried by exactly one ALS patient and by no control at all (so-called 'private' ALS variants)?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There is 1 private ALS variant carried by exactly one ALS patient and no control at all.","There is 1 private ALS variant carried by exactly one ALS patient and no control at all.","llama3.1:70b [adaptive]","agentic_adaptive",138.4,"2:18 min",0,16.73,100.901,0,0.011,17.516,135.158,135.16,NA
+"F09","toolfree","Which ALS patient has the most 'private' variants — variants carried only by that patient and no one else in the entire dataset?","[mode: dual_adaptive]
+[complexity: simple]
+[tools called: get_burden_per_sample]
+--- Final response ---
+Database error: HTTP 422 Unprocessable Entity.","Database error: HTTP 422 Unprocessable Entity.","llama3.1:70b [adaptive]","agentic_adaptive",26.3,"26.3 sec",0,23.029,NA,NA,0.022,NA,23.051,23.052,NA
+"F10","toolfree","For high-impact variants only, what is the case-to-control burden ratio per gene? Which genes show enrichment in cases?","[mode: agentic]
+[complexity: complex]
+[tools called: genotype_analysis/get_dosage_ratio_by_gene]
+--- Final response ---
+The case-to-control burden ratio per gene for high-impact variants is as follows: CYP19A1: 1.5, PEX5: 1.3784, UBQLN2: 1.1429, ABCA4: 1.0092, FUS: 1.0, NEK1: 0.9191, IL3RA: 0.8611, TARDBP: 0.8, RIN3: 0.8, OPTN: 0.7797, SOD1: 0.7308, ZNF483: 0.3571; genes showing enrichment in cases are CYP19A1, PEX5,","The case-to-control burden ratio per gene for high-impact variants is as follows: CYP19A1: 1.5, PEX5: 1.3784, UBQLN2: 1.1429, ABCA4: 1.0092, FUS: 1.0, NEK1: 0.9191, IL3RA: 0.8611, TARDBP: 0.8, RIN3: 0.8, OPTN: 0.7797, SOD1: 0.7308, ZNF483: 0.3571; genes showing enrichment in cases are CYP19A1, PEX5,","llama3.1:70b [adaptive]","agentic_adaptive",194.1,"3:14 min",32.499,51.835,NA,NA,0.012,109.787,194.133,194.136,NA
+"F11","toolfree","What is the mean age of ALS cases per super-population? Which population has the highest average age?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+The mean age of ALS cases per super-population is AFR: 60.44, EAS: 60.30, SAS: 60.16, AMR: 59.82, EUR: 59.64, with the highest average age found in AFR (60.44).","The mean age of ALS cases per super-population is AFR: 60.44, EAS: 60.30, SAS: 60.16, AMR: 59.82, EUR: 59.64, with the highest average age found in AFR (60.44).","llama3.1:70b [adaptive]","agentic_adaptive",126.9,"2:06 min",31.66,51.238,NA,NA,0.017,43.965,126.88,126.883,NA
+"F12","toolfree","How many female ALS cases are there in the South Asian (SAS) population?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+There are 576 female ALS cases in the South Asian (SAS) population.","There are 576 female ALS cases in the South Asian (SAS) population.","llama3.1:70b [adaptive]","agentic_adaptive",110.5,"1:50 min",31.681,41.072,NA,NA,0.023,16.02,110.537,110.541,21.741
+"F13","toolfree","What is the sex, population, and age of each of the five named ALS patients (ALS1 through ALS5) from the pheno table?","[mode: agentic]
+[complexity: complex]
+[tools called: phenotype_data/run_phenotype_query]
+--- Final response ---
+ALS1: female, PJL, 66 years; ALS2: female, BEB, 67 years; ALS3: male, TSI, 54 years; ALS4: female, GWD, 65 years; ALS5: male, MSL, 59 years.","ALS1: female, PJL, 66 years; ALS2: female, BEB, 67 years; ALS3: male, TSI, 54 years; ALS4: female, GWD, 65 years; ALS5: male, MSL, 59 years.","llama3.1:70b [adaptive]","agentic_adaptive",159.9,"2:39 min",38.359,50.357,NA,NA,0.025,46.548,159.857,159.86,24.568
+"F14","toolfree","How many variants have contradictory functional predictions — deleterious by SIFT but benign by PolyPhen? Which genes have the most such contradictory variants?","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/run_variant_query]
+--- Final response ---
+There are 10 genes with contradictory functional predictions — deleterious by SIFT but benign by PolyPhen, with ABCA4 having the most such variants (43), followed by RIN3 (16), ZNF483 (12), NEK1 (10), PEX5 (9), CYP19A1 (8), FUS (7), OPTN and IL3RA (6 each), and SOD1 (5).","There are 10 genes with contradictory functional predictions — deleterious by SIFT but benign by PolyPhen, with ABCA4 having the most such variants (43), followed by RIN3 (16), ZNF483 (12), NEK1 (10), PEX5 (9), CYP19A1 (8), FUS (7), OPTN and IL3RA (6 each), and SOD1 (5).","llama3.1:70b [adaptive]","agentic_adaptive",100.3,"1:40 min",0,15.777,22.993,0,0.014,58.175,96.959,96.961,NA
+"F15","toolfree","How many variants have an allele frequency above the dataset average? Use a subquery to compute the average.","[mode: dual]
+[complexity: simple]
+[tools called: variant_analysis/count_variants_above_average]
+--- Final response ---
+There are 58 variants with an allele frequency above the dataset average of 0.001584.","There are 58 variants with an allele frequency above the dataset average of 0.001584.","llama3.1:70b [adaptive]","agentic_adaptive",40.7,"40.7 sec",0,19.32,NA,NA,0.014,18.324,37.658,37.659,NA

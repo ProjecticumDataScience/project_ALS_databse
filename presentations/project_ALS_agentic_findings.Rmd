@@ -1,0 +1,361 @@
+---
+title: "Project ALS — Agentic Architecture & Final Benchmark Findings"
+subtitle: "From querychat to a Multi-Server Agentic Pipeline on llama3.1:70b"
+author: "Projecticum Data Science"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    toc_depth: 3
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 10,
+  fig.height = 6
+)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(knitr)
+library(kableExtra)
+library(DiagrammeR)
+
+# ── Path to the final graded benchmark CSV ──────────────────
+# (111 questions, agentic_adaptive backend, llama3.1:70b, run on SURF HPC)
+GRADED_CSV <- "~/project_ALS_databse/analysis/benchmark_surf_grading/grading_20260621_143922/finalgraded_20260621_121012.csv"
+# ──────────────────────────────────────────────────────────────
+
+combined <- read.csv(GRADED_CSV)
+combined$grade_answer <- ifelse(toupper(as.character(combined$grade_answer)) == "TRUE", 1L,
+                          ifelse(toupper(as.character(combined$grade_answer)) == "FALSE", 0L,
+                          suppressWarnings(as.integer(combined$grade_answer))))
+
+ALL_CATEGORIES <- c("simple","analytical","complex","phenotype","annotation_trap",
+                     "unanswerable","rvat","nonsense","toolfree")
+ALL_CATEGORY_LABELS <- c("Simple (S)","Analytical (A)","Complex (C)","Phenotype (P)",
+                          "Annotation Trap (T)","Unanswerable (U)","RVAT (R)",
+                          "Nonsense (N)","Toolfree (F)")
+
+theme_als <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 15, margin = margin(b = 10)),
+    plot.subtitle    = element_text(color = "grey40", size = 11, margin = margin(b = 10)),
+    axis.title       = element_text(face = "bold"),
+    axis.text        = element_text(color = "grey20"),
+    axis.text.x      = element_text(angle = 45, hjust = 1),
+    legend.title     = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90"),
+    plot.caption     = element_text(color = "grey50", size = 9, margin = margin(t = 10))
+  )
+```
+
+---
+
+# 1. From querychat to an Agentic Pipeline
+
+The earlier phase of this project (see `project_ALS_presentation.Rmd`) established that `querychat` — Posit's natural-language-to-SQL package — had real structural limitations for this use case: it could only address a single data source at a time, had no mechanism for calling specialised statistical tools (the `rvat` R package's burden tests, MAF calculations, LD), and offered no way to gracefully refuse or clarify a genuinely unanswerable question.
+
+That earlier document's own "Future Work" section proposed an MCP-based agent as the way forward. This document picks up exactly there: it describes the agentic architecture that was actually built, how it evolved through iterative benchmark-driven debugging on SURF HPC, and the final results.
+
+## What changed conceptually
+
+| | querychat (early phase) | Agentic pipeline (this phase) |
+|---|---|---|
+| Data sources | Single table via `MultiTableSource` workaround | 6 specialised MCP servers + a real rvat statistical bridge |
+| Tool selection | None — always generates SQL | Explicit routing step picks the right tool for the question shape |
+| Complex questions | Not supported | Multi-step agentic loop (up to 5 tool calls) |
+| Error handling | Query either works or silently fails | SQL errors are fed back to the model for self-correction |
+| Statistical tests | Not available | Real `rvat` burden tests, MAF, LD via an R/plumber bridge |
+| Unanswerable questions | No mechanism to refuse | Dedicated nonsense/unanswerable gate, zero LLM cost when triggered |
+
+---
+
+# 2. Architecture
+
+The final architecture (implemented in `final_app/`, ported from the development version in `scripts/agentic_surf/`) is a single-model pipeline running entirely on **llama3.1:70b**, hosted on SURF HPC (CPU-only, no GPU).
+
+```{r architecture-diagram, echo=FALSE, fig.cap="Current agentic pipeline architecture"}
+grViz("
+digraph als_pipeline {
+  graph [layout = dot, rankdir = TB, fontname = 'Helvetica', fontsize = 11,
+         ranksep = 0.4, nodesep = 0.45, bgcolor = 'white']
+  node  [fontname = 'Helvetica', fontsize = 11, style = 'filled,rounded',
+         shape = box, penwidth = 1.1, margin = '0.18,0.1']
+  edge  [fontname = 'Helvetica', fontsize = 9, penwidth = 1.0, color = '#888888', fontcolor = '#555555']
+
+  researcher [label = 'Researcher', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  shiny      [label = 'final_app.R\\n(Shiny frontend)', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  gate       [label = 'Nonsense / unanswerable gate\\n(no LLM call if caught)', fillcolor = '#FBE3E3', color = '#A23B3B', fontcolor = '#7A2424']
+  classify   [label = 'classify_complexity()\\nsimple vs complex', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880']
+  decompose  [label = 'decompose_question()\\n(skipped when not needed)', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880', style = 'filled,rounded,dashed']
+  route      [label = 'route_question()\\npicks server + tool', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880']
+  sqlgen     [label = 'generate_sql() + validate_sql()', fillcolor = '#F5F3FF', color = '#7060C8', fontcolor = '#302880', style = 'filled,rounded,dashed']
+  agentic    [label = 'run_agentic_pipeline()\\nmulti-step, max 5 steps', fillcolor = '#FFF3CD', color = '#8A6D1A', fontcolor = '#5C4A10', style = 'filled,rounded,dashed']
+  mcpo       [label = 'mcpo (MCP \U00002192 HTTP proxy)', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  tools      [label = '6 MCP servers', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  rvat       [label = 'rvat plumber server (R)\\nburden tests, MAF, LD', fillcolor = '#E3EEFB', color = '#2A5C9A', fontcolor = '#1A3C6B']
+  db         [label = 'rvatData.gdb\\nvarInfo_synthetic + pheno', shape = cylinder, fillcolor = '#ECEAE3', color = '#7A7870', fontcolor = '#3C3C3A']
+  selfcorrect[label = 'Self-correct on SQL error\\n(real error fed back, 1 retry)', fillcolor = '#FBE3E3', color = '#A23B3B', fontcolor = '#7A2424', style = 'filled,rounded,dashed']
+  summarize  [label = 'summarize_result()\\n1-sentence answer', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  answer     [label = 'Answer + data table', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+
+  researcher -> shiny -> gate
+  gate -> classify [label = 'passes']
+  gate -> answer [label = 'caught \U2014 instant reply', style = dashed]
+  classify -> decompose [label = 'simple']
+  classify -> agentic [label = 'complex']
+  decompose -> route -> sqlgen [label = 'if SQL tool', style = dashed]
+  route -> mcpo
+  sqlgen -> mcpo
+  agentic -> mcpo
+  mcpo -> tools -> db
+  tools -> rvat [style = dashed]
+  rvat -> db
+  tools -> selfcorrect [label = 'on error', style = dashed]
+  selfcorrect -> tools [label = 'retry', style = dashed]
+  tools -> summarize -> answer
+}
+")
+```
+
+## Why single-model, not multi-model
+
+Earlier iterations explored a two-model setup (`llama3.1:70b` as orchestrator plus `duckdb-nsql` as a dedicated SQL specialist) and an "adaptive" mode that picked between sub-models per question. Two practical findings ended this approach:
+
+1. **Resource contention.** SURF HPC's available node is CPU-only — no GPU. Running two models simultaneously meant both competed for the same CPU cores, and the smaller model didn't actually free up capacity the way it would on separate GPU pools.
+2. **The sub-model was structurally disconnected.** A code-level audit of `run_dual_pipeline()` found that `sub_model`/`sub_sql`/`sub_reason` were accepted as function parameters but never referenced anywhere in the function body — every code path, regardless of selected "mode," ultimately called `classify_tool(question, orch_model = orch_model)` with a single model. The mode picker in the UI had been cosmetic for some time before this was caught.
+
+Once this was identified, the architecture was deliberately simplified to one model, one pipeline, removing roughly 65 lines of dead UI and dispatch logic.
+
+---
+
+# 3. Iterative Debugging — What Benchmark-Driven Development Looked Like
+
+The single most effective technique across this project was running the full 111-question benchmark, inspecting every score below 3/4 against its actual pipeline log, and tracing each failure to a root cause before writing any fix. A representative sample of bugs found this way:
+
+| Symptom | Root cause | Fix |
+|---|---|---|
+| "Which control sample has the highest burden" returned a fabricated sample ID and number | Router picked a group-totals-only tool that cannot answer per-sample questions; the summarizer then invented specificity to compensate | Built a dedicated `get_sample_burden()` tool, with and without a `sample_id` argument covering both per-sample and all-samples shapes |
+| Empty database result produced a fully invented variant with fake HGVS notation | No hard rule against fabricating from an empty result | Added a deterministic early-exit: a genuinely empty/blank tool result skips the LLM summarizer entirely and returns a fixed "no matching result" message |
+| "How many female carriers in SAS have a pathogenic mutation in SOD1?" returned 1 instead of 9 | The carrier-lookup tool only ever queried a 10-sample synthetic genotype table, never the real 25,000-sample cohort | Built a new `rvat_analysis/get_carrier_count_filtered` endpoint querying the real cohort via `rvat::getCarriers()`, with explicit router rules distinguishing when each carrier tool applies |
+| A self-correction retry burned 78 seconds and still failed with the same error | The agentic loop's tool-call parser had its own independent server-name handling that never received a fix already applied to the simpler routing path | Applied the same structural server correction to both code paths |
+| "Compare CADD score for deleterious vs benign variants" returned a single subtracted delta instead of both values | A hardcoded SQL-generation hint explicitly told the model to compute `ABS(a-b)`, directly contradicting a worked example that said to report both values | Rewrote the hint to require both named values as separate columns, with a delta only as an addition, never a replacement |
+| Genotype-3 question ("variants with genotype 3, which doesn't exist") returned 200 fabricated matches | SQL generator silently substituted a valid genotype value instead of querying the literal (impossible) value asked for | Added an explicit schema rule: query the exact literal value stated, even when it is outside the valid range — the correct answer is zero rows |
+| "Female carriers in SAS" returned 0 | Model used `pop = 'SAS'` instead of `superPop = 'SAS'` — the database has both a fine-grained population code and a 5-value regional grouping | Documented the distinction explicitly in the SQL schema block: a region name always means `superPop` |
+
+A pattern worth naming explicitly: several early attempts at fixing these bugs took the form of hardcoded overrides — e.g. forcing a particular parameter value in code whenever a tool was called, regardless of what the model decided. On inspection, this style of fix tended to be brittle (it silently mishandled the cases it hadn't been written for) and conflicted with the project's general approach of giving the model good information and letting it reason, rather than overriding its judgement after the fact. Several of these overrides were deliberately reverted in favor of either (a) clearer tool documentation and routing rules, or (b) consolidating two overlapping tools into one tool with an optional parameter, removing the decision point entirely rather than adding a rule to govern it.
+
+---
+
+# 4. Tool Inventory
+
+Six MCP servers, reflecting the question types that benchmarking showed needed dedicated handling rather than free-form SQL:
+
+```{r tool-table, echo=FALSE}
+tool_table <- data.frame(
+  Server = c("db_exploration", "variant_analysis", "genotype_analysis",
+             "phenotype_data", "clinvar_annotation", "rvat_analysis"),
+  Covers = c(
+    "Schema, table info, explicit database limitations",
+    "Variant-level SQL: counts, impact filters, CADD/SIFT/PolyPhen, allele frequency, gene summaries, CADD/PolyPhen correlation, above-average comparisons",
+    "Carrier and burden analysis: per-sample burden (one sample or all), threshold-based carrier counts, case/control dosage ratios with an explicit enrichment flag",
+    "Multi-table joins between genotype columns and the pheno table (synthetic 10-sample subset)",
+    "ClinVar lookup via rsID, with a local SQLite cache",
+    "Bridge to the R/plumber rvat server — burden tests, MAF, LD, single-variant association, and carrier counts against the full 25,000-sample cohort"
+  )
+)
+kable(tool_table, caption = "MCP servers in the final architecture") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+```
+
+A late but important addition: `get_carrier_count_filtered`, added specifically because the original `phenotype_data` carrier tool was structurally limited to a 10-sample synthetic genotype table and could never correctly answer population- or sex-filtered carrier questions against the real cohort. Two carrier-counting tools now exist by design — the router distinguishes them by whether the question explicitly mentions "pathogenic" or an impact level.
+
+---
+
+# 5. Benchmark Design
+
+The benchmark covers **111 questions across 9 categories**, expanded from the original 15-question version used in the querychat phase of the project. The expansion specifically targets failure modes that only became visible once the agentic architecture made more complex questions answerable.
+
+```{r category-table, echo=FALSE}
+cat_table <- data.frame(
+  Category = c("Simple (S)", "Analytical (A)", "Complex (C)", "Phenotype (P)",
+               "Annotation Trap (T)", "Unanswerable (U)", "RVAT (R)",
+               "Nonsense (N)", "Toolfree (F)"),
+  Count = c(16, 17, 18, 6, 3, 15, 5, 16, 15),
+  Tests = c(
+    "Single-fact lookups (counts, simple filters)",
+    "Aggregation, ratios, comparisons across one dimension",
+    "Multi-step reasoning, per-entity breakdowns, multi-condition filters",
+    "Joins between genotype and phenotype tables",
+    "Whether the model uses the actual coded value (e.g. PolyPhen='D') rather than its English description",
+    "Whether the model correctly refuses or explains a genuine data gap, without hallucinating",
+    "Real statistical tests via the rvat R package — burden tests, MAF, LD, single-variant association",
+    "Whether the model refuses impossible questions, asks for clarification on vague ones, and correctly handles biological contradictions (without fabricating)",
+    "Complex SQL questions answerable without specialised MCP tools — tests SQL construction quality directly"
+  )
+)
+kable(cat_table, caption = "Benchmark question categories (111 total)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+```
+
+Each response is graded on four independent criteria by an LLM grader (`gemma3`), against a ground-truth answer key documented in `references/benchmarks_agentic_surf.md`:
+
+- **Answer correctness** — does the stated value/conclusion match the expected answer
+- **Conciseness** — is the response a single direct sentence, free of unrequested commentary
+- **Hallucination-free** — does the response avoid stating anything not actually supported by the tool result
+- **Tool correctness** — was the appropriate MCP tool (or correctly-constructed SQL) actually used
+
+---
+
+# 6. Final Benchmark Results
+
+```{r overall-score, echo=FALSE, fig.height=3}
+overall <- mean(combined$grade_total, na.rm = TRUE)
+ggplot(data.frame(model = "llama3.1:70b [adaptive]", score = overall),
+       aes(x = model, y = score)) +
+  geom_col(fill = "#2A9D8F", width = 0.5) +
+  geom_text(aes(label = sprintf("%.2f", score)), hjust = -0.3, size = 6, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 4.3), breaks = 0:4) +
+  labs(title = "Overall average score", subtitle = "Averaged across all 111 benchmark questions",
+       x = NULL, y = "Average score (out of 4)") +
+  theme_als
+```
+
+**Overall: 3.51 / 4.00** across all 111 questions — the highest score reached across every architecture tested in this project, including the earlier querychat-based pipeline and every multi-model variant of the agentic pipeline.
+
+## Score by criterion
+
+```{r criteria-chart, echo=FALSE}
+crit <- data.frame(
+  criterion = c("Answer correct", "Concise response", "Hallucination free", "Tool correct"),
+  pct = c(
+    mean(combined$grade_answer, na.rm = TRUE),
+    mean(combined$grade_minimal_response, na.rm = TRUE),
+    mean(combined$grade_hallucination, na.rm = TRUE),
+    mean(combined$grade_tool, na.rm = TRUE)
+  )
+)
+ggplot(crit, aes(x = reorder(criterion, pct), y = pct)) +
+  geom_col(fill = "#264653", width = 0.6) +
+  geom_text(aes(label = percent(pct, accuracy = 1)), vjust = -0.5, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1.1), labels = percent) +
+  labs(title = "Pass rate per grading criterion", x = NULL, y = "Proportion correct") +
+  theme_als
+```
+
+The standout result is **hallucination-free at 99.1%** — out of 111 questions, the model fabricated unsupported content in essentially none of them. Given that several earlier debugging sessions were specifically about closing hallucination gaps (the empty-result guard, the genotype-range rule, the carrier-count scoping fix), this is a meaningful validation that those fixes generalized rather than just patching the specific cases they were built from.
+
+**Tool correctness at 77.5%** is the weakest criterion and the clearest area for further work — see Section 7.
+
+## Score by category
+
+```{r category-chart, echo=FALSE, fig.height=8}
+cat_scores <- combined %>%
+  group_by(category) %>%
+  summarise(mean_total = mean(grade_total, na.rm = TRUE), n = n(), .groups = "drop") %>%
+  filter(category %in% ALL_CATEGORIES) %>%
+  mutate(category = factor(category, levels = ALL_CATEGORIES, labels = ALL_CATEGORY_LABELS))
+
+ggplot(cat_scores, aes(x = reorder(category, mean_total), y = mean_total)) +
+  geom_col(fill = "#2A9D8F", width = 0.6) +
+  geom_text(aes(label = sprintf("%.2f", mean_total)), hjust = -0.2, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 4.3), breaks = 0:4) +
+  labs(title = "Average score per category", x = NULL, y = "Average score (out of 4)") +
+  theme_als
+```
+
+```{r category-table-results, echo=FALSE}
+kable(cat_scores %>% select(category, mean_total, n) %>%
+        rename(Category = category, `Mean score` = mean_total, `N questions` = n),
+      digits = 2, caption = "Per-category scores") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+```
+
+**Perfect or near-perfect categories (4.00):** Annotation Trap, Unanswerable, RVAT. These represent three different kinds of correctness that were each the subject of dedicated debugging earlier in the project — using raw coded values instead of English descriptions, refusing genuinely unanswerable questions without hallucinating, and correctly invoking real statistical tests via the rvat bridge. All three holding at a perfect score across the full 111-question run is a reasonable signal that the underlying fixes were structural rather than narrow patches.
+
+**Weakest categories: Analytical (3.06) and Complex (3.11).** Both involve multi-step aggregation — exactly the question shape most likely to expose SQL generation precision issues (see Section 7).
+
+---
+
+# 7. Where the Remaining Errors Live
+
+```{r heatmap-note, echo=FALSE}
+# (Per-question heatmap was generated separately by 03_visualise.R —
+#  see analysis/benchmark_surf_grading/grading_20260621_143922/plot_heatmap.png)
+```
+
+Only **one outright tool/server error** occurred across the full 111-question run (`A08`, an HTTP failure on a percentage-aggregation query) — down from a peak of roughly a dozen errors earlier in the project. The remaining gap to a perfect score is concentrated in **answer precision on multi-step SQL questions**, not crashes, wrong routing, or hallucination.
+
+Specific patterns still visible in the lowest-scoring questions:
+
+- **COUNT vs SUM confusion** persists in a minority of per-entity breakdown questions (e.g. C03: per-patient high-impact variant counts came back as genotype-dosage sums rather than variant counts, despite an explicit schema rule covering exactly this distinction). This suggests the rule is present in the prompt but not reliably applied under the combined cognitive load of per-entity grouping plus correct aggregation — a known limitation of in-context instruction-following rather than a missing rule.
+- **Multi-condition "full gene summary" questions** (A17, C11 — "give a full summary of gene X: total variants, impact distribution, mean allele frequency") sit at 2/4 despite each individual sub-fact being independently answerable, suggesting the model sometimes answers a subset of a compound question rather than all parts.
+- **Population-table questions** (P01–P03, female/SAS carrier counts) sit at 2/4 — these specifically test the disambiguation between the two carrier-counting tools (synthetic 10-sample vs. real 25,000-sample cohort) and remain a soft spot despite explicit router rules added for this distinction.
+
+None of these represent a regression — they are the same residual fragility around complex multi-step SQL construction that has been present (at a higher error rate) throughout the project, narrowing run over run but not yet fully closed.
+
+---
+
+# 8. Response Time
+
+```{r timing-chart, echo=FALSE}
+timing <- combined %>%
+  group_by(category) %>%
+  summarise(mean_sec = mean(elapsed_sec, na.rm = TRUE), .groups = "drop") %>%
+  filter(category %in% ALL_CATEGORIES) %>%
+  mutate(category = factor(category, levels = ALL_CATEGORIES, labels = ALL_CATEGORY_LABELS))
+
+ggplot(timing, aes(x = category, y = mean_sec)) +
+  geom_col(fill = "#264653", width = 0.6) +
+  geom_text(aes(label = ifelse(mean_sec >= 60,
+                               sprintf("%d:%02d min", as.integer(mean_sec) %/% 60L, as.integer(mean_sec) %% 60L),
+                               sprintf("%.0f sec", mean_sec))),
+            vjust = -0.5, fontface = "bold", size = 3.2) +
+  labs(title = "Average response time per category",
+       subtitle = "Time from question submission to final response",
+       x = NULL, y = "Mean elapsed time (sec)") +
+  theme_als
+```
+
+Average response time across all categories: **78.4 seconds**. This is a direct consequence of running a 70-billion-parameter model on CPU-only infrastructure — phase-level timing instrumentation (added specifically to investigate this) consistently shows that database/tool execution itself takes well under a second; essentially all elapsed time is LLM inference.
+
+```{r phase-timing-note, echo=FALSE}
+# Phase breakdown plot (decompose/route/sql_gen/validate/mcp_call/self_correct/summarize)
+# generated by 03_visualise.R — see plot_phase_timing.png in the same grading folder.
+```
+
+The phase-by-phase breakdown (built this session specifically to answer "where does the time actually go") shows that for the slowest category, **Complex questions**, self-correction alone can account for over a minute when it fires — confirming that reducing unnecessary self-correction retries (by improving first-pass SQL/routing accuracy) is the most direct lever for both speed and accuracy simultaneously, rather than these being separate problems.
+
+The single structural fix available to meaningfully change this ceiling — rather than incrementally trimming prompt/retry overhead — is GPU access, which was raised but not resolved within this project's infrastructure allocation.
+
+---
+
+# 9. Conclusions
+
+The agentic, single-model architecture on `llama3.1:70b` represents the strongest result achieved across every configuration tested in this project:
+
+- **3.51/4.00 overall**, up from early querychat-phase baselines in the 1.8–2.4 range
+- **99.1% hallucination-free** — the most safety-critical metric, and the one most directly shaped by deliberate architectural decisions (the nonsense gate, the empty-result guard, explicit schema documentation of impossible values)
+- **Effectively zero crash-level errors** (1/111) — down from roughly a dozen at earlier points in the project
+- A genuinely simpler codebase than the multi-model alternatives it replaced, after removing infrastructure (a second model, a mode picker, dead dispatch logic) that benchmarking showed added complexity without adding accuracy
+
+The remaining gap to a perfect score is concentrated almost entirely in **precise multi-step SQL construction** for analytical and complex questions — a known, well-characterized limitation rather than an open question about what's wrong. The project's own debugging history suggests the most reliable fix for this class of problem is not further prompt engineering but **purpose-built tools**: every time a recurring SQL-construction failure was replaced with a dedicated MCP endpoint (per-sample burden, threshold-based carrier counts, CADD/PolyPhen correlation, above-average comparisons), the corresponding question category's accuracy improved immediately and held across subsequent runs. Continuing in that direction — identifying the next few recurring SQL patterns and giving them dedicated tools — is the clearest path to closing the remaining gap.
+

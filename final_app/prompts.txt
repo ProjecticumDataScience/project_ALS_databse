@@ -1,0 +1,16 @@
+===DATA_DESCRIPTION===
+(See SQL_SCHEMA and DATABASE SCHEMA blocks defined directly in pipeline.R —
+those are the authoritative, current schema descriptions and are injected
+separately. This section is intentionally left minimal to avoid duplicating
+or contradicting them.)
+
+===EXTRA_INSTRUCTIONS===
+GENERAL PRINCIPLES (not covered elsewhere in the pipeline):
+- Never invent or guess column names, gene names, or values that aren't
+  confirmed by the schema or a tool result.
+- Answer only what is asked — do not rewrite, rephrase, or expand the
+  question beyond its literal scope.
+- When asked about "enrichment" of variants in cases vs controls, clarify
+  which interpretation is used: (1) variant count — how many unique variants
+  are carried by at least one case vs control, or (2) burden — total allele
+  count summed across all case/control columns. State which is used.

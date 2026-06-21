@@ -1,0 +1,45 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# environment.yml — Conda environment for the Project ALS final_app
+#
+# NOTE: Ollama is NOT installed via this environment. Ollama runs as its own
+# system service (installed separately via https://ollama.com/install.sh) and
+# is accessed over plain HTTP at localhost:11434. It does not need to be a
+# conda package, and including it here in the original environment.yml was
+# incorrect — conda's 'defaults' channel does not reliably provide a working
+# Ollama install. Install Ollama yourself before using this environment:
+#
+#   curl -fsSL https://ollama.com/install.sh | sh
+#   ollama pull llama3.1:70b
+#
+# Everything below this point IS required and was verified against actual
+# library()/import statements in final_app.R, pipeline.R, and rvat_server.R.
+# ══════════════════════════════════════════════════════════════════════════════
+name: mcp_env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base>=4.2
+  - r-shiny
+  - r-bslib
+  - r-dt
+  - r-httr2
+  - r-jsonlite
+  - r-shinyjs
+  - r-plumber
+  - bioconductor-summarizedexperiment
+  - bioconductor-genomicranges
+  - python=3.11
+  - pip
+  - pip:
+    - mcp
+    - mcpo
+
+# ── Not installable via conda — install manually ────────────────────────────
+# rvat (the R package used by mcp_servers/rvat_server.R) is not on CRAN or a
+# standard Bioconductor mirror as of this writing. Install from source/GitHub:
+#
+#   R -e 'remotes::install_github("CenterForStatistics-UGent/rvat")'
+#
+# (adjust the install source if your team uses a different rvat fork/release)
