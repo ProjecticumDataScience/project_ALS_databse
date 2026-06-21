@@ -1,6 +1,6 @@
 # Project MinE ALS — Variant Database Assistant
 
-**Authors:** Luuk Engels, Robin Jansen, Siard Groot
+**Authors:** Luuk Engels, Robin Jansen, Siard Groot ✎
 
 An LLM-powered natural-language assistant for querying the Project MinE ALS
 genomic variant database (`rvatData.gdb`). Ask a question in plain English —
@@ -9,7 +9,7 @@ whether a gene shows statistical burden enrichment in ALS cases versus
 controls — and the assistant routes it to the right database tool, writes
 and validates SQL where needed, and answers with the actual result.
 
-**👉 Start here: [`final_app/`](final_app/)** — the finished, presentation-ready
+**༊*·˚ Start here: [`final_app/`](final_app/)** — the finished, presentation-ready
 version of this project. Everything else in this repository is iteration
 history kept for reference (benchmark results, earlier architecture
 experiments, the original MVP). If you just want to run the assistant,
