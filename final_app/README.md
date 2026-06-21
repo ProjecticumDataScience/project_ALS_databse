@@ -1,5 +1,7 @@
 # Project MinE ALS — Variant Assistant (final_app)
 
+**Authors:** Luuk Engels, Robin Jansen, Siard Groot
+
 LLM-powered chatbot for querying the Project MinE ALS genomic variant database
 (`rvatData.gdb`). A single researcher question is answered by an adaptive
 pipeline — decompose, route, generate SQL, validate, self-correct — running

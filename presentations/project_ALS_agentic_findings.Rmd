@@ -1,7 +1,7 @@
 ---
 title: "Project ALS — Agentic Architecture & Final Benchmark Findings"
 subtitle: "From querychat to a Multi-Server Agentic Pipeline on llama3.1:70b"
-author: "Projecticum Data Science"
+author: "Luuk Engels, Robin Jansen, Siard Groot — Projecticum Data Science"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document:
