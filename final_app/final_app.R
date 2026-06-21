@@ -482,8 +482,22 @@ server <- function(input, output, session) {
       rv$questions_asked <- rv$questions_asked + 1L
       
       if (result$ok) {
-        rv$last_df      <- result$df
-        rv$row_count    <- if (!is.null(result$df)) nrow(result$df) else NULL
+        ## get_database_limitations returns the full reference doc of what's
+        ## NOT in the database (missing data, impossible combinations, etc.)
+        ## as a flattened key/value table. That's correct data, but showing
+        ## it as the main results table is noise — the chat bubble's
+        ## one-sentence summary already answers the actual question, and
+        ## dumping 7 unrelated rows of database limitations underneath it
+        ## reads as a rendering bug rather than useful output.
+        is_limitations_dump <- identical(result$tool, "db_exploration/get_database_limitations") ||
+                                identical(result$tool, "get_database_limitations")
+        if (is_limitations_dump) {
+          rv$last_df   <- NULL
+          rv$row_count <- NULL
+        } else {
+          rv$last_df      <- result$df
+          rv$row_count    <- if (!is.null(result$df)) nrow(result$df) else NULL
+        }
         rv$tools_called <- rv$tools_called + 1L
       } else {
         rv$errors_this_session <- rv$errors_this_session + 1L

@@ -801,7 +801,7 @@ SQL_SCHEMA <- paste0(
 )
 
 ## Single lightweight ping — just loads weights into memory.
-warmup_ping <- function(model, timeout_sec = 120) {
+warmup_ping <- function(model, timeout_sec = 240) {
   body <- list(
     model       = model,
     prompt      = "ping",
@@ -855,7 +855,7 @@ warmup_exercise <- function(model, timeout_sec = 120) {
   results
 }
 
-warmup_model <- function(model, timeout_sec = 120) {
+warmup_model <- function(model, timeout_sec = 240) {
   start <- Sys.time()
 
   ping <- warmup_ping(model, timeout_sec)

@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "db_exploration": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/DB_exploration.py"]
+    },
+    "variant_analysis": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/variant_analysis.py"]
+    },
+    "genotype_analysis": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/genotype_analysis.py"]
+    },
+    "phenotype_data": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/phenotype_data.py"]
+    },
+    "clinvar_annotation": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/clinvar_annotation.py"]
+    },
+    "rvat_analysis": {
+      "command": "/home/rjansen4/miniconda3/envs/mcp_env/bin/python3",
+      "args": ["/home/rjansen4/project_ALS_databse/final_app/mcp_servers/rvat_bridge.py"]
+    }
+  }
+}
