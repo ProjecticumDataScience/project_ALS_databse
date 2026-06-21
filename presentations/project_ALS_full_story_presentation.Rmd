@@ -1,0 +1,350 @@
+---
+title: "Project ALS — Natural Language Access to the Variant Database"
+subtitle: "From a single-table prototype to a six-server agentic pipeline"
+author: "Luuk Engels, Robin Jansen, Siard Groot — Projecticum Data Science"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    toc_depth: 3
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 10,
+  fig.height = 6
+)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(knitr)
+library(kableExtra)
+library(DiagrammeR)
+
+# ── Path to the final graded benchmark CSV ──────────────────
+GRADED_CSV <- "~/project_ALS_databse/analysis/benchmark_surf_grading/grading_20260621_143922/finalgraded_20260621_121012.csv"
+# ──────────────────────────────────────────────────────────────
+
+combined <- read.csv(GRADED_CSV)
+combined$grade_answer <- ifelse(toupper(as.character(combined$grade_answer)) == "TRUE", 1L,
+                          ifelse(toupper(as.character(combined$grade_answer)) == "FALSE", 0L,
+                          suppressWarnings(as.integer(combined$grade_answer))))
+
+ALL_CATEGORIES <- c("simple","analytical","complex","phenotype","annotation_trap",
+                     "unanswerable","rvat","nonsense","toolfree")
+ALL_CATEGORY_LABELS <- c("Simple (S)","Analytical (A)","Complex (C)","Phenotype (P)",
+                          "Annotation Trap (T)","Unanswerable (U)","RVAT (R)",
+                          "Nonsense (N)","Toolfree (F)")
+
+theme_als <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 15, margin = margin(b = 10)),
+    plot.subtitle    = element_text(color = "grey40", size = 11, margin = margin(b = 10)),
+    axis.title       = element_text(face = "bold"),
+    axis.text        = element_text(color = "grey20"),
+    axis.text.x      = element_text(angle = 45, hjust = 1),
+    legend.title     = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90"),
+    plot.caption     = element_text(color = "grey50", size = 9, margin = margin(t = 10))
+  )
+```
+
+> **This document is the ground truth for the live presentation.** Everything
+> shown live on the SURF server — the working app, example questions, the
+> architecture walkthrough — is documented here in full, with the actual
+> benchmark numbers and reasoning behind each design decision. Find this file,
+> and everything it references, in the project's git repository.
+
+---
+
+# 0. The Goal, in One Sentence
+
+Let a researcher ask the Project MinE ALS genomic variant database a question in **plain English** — no SQL, no knowledge of the `rvat` R package — and get back a **correct, grounded** answer.
+
+Everything in this document is the story of how far that goal actually got pushed, told through four distinct stages of the project.
+
+---
+
+# Stage 1 — A Single Table, One Model, One Tool
+
+## Where it started
+
+The very first working prototype answered questions against **exactly one table**: `varInfo_synthetic`, a synthetic 10-sample genotype subset (5 ALS cases, 5 matched controls) covering 1,802 variants across 12 ALS-associated genes. One Ollama model. One query path. No routing, no multi-step reasoning, no fallback if the question needed anything beyond a single SQL query against that one table.
+
+```{r stage1-diagram, echo=FALSE, fig.cap="Stage 1 — single table, single tool"}
+grViz("
+digraph stage1 {
+  graph [layout = dot, rankdir = LR, fontname = 'Helvetica', fontsize = 12, bgcolor = 'white']
+  node  [fontname = 'Helvetica', fontsize = 12, style = filled, shape = roundedbox]
+
+  User    [label = 'Researcher\\n(plain English)', fillcolor = '#E8F4FD', color = '#457B9D']
+  LLM     [label = 'Local LLM\\n(Ollama)',         fillcolor = '#E1D5E7', color = '#9B5DE5']
+  QC      [label = 'querychat\\n(NL to SQL)',       fillcolor = '#FFF2CC', color = '#E9C46A']
+  DB      [label = 'varInfo_synthetic\\n(one table)', fillcolor = '#FFE6CC', color = '#F4A261']
+  Answer  [label = 'Answer',                       fillcolor = '#D5E8D4', color = '#2A9D8F']
+
+  User -> LLM -> QC -> DB -> Answer
+}
+")
+```
+
+## What this version could and could not do
+
+This worked, in a narrow sense — for simple questions wholly contained within that one table, it produced reasonable answers. But the limitation was structural, not a bug to be patched: there was no way to ask anything that required phenotype data (sex, age, population), no way to run a real statistical test, and no graceful way to refuse a question the table genuinely couldn't answer. A single querychat connection is fundamentally a single-table tool.
+
+This is exactly where the project's first major pivot came from.
+
+---
+
+# Stage 2 — Reaching Across Tables
+
+## The problem
+
+A huge fraction of genuinely interesting ALS research questions need **more than one table at once** — "how many female carriers of a given gene are there," for instance, requires joining the genotype table to a separate phenotype table containing sex, age, and population data for the full cohort.
+
+`querychat` as a single-source tool couldn't do this natively. The team explored two paths to close this gap: a custom `MultiTableSource` extension to `querychat` itself, and, in parallel, a direct exploration of `ellmer` with hand-defined tools — which turned out to be the more flexible foundation for what came next.
+
+## What this stage actually unlocked
+
+By the end of this stage, the prototype could correctly join genotype columns to the **`pheno`** table — a much larger, 25,000-sample real cohort, not just the small synthetic genotype subset — and answer questions involving sex, population, and age, alongside the variant-level data from Stage 1.
+
+This is also where the team confirmed something important: the small "IID" naming convention linking genotype columns (`ALS_1`, `Control_3`, …) to phenotype rows required deliberate, explicit handling — `ALS_1` in the genotype table corresponds to IID `'ALS1'` (no underscore) in the phenotype table. Small detail, but it was a real source of early bugs, and it's documented explicitly in the final tool code today specifically because of how much friction it caused here.
+
+---
+
+# Stage 3 — Going Agentic: Multiple Servers, Real Tool-Calling
+
+## Why a bigger architectural change was needed
+
+Multi-table access solved one limitation. It didn't solve two others: the system still had no way to **decide which of several different tool types** a question actually needed (a plain SQL lookup? A phenotype join? A real statistical test?), and it still had no mechanism to **gracefully refuse** a genuinely unanswerable question rather than guessing.
+
+This is where the project moved from a single querychat pipeline to a proper **agentic, multi-server architecture** using the Model Context Protocol (MCP) — giving the model a defined set of callable tools, spread across multiple specialized servers, plus the judgment to pick between them.
+
+```{r stage3-diagram, echo=FALSE, fig.cap="Stage 3 — agentic architecture, multiple MCP servers"}
+grViz("
+digraph stage3 {
+  graph [layout = dot, rankdir = TB, fontname = 'Helvetica', fontsize = 11, bgcolor = 'white', ranksep = 0.4]
+  node  [fontname = 'Helvetica', fontsize = 11, style = 'filled,rounded', shape = box]
+  edge  [fontname = 'Helvetica', fontsize = 9, color = '#888888', fontcolor = '#555555']
+
+  researcher [label = 'Researcher', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  llm        [label = 'LLM orchestrator\\n(picks a tool)', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880']
+  mcpo       [label = 'mcpo (MCP to HTTP proxy)', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  variant    [label = 'variant_analysis', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  geno       [label = 'genotype_analysis', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  pheno      [label = 'phenotype_data', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  clinvar    [label = 'clinvar_annotation', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  db         [label = 'rvatData.gdb', shape = cylinder, fillcolor = '#ECEAE3', color = '#7A7870', fontcolor = '#3C3C3A']
+  answer     [label = 'Answer', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+
+  researcher -> llm -> mcpo
+  mcpo -> variant -> db
+  mcpo -> geno -> db
+  mcpo -> pheno -> db
+  mcpo -> clinvar -> db
+  db -> mcpo -> answer
+}
+")
+```
+
+## What this unlocked
+
+By this point the system could: route a question to exactly the right tool out of several specialized servers; refuse an unanswerable question explicitly rather than hallucinating; and — critically — generate **its own SQL** for the long tail of questions no pre-built tool covered, with that SQL validated and, if it failed, **self-corrected** using the real database error fed back to the model.
+
+This is also where the project's testing rigor stepped up: a benchmark of dozens of questions grew into the full **111-question, 9-category benchmark** still in use today, because a multi-tool architecture has many more ways to go subtly wrong than a single querychat call, and informal testing stopped being enough to trust the system.
+
+---
+
+# Stage 4 — Real Statistics: the `rvat` Bridge
+
+## The last major capability gap
+
+Even with multiple tools and self-correcting SQL, one whole category of genuinely important questions remained out of reach: **real statistical genetics**. "Does this gene show a statistically significant burden of rare variants in ALS cases versus controls?" is not a SQL question — it requires the actual `rvat` R package's burden-testing machinery (Firth regression, SKAT, minor allele frequency calculated properly from a genotype matrix, linkage disequilibrium).
+
+## The fix: bridging into a real R statistical server
+
+The final architecture adds a dedicated **R/plumber HTTP server** running `rvat` directly, with a thin Python MCP bridge (`rvat_bridge.py`) exposing its endpoints as callable tools alongside everything else. This is the piece that turns the system from "a natural-language SQL interface" into something that can genuinely support real genomic research questions: burden tests, MAF, LD, single-variant association — computed by the actual statistical package researchers would otherwise run by hand.
+
+```{r stage4-diagram, echo=FALSE, fig.cap="Stage 4 — final architecture, six MCP servers including the rvat bridge"}
+grViz("
+digraph stage4 {
+  graph [layout = dot, rankdir = TB, fontname = 'Helvetica', fontsize = 11,
+         ranksep = 0.4, nodesep = 0.45, bgcolor = 'white']
+  node  [fontname = 'Helvetica', fontsize = 11, style = 'filled,rounded',
+         shape = box, penwidth = 1.1, margin = '0.18,0.1']
+  edge  [fontname = 'Helvetica', fontsize = 9, penwidth = 1.0, color = '#888888', fontcolor = '#555555']
+
+  researcher [label = 'Researcher', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  shiny      [label = 'final_app.R\\n(Shiny frontend)', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  gate       [label = 'Nonsense / unanswerable gate\\n(no LLM call if caught)', fillcolor = '#FBE3E3', color = '#A23B3B', fontcolor = '#7A2424']
+  classify   [label = 'classify_complexity()\\nsimple vs complex', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880']
+  decompose  [label = 'decompose_question()\\n(skipped when not needed)', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880', style = 'filled,rounded,dashed']
+  route      [label = 'route_question()\\npicks server + tool', fillcolor = '#ECEAFB', color = '#4A42B0', fontcolor = '#302880']
+  sqlgen     [label = 'generate_sql() + validate_sql()', fillcolor = '#F5F3FF', color = '#7060C8', fontcolor = '#302880', style = 'filled,rounded,dashed']
+  agentic    [label = 'run_agentic_pipeline()\\nmulti-step, max 5 steps', fillcolor = '#FFF3CD', color = '#8A6D1A', fontcolor = '#5C4A10', style = 'filled,rounded,dashed']
+  mcpo       [label = 'mcpo (MCP to HTTP proxy)', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  tools      [label = '6 MCP servers', fillcolor = '#FDF0DC', color = '#9A6010', fontcolor = '#6B4200']
+  rvat       [label = 'rvat plumber server (R)\\nburden tests, MAF, LD', fillcolor = '#E3EEFB', color = '#2A5C9A', fontcolor = '#1A3C6B']
+  db         [label = 'rvatData.gdb\\nvarInfo_synthetic + pheno', shape = cylinder, fillcolor = '#ECEAE3', color = '#7A7870', fontcolor = '#3C3C3A']
+  selfcorrect[label = 'Self-correct on SQL error\\n(real error fed back, 1 retry)', fillcolor = '#FBE3E3', color = '#A23B3B', fontcolor = '#7A2424', style = 'filled,rounded,dashed']
+  summarize  [label = 'summarize_result()\\n1-sentence answer', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+  answer     [label = 'Answer + data table', fillcolor = '#C6E8DF', color = '#0A5C47', fontcolor = '#0A5C47']
+
+  researcher -> shiny -> gate
+  gate -> classify [label = 'passes']
+  gate -> answer [label = 'caught - instant reply', style = dashed]
+  classify -> decompose [label = 'simple']
+  classify -> agentic [label = 'complex']
+  decompose -> route -> sqlgen [label = 'if SQL tool', style = dashed]
+  route -> mcpo
+  sqlgen -> mcpo
+  agentic -> mcpo
+  mcpo -> tools -> db
+  tools -> rvat [style = dashed]
+  rvat -> db
+  tools -> selfcorrect [label = 'on error', style = dashed]
+  selfcorrect -> tools [label = 'retry', style = dashed]
+  tools -> summarize -> answer
+}
+")
+```
+
+## A simplification that happened along the way
+
+One detail worth being upfront about: an earlier version of this final stage ran **two models** — a large orchestrator plus a smaller, dedicated SQL-writing model. Careful benchmarking, plus a direct code review, showed the second model wasn't reliably improving results, and in some configurations wasn't even properly wired into the decision logic. The architecture was simplified to a **single model, llama3.1:70b, throughout** — and this simpler version benchmarked *better*, not worse, partly because the SURF server has no GPU, so two models competing for the same CPU cores was actively working against the system rather than helping it.
+
+---
+
+# The Benchmark: How We Know Any of This Actually Works
+
+```{r tool-table, echo=FALSE}
+tool_table <- data.frame(
+  Server = c("db_exploration", "variant_analysis", "genotype_analysis",
+             "phenotype_data", "clinvar_annotation", "rvat_analysis"),
+  Covers = c(
+    "Schema, table info, explicit database limitations",
+    "Variant-level SQL: counts, impact filters, CADD/SIFT/PolyPhen, allele frequency, gene summaries",
+    "Carrier and burden analysis: per-sample burden, threshold-based carrier counts, case/control dosage ratios",
+    "Multi-table joins between genotype columns and the pheno table",
+    "ClinVar lookup via rsID, with a local cache",
+    "Bridge to the R/plumber rvat server — real burden tests, MAF, LD, association tests, full-cohort carrier counts"
+  )
+)
+kable(tool_table, caption = "The six MCP servers in the final architecture") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+```
+
+```{r category-table, echo=FALSE}
+cat_table <- data.frame(
+  Category = c("Simple (S)", "Analytical (A)", "Complex (C)", "Phenotype (P)",
+               "Annotation Trap (T)", "Unanswerable (U)", "RVAT (R)",
+               "Nonsense (N)", "Toolfree (F)"),
+  Count = c(16, 17, 18, 6, 3, 15, 5, 16, 15),
+  Tests = c(
+    "Single-fact lookups",
+    "Aggregation, ratios, comparisons",
+    "Multi-step reasoning, per-entity breakdowns",
+    "Joins between genotype and phenotype tables",
+    "Using the actual coded value, not its English description",
+    "Correctly refusing a genuine data gap, without hallucinating",
+    "Real statistical tests via the rvat R package",
+    "Refusing impossible questions, asking for clarification on vague ones",
+    "Complex SQL answerable without specialised tools"
+  )
+)
+kable(cat_table, caption = "111 benchmark questions across 9 categories") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+```
+
+Every response is graded by an LLM grader against a written ground-truth answer key, on four independent criteria: **answer correctness**, **conciseness**, **hallucination-free**, and **tool correctness**.
+
+---
+
+# Final Results
+
+```{r overall-score, echo=FALSE, fig.height=3}
+overall <- mean(combined$grade_total, na.rm = TRUE)
+ggplot(data.frame(model = "llama3.1:70b [adaptive]", score = overall),
+       aes(x = model, y = score)) +
+  geom_col(fill = "#2A9D8F", width = 0.5) +
+  geom_text(aes(label = sprintf("%.2f", score)), hjust = -0.3, size = 6, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 4.3), breaks = 0:4) +
+  labs(title = "Overall average score", subtitle = "Averaged across all 111 benchmark questions",
+       x = NULL, y = "Average score (out of 4)") +
+  theme_als
+```
+
+**3.51 / 4.00 overall** — the strongest result across every architecture tested in this project, from the original single-table prototype through every intermediate stage.
+
+```{r criteria-chart, echo=FALSE}
+crit <- data.frame(
+  criterion = c("Answer correct", "Concise response", "Hallucination free", "Tool correct"),
+  pct = c(
+    mean(combined$grade_answer, na.rm = TRUE),
+    mean(combined$grade_minimal_response, na.rm = TRUE),
+    mean(combined$grade_hallucination, na.rm = TRUE),
+    mean(combined$grade_tool, na.rm = TRUE)
+  )
+)
+ggplot(crit, aes(x = reorder(criterion, pct), y = pct)) +
+  geom_col(fill = "#264653", width = 0.6) +
+  geom_text(aes(label = percent(pct, accuracy = 1)), vjust = -0.5, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1.1), labels = percent) +
+  labs(title = "Pass rate per grading criterion", x = NULL, y = "Proportion correct") +
+  theme_als
+```
+
+**99.1% hallucination-free** is the number we'd point to first in a genomics context — almost never does the system state something false with confidence.
+
+```{r category-chart, echo=FALSE, fig.height=7}
+cat_scores <- combined %>%
+  group_by(category) %>%
+  summarise(mean_total = mean(grade_total, na.rm = TRUE), n = n(), .groups = "drop") %>%
+  filter(category %in% ALL_CATEGORIES) %>%
+  mutate(category = factor(category, levels = ALL_CATEGORIES, labels = ALL_CATEGORY_LABELS))
+
+ggplot(cat_scores, aes(x = reorder(category, mean_total), y = mean_total)) +
+  geom_col(fill = "#2A9D8F", width = 0.6) +
+  geom_text(aes(label = sprintf("%.2f", mean_total)), hjust = -0.2, fontface = "bold") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 4.3), breaks = 0:4) +
+  labs(title = "Average score per category", x = NULL, y = "Average score (out of 4)") +
+  theme_als
+```
+
+Annotation Trap, Unanswerable, and RVAT — the three categories most directly testing whether the *rvat statistical bridge* and *refusal logic from Stage 3/4* actually work — all sit at a perfect 4.00. Analytical and Complex remain the weakest, around 3.1, and the honest reason is precise multi-step SQL construction — a known limitation, not a mystery.
+
+---
+
+# Live Demo
+
+The working app will be shown live on the SURF HPC server, running the architecture described in Stage 4 above. A few example questions worth trying live, chosen to show the range of what the system can now do that it couldn't at Stage 1:
+
+- *A Stage-1-style single-table question:* "How many high-impact variants are in ABCA4?"
+- *A Stage-2-style multi-table question:* "How many female carriers are there in SOD1?"
+- *A Stage-3-style routed/refused question:* "What is the allele frequency of VAR_id 30 in Europeans?" *(genuinely unanswerable — watch it refuse correctly rather than guess)*
+- *A Stage-4-style real statistics question:* "Run a burden test for SOD1 in ALS cases versus controls."
+
+---
+
+# Where This Goes Next
+
+The clearest, evidence-backed next step is the same pattern that has worked at every stage of this project: when the benchmark shows the model repeatedly struggling with the same *kind* of question, build it a dedicated tool rather than hoping better prompting fixes it. The remaining gap in Analytical and Complex questions is a known, specific, and — based on this project's own track record — solvable problem.
+
+The full codebase, all 111 ground-truth benchmark questions, every benchmark run from this project's history, and this document are all in the project's git repository under `final_app/` and `analysis/`.
